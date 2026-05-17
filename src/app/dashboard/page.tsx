@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
@@ -12,9 +12,8 @@ import Link from "next/link";
 type RegistrationWithClass = Registration & { classes: Class };
 type AttendanceWithClass = Attendance & { classes: Class };
 
-function DashboardPageContent() {
+export default function DashboardPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -22,8 +21,14 @@ function DashboardPageContent() {
   const [attendance, setAttendance] = useState<AttendanceWithClass[]>([]);
   const [passes, setPasses] = useState<Pass[]>([]);
   const [loading, setLoading] = useState(true);
-  const justBooked = searchParams.get("success") === "true";
-  const justBoughtPass = searchParams.get("passSuccess") === "true";
+  const [justBooked, setJustBooked] = useState(false);
+  const [justBoughtPass, setJustBoughtPass] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setJustBooked(params.get("success") === "true");
+    setJustBoughtPass(params.get("passSuccess") === "true");
+  }, []);
 
   useEffect(() => { loadData(); }, []);
 
@@ -264,6 +269,3 @@ function DashboardPageContent() {
   );
 }
 
-export default function DashboardPage() {
-  return <Suspense><DashboardPageContent /></Suspense>;
-}

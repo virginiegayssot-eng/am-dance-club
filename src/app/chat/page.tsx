@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
@@ -22,17 +22,14 @@ type Conversation = {
   unread: number;
 };
 
-function ChatPageContent() {
+export default function ChatPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [me, setMe] = useState<Profile | null>(null);
-  const [activeChannel, setActiveChannel] = useState<"group" | string>(
-    searchParams.get("dm") ?? "group"
-  );
+  const [activeChannel, setActiveChannel] = useState<"group" | string>("group");
   const [messages, setMessages] = useState<Message[]>([]);
   const [students, setStudents] = useState<Profile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -103,8 +100,9 @@ function ChatPageContent() {
 
     setLoading(false);
 
-    const dmParam = searchParams.get("dm");
+    const dmParam = new URLSearchParams(window.location.search).get("dm");
     if (dmParam) {
+      setActiveChannel(dmParam);
       const { data: target } = await supabase.from("profiles").select("*").eq("id", dmParam).single();
       setDmTarget(target);
     }
@@ -363,6 +361,3 @@ function ChatPageContent() {
   );
 }
 
-export default function ChatPage() {
-  return <Suspense><ChatPageContent /></Suspense>;
-}
