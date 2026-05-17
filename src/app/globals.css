@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pink: #e4c3cc;
+  --pink-light: #e5c3cb;
+  --blue: #2041d8;
+  --blue-light: #a3bdfe;
+  --black: #000000;
+  --cream: #fff8f3;
+}
+
+@layer base {
+  body {
+    @apply bg-[#e4c3cc] text-black font-body;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#2041d8] text-white font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-blue-800 transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-[#2041d8] text-[#2041d8] font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#2041d8] hover:text-white transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+  }
+
+  .btn-pink {
+    @apply bg-[#e4c3cc] text-black font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#e5c3cb] transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+  }
+
+  .card {
+    @apply bg-[#fff8f3] rounded-2xl shadow-sm border border-[#e4c3cc]/30 overflow-hidden;
+  }
+
+  .input {
+    @apply w-full border border-[#2041d8]/20 rounded-xl px-4 py-3 text-sm font-body focus:outline-none focus:border-[#2041d8] focus:ring-1 focus:ring-[#2041d8] transition-colors bg-white;
+  }
+
+  .label {
+    @apply block text-xs font-heading uppercase tracking-wider text-gray-500 mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-confirmed {
+    @apply badge bg-green-100 text-green-700;
+  }
+
+  .badge-pending {
+    @apply badge bg-yellow-100 text-yellow-700;
+  }
+
+  .badge-cancelled {
+    @apply badge bg-red-100 text-red-700;
+  }
+
+  .section-title {
+    @apply font-heading text-3xl md:text-4xl tracking-tight;
+  }
+}
