@@ -1,7 +1,6 @@
 "use client";
-export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,7 +12,7 @@ import Link from "next/link";
 type RegistrationWithClass = Registration & { classes: Class };
 type AttendanceWithClass = Attendance & { classes: Class };
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -263,4 +262,8 @@ export default function DashboardPage() {
       <Footer />
     </div>
   );
+}
+
+export default function DashboardPage() {
+  return <Suspense><DashboardPageContent /></Suspense>;
 }

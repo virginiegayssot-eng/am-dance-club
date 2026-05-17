@@ -1,7 +1,6 @@
 "use client";
-export const dynamic = "force-dynamic";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
@@ -23,7 +22,7 @@ type Conversation = {
   unread: number;
 };
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -362,4 +361,8 @@ export default function ChatPage() {
       </div>
     </div>
   );
+}
+
+export default function ChatPage() {
+  return <Suspense><ChatPageContent /></Suspense>;
 }
