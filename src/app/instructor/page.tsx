@@ -96,7 +96,7 @@ export default function InstructorPage() {
     const { data: classData } = await supabase
       .from("classes")
       .select("*")
-      .order("class_date", { ascending: false });
+      .order("class_date", { ascending: true });
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
 
@@ -508,7 +508,7 @@ export default function InstructorPage() {
 
   const today = new Date().toISOString().split("T")[0];
   const upcomingClasses = classes.filter(c => !c.is_cancelled && c.class_date >= today);
-  const pastClasses = classes.filter(c => c.class_date < today || c.is_cancelled);
+  const pastClasses = classes.filter(c => c.class_date < today || c.is_cancelled).reverse();
   const todaysClass = classes.find(c => !c.is_cancelled && c.class_date === today);
 
   return (
@@ -635,7 +635,7 @@ export default function InstructorPage() {
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setActiveTab("classes")} className="font-body text-sm text-gray-400 hover:text-black">
+                    <button onClick={() => { setActiveTab("classes"); setSelectedClass(null); }} className="font-body text-sm text-gray-400 hover:text-black">
                       ← Back
                     </button>
                     <div>
