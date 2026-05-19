@@ -87,7 +87,7 @@ export default function ReportsPage() {
 
     // Classes
     const { data: classData } = await supabase
-      .from("classes").select("*").order("class_date", { ascending: false });
+      .from("classes").select("*").order("class_date", { ascending: true });
 
     // Build student reports
     const studentRows: StudentReport[] = (profiles ?? []).map(p => {
@@ -362,7 +362,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {classes.map(c => {
+                  {classes.filter(c => c.class_date >= new Date().toISOString().split("T")[0]).map(c => {
                     const rate = c.registered > 0 ? Math.round((c.attended / c.registered) * 100) : 0;
                     return (
                       <tr key={c.id} className="hover:bg-gray-50/50">
