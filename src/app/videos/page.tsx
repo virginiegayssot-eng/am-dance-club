@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Video } from "@/lib/supabase";
 
 export default function VideosPage() {
+  const router = useRouter();
   const supabase = createClient();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     loadVideos();
@@ -19,7 +20,7 @@ export default function VideosPage() {
 
   async function loadVideos() {
     const { data: { user } } = await supabase.auth.getUser();
-    setIsLoggedIn(!!user);
+    if (!user) { router.push("/auth/login"); return; }
 
     const { data } = await supabase
       .from("videos")
@@ -36,21 +37,11 @@ export default function VideosPage() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
         <div className="mb-10">
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Watch anytime</p>
-          <h1 className="section-title mb-3">Class Recordings</h1>
+          <h1 className="section-title mb-3">Videos</h1>
           <p className="font-body text-gray-500">
-            Missed a Friday? Catch up with recordings from past sessions.
+            Your choreo library. Keep practising between classes.
           </p>
         </div>
-
-        {!isLoggedIn && (
-          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-5 mb-8 font-body text-sm flex items-center gap-3">
-            <span>🔐</span>
-            <span>
-              Some recordings are for registered students only.{" "}
-              <a href="/auth/login" className="text-[#2041d8] underline">Log in</a> to access all videos.
-            </span>
-          </div>
-        )}
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

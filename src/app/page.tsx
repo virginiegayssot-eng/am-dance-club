@@ -14,8 +14,8 @@ export default function HomePage() {
             <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-4">
               Every Friday · 7:00 AM
             </p>
-            <h1 className="font-heading text-5xl md:text-7xl leading-none mb-6 text-black">
-              THE A.M<br />
+            <h1 className="font-heading text-5xl md:text-7xl leading-none mb-6">
+              <span className="text-[#2041d8]">THE A.M</span><br />
               <span className="text-[#2041d8]">Dance Club</span>
             </h1>
             <p className="font-body text-lg text-black/70 mb-4 leading-relaxed">
@@ -25,21 +25,29 @@ export default function HomePage() {
               Set to Afro, Latin, R&B and pop beats — easy to follow, broken down before the music starts.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/classes" className="btn-primary">View Classes</Link>
-              <Link href="/auth/signup" className="btn-secondary">Join the Club</Link>
+              <Link href="/classes" className="btn-secondary">View Classes</Link>
+              <Link href="/auth/signup" className="btn-primary">Join the Club</Link>
+              <Link href="/auth/login" className="font-body text-sm text-black/60 hover:text-[#2041d8] transition-colors self-center underline underline-offset-2">Already a member? Log in</Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Blue info strip */}
-      <section className="bg-[#2041d8] text-white py-5">
+      <section className="bg-[#2041d8] text-white py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-wrap justify-center md:justify-between items-center gap-6 text-sm font-body">
-            <span>📍 North Steyne Surf Life Saving Club, Manly NSW 2095</span>
-            <span>🕖 Every Friday · 7:00 AM – 7:45 AM</span>
-            <span>🎵 Adults & Teens (12+)</span>
-            <span>💳 Book & pay online</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y-0 md:divide-x md:divide-white/20">
+            {[
+              { label: "Location", value: "North Steyne Surf Club, Manly NSW" },
+              { label: "Schedule", value: "Every Friday · 7:00 – 7:45 AM" },
+              { label: "Who", value: "Adults & Teens (12+)" },
+              { label: "Booking", value: "Book & pay online" },
+            ].map(item => (
+              <div key={item.label} className="flex flex-col items-center text-center gap-1.5 px-4">
+                <p className="font-heading text-xs uppercase tracking-widest text-[#e4c3cc]">{item.label}</p>
+                <p className="font-body text-sm text-white/90 leading-snug">{item.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -47,7 +55,7 @@ export default function HomePage() {
       {/* Why You'll Love THE AM */}
       <section className="bg-[#e5c3cb] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-black">Why You'll Love THE A.M</h2>
+          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#2041d8]">Why You'll Love THE A.M</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { title: "Stronger Body", desc: "Wake up your body with movement that builds stamina, tones muscles, and gets your heart pumping." },
@@ -56,7 +64,7 @@ export default function HomePage() {
               { title: "Improved Coordination", desc: "Master choreography designed to challenge and grow your rhythm skills." },
               { title: "Feel-Good Community", desc: "Be part of a fun, inclusive, and empowering community." },
             ].map(f => (
-              <div key={f.title} className="bg-[#e4c3cc]/60 rounded-2xl p-6">
+              <div key={f.title} className="bg-white rounded-2xl p-6">
                 <h3 className="font-heading text-lg text-[#2041d8] mb-2">{f.title}</h3>
                 <p className="font-body text-sm text-black/70 leading-relaxed">{f.desc}</p>
               </div>
@@ -70,13 +78,13 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
-              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6">Location & Hours</h2>
+              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Location & Hours</h2>
               <p className="font-body text-lg leading-relaxed mb-1">North Steyne Surf Life Saving Club</p>
               <p className="font-body text-lg mb-4">Manly NSW 2095</p>
               <p className="font-body text-lg">Fridays 7:00 am to 7:45 am</p>
             </div>
             <div>
-              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6">Class Prices</h2>
+              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Class Prices</h2>
               <div className="space-y-3 font-body">
                 <p><strong>Casual Drop-In:</strong> $24 per class</p>
                 <p><strong>Double Pass:</strong> $38 — Two spots in the same class</p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
@@ -213,7 +214,68 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden max-w-6xl mx-auto w-full px-0 sm:px-6 py-0 sm:py-6 gap-4">
+      <div className="flex flex-col flex-1 overflow-hidden max-w-6xl mx-auto w-full px-0 sm:px-6 py-0 sm:py-6 md:flex-row gap-4">
+
+        {/* Mobile channel switcher for students */}
+        {me?.role !== "instructor" && (
+          <div className="md:hidden flex flex-row gap-2 px-3 pt-3 shrink-0">
+            <button
+              onClick={() => { setActiveChannel("group"); setDmTarget(null); }}
+              className={`flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-white border border-gray-200 text-black"}`}
+            >
+              💬 Group Chat
+            </button>
+            <button
+              onClick={async () => {
+                const { data: instructors } = await supabase.from("profiles").select("*").eq("role", "instructor").limit(1);
+                if (instructors?.[0]) selectDM(instructors[0]);
+              }}
+              className={`flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors ${activeChannel !== "group" ? "bg-[#2041d8] text-white" : "bg-white border border-gray-200 text-black"}`}
+            >
+              Message Ginny
+            </button>
+            <a
+              href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors bg-white border border-gray-200 text-black"
+            >
+              WhatsApp
+            </a>
+          </div>
+        )}
+
+        {/* Mobile channel switcher for instructor */}
+        {me?.role === "instructor" && (
+          <div className="md:hidden shrink-0 bg-white border-b border-gray-100">
+            <div className="flex overflow-x-auto gap-2 px-3 pt-3 pb-2 scrollbar-hide">
+              <button
+                onClick={() => { setActiveChannel("group"); setDmTarget(null); }}
+                className={`flex-shrink-0 px-4 py-2 rounded-xl font-body text-sm transition-colors ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-gray-100 text-black"}`}
+              >
+                💬 Group
+              </button>
+              {students.map(s => {
+                const isActive = activeChannel === s.id;
+                const unread = unreadCounts[s.id] ?? 0;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => selectDM(s)}
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl font-body text-sm transition-colors ${isActive ? "bg-[#2041d8] text-white" : "bg-gray-100 text-black"}`}
+                  >
+                    {s.full_name?.split(" ")[0] ?? s.email}
+                    {unread > 0 && (
+                      <span className={`text-xs font-heading w-4 h-4 rounded-full flex items-center justify-center ${isActive ? "bg-white text-[#2041d8]" : "bg-[#2041d8] text-white"}`}>
+                        {unread}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 shrink-0 bg-white rounded-2xl border border-[#e4c3cc]/30 overflow-hidden">
@@ -235,7 +297,7 @@ export default function ChatPage() {
           <div className="flex-1 overflow-y-auto">
             {me?.role === "instructor" ? (
               <>
-                <p className="font-heading text-xs uppercase tracking-widest text-gray-400 px-4 pt-3 pb-1">Students</p>
+                <p className="font-heading text-xs uppercase tracking-widest text-gray-400 px-4 pt-3 pb-1">Members</p>
                 {students.map(s => {
                   const isActive = activeChannel === s.id;
                   const unread = unreadCounts[s.id] ?? 0;
@@ -245,8 +307,8 @@ export default function ChatPage() {
                       onClick={() => selectDM(s)}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${isActive ? "bg-[#e4c3cc]/30" : "hover:bg-gray-50"}`}
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-xs font-heading shrink-0">
-                        {(s.full_name ?? s.email)[0].toUpperCase()}
+                      <div className="w-8 h-8 rounded-full bg-[#e4c3cc]/50 overflow-hidden flex items-center justify-center text-xs font-heading shrink-0">
+                        {s.avatar_url ? <Image src={s.avatar_url} alt="" width={32} height={32} className="object-cover w-full h-full" /> : (s.full_name ?? s.email)[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-body text-sm truncate">{s.full_name ?? s.email}</p>
@@ -279,6 +341,21 @@ export default function ChatPage() {
               </div>
             )}
           </div>
+
+          {/* WhatsApp link */}
+          <a
+            href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-lg">💬</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-heading text-xs">WhatsApp Group</p>
+              <p className="font-body text-xs text-gray-400">Polls & community</p>
+            </div>
+            <span className="text-xs text-[#25D366]">→</span>
+          </a>
         </aside>
 
         {/* Chat panel */}
@@ -291,7 +368,7 @@ export default function ChatPage() {
             <div>
               <p className="font-heading text-sm">{activeName}</p>
               <p className="font-body text-xs text-gray-400">
-                {activeChannel === "group" ? "All students & instructor" : "Private message"}
+                {activeChannel === "group" ? "All members & instructor" : "Private message"}
               </p>
             </div>
           </div>
@@ -312,13 +389,13 @@ export default function ChatPage() {
             ) : (
               messages.map(msg => {
                 const isMe = msg.sender_id === me?.id;
-                const senderName = isMe ? "You" : (msg.profiles?.full_name ?? msg.profiles?.email ?? "Unknown");
+                const senderName = isMe ? (me?.full_name ?? me?.email ?? "You") : (msg.profiles?.full_name ?? msg.profiles?.email ?? "Unknown");
                 const time = new Date(msg.created_at).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" });
                 const date = new Date(msg.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" });
                 return (
                   <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
-                      {!isMe && (
+                      {activeChannel === "group" && (
                         <span className="font-heading text-xs text-gray-400 px-1">{senderName}</span>
                       )}
                       <div className={`px-4 py-2.5 rounded-2xl font-body text-sm leading-relaxed ${

@@ -126,11 +126,10 @@ export default function ClassesPage() {
 
         {/* Active pass notice */}
         {hasPass && (
-          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-8 flex items-center gap-3">
-            <span className="text-xl">🎟️</span>
+          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-8">
             <div>
               <p className="font-heading text-sm">
-                {bestPass.pass_types?.name} active — {bestPass.classes_remaining} class{bestPass.classes_remaining !== 1 ? "es" : ""} remaining
+                {(bestPass as any).pass_types?.name ?? "Your pass"} — {bestPass.classes_remaining} class{bestPass.classes_remaining !== 1 ? "es" : ""} remaining
               </p>
               <p className="font-body text-xs text-gray-500">
                 Clicking "Book" will automatically deduct from your pass.
@@ -167,17 +166,13 @@ export default function ClassesPage() {
                     </p>
                   </div>
 
-                  <div className="p-6 flex flex-col flex-1">
-                    <h3 className="font-heading text-lg mb-1">{cls.title}</h3>
-                    {cls.description && <p className="font-body text-sm text-gray-500 mb-4 leading-relaxed">{cls.description}</p>}
-
-                    <div className="space-y-2 mt-auto mb-5">
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><span>🕖</span>7:00 AM · {cls.duration_minutes} min</div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="space-y-1.5 mb-5">
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><span>🕖</span>7:00 AM · 45 min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><span>📍</span>{cls.location}</div>
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600">
-                        <span>👥</span>
-                        {isFull ? <span className="text-red-500">Class full</span> : <span>{spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} left</span>}
-                      </div>
+                      {isFull && (
+                        <div className="flex items-center gap-2 text-sm font-body text-red-500"><span>👥</span>Class full</div>
+                      )}
                     </div>
 
                     <div className="border-t border-gray-100 pt-4">

@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 import Stripe from "stripe";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 const PASS_CONFIGS: Record<string, { classes: number; validityDays: number | null }> = {
   casual: { classes: 1,  validityDays: null },
@@ -22,12 +33,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = adminClient();
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.CheckoutSession;
     const meta = session.metadata ?? {};
-    const { passTypeId, studentId, classId, isDoublePass } = meta;
+    const { passTypeId, studentId, classId, isDoublePass, discountId } = meta;
 
     if (!passTypeId || !studentId) {
       return NextResponse.json({ received: true });
@@ -73,6 +84,33 @@ export async function POST(req: NextRequest) {
         .from("passes")
         .update({ classes_remaining: 0 })
         .eq("id", pass.id);
+    }
+
+    // Notify instructor
+    const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", studentId).single();
+    const passLabel = passTypeId === "casual" ? "Casual ($24)" : passTypeId === "double" ? "Double Pass ($38)" : passTypeId === "intro" ? "Intro Pass (3 classes)" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
+    let emailBody = `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just purchased a <strong>${passLabel}</strong>.`;
+    if (classId) {
+      const { data: cls } = await supabase.from("classes").select("title, class_date").eq("id", classId).single();
+      if (cls) {
+        const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+        emailBody += ` They are booked in for <strong>${cls.title}</strong> on ${classDate}.`;
+      }
+    }
+    emailBody += `</p>`;
+    await resend.emails.send({
+      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+      subject: `New booking – ${profile?.full_name ?? "A student"}`,
+      html: emailBody,
+    }).catch(() => {});
+
+    // Increment discount code usage
+    if (discountId) {
+      const { data: dc } = await supabase.from("discount_codes").select("uses_count").eq("id", discountId).single();
+      if (dc) {
+        await supabase.from("discount_codes").update({ uses_count: dc.uses_count + 1 }).eq("id", discountId);
+      }
     }
   }
 

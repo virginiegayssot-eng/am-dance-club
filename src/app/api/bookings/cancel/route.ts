@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
+
+export async function POST(req: NextRequest) {
+  const supabase = createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { registrationId } = await req.json();
+  if (!registrationId) return NextResponse.json({ error: "Missing registrationId" }, { status: 400 });
+
+  const { data: reg } = await supabase
+    .from("registrations")
+    .select("*, classes(class_date, class_time)")
+    .eq("id", registrationId)
+    .eq("student_id", user.id)
+    .single();
+
+  if (!reg) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  if (reg.status === "cancelled") return NextResponse.json({ error: "Already cancelled" }, { status: 400 });
+
+  const classDateTime = new Date(`${reg.classes.class_date}T${reg.classes.class_time ?? "07:00:00"}`);
+  const hoursUntilClass = (classDateTime.getTime() - Date.now()) / 3_600_000;
+  const isRefundable = hoursUntilClass >= 24;
+
+  await supabase
+    .from("registrations")
+    .update({ status: "cancelled" })
+    .eq("id", registrationId);
+
+  let passRefunded = false;
+  if (isRefundable && reg.pass_id) {
+    const { data: pass } = await supabase
+      .from("passes")
+      .select("classes_remaining, classes_total")
+      .eq("id", reg.pass_id)
+      .single();
+
+    if (pass) {
+      await supabase
+        .from("passes")
+        .update({ classes_remaining: pass.classes_remaining + 1 })
+        .eq("id", reg.pass_id);
+      passRefunded = true;
+    }
+  }
+
+  return NextResponse.json({ cancelled: true, isRefundable, passRefunded });
+}

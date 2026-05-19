@@ -88,3 +88,12 @@ export type Video = {
   is_public: boolean;
   created_at: string;
 };
+
+export type Playlist = {
+  id: string;
+  title: string;
+  description: string | null;
+  spotify_url: string;
+  spotify_id: string;
+  created_at: string;
+};

@@ -23,6 +23,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [justBooked, setJustBooked] = useState(false);
   const [justBoughtPass, setJustBoughtPass] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancelResult, setCancelResult] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -31,6 +33,30 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { loadData(); }, []);
+
+  async function cancelBooking(registrationId: string) {
+    setCancellingId(registrationId);
+    setCancelResult(null);
+    const res = await fetch("/api/bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ registrationId }),
+    });
+    const data = await res.json();
+    setCancellingId(null);
+    if (!res.ok) {
+      setCancelResult({ message: data.error ?? "Something went wrong.", type: "error" });
+    } else if (data.passRefunded) {
+      setCancelResult({ message: "Booking cancelled and your pass credit has been returned.", type: "success" });
+      loadData();
+    } else if (data.isRefundable) {
+      setCancelResult({ message: "Booking cancelled. For a refund please contact theamdance@gmail.com.", type: "success" });
+      loadData();
+    } else {
+      setCancelResult({ message: "Booking cancelled. As it's within 24 hours, no refund applies per our policy.", type: "success" });
+      loadData();
+    }
+  }
 
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -101,6 +127,12 @@ export default function DashboardPage() {
             You're booked! See you on the dancefloor.
           </div>
         )}
+        {cancelResult && (
+          <div className={`rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3 ${cancelResult.type === "success" ? "bg-green-50 border border-green-200 text-green-700" : "bg-red-50 border border-red-200 text-red-700"}`}>
+            {cancelResult.message}
+            <button onClick={() => setCancelResult(null)} className="ml-auto text-current opacity-50 hover:opacity-100">✕</button>
+          </div>
+        )}
         {justBoughtPass && (
           <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
             <span className="text-xl">🎟️</span>
@@ -111,8 +143,8 @@ export default function DashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Upcoming", value: upcoming.length, color: "bg-[#a3bdfe]/20" },
-            { label: "Classes attended", value: attendedCount, color: "bg-[#e4c3cc]/20" },
+            { label: "Upcoming", value: upcoming.length, color: "bg-[#fff8f3]" },
+            { label: "Classes attended", value: attendedCount, color: "bg-[#fff8f3]" },
             { label: "Active passes", value: activePasses.length, color: "bg-[#fff8f3]" },
             { label: "Past classes", value: past.length, color: "bg-[#fff8f3]" },
           ].map(stat => (
@@ -207,7 +239,7 @@ export default function DashboardPage() {
                       })} · 7:00 AM · {reg.classes?.location}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
                     {reg.amount_paid_cents ? (
                       <>
                         <p className="font-heading text-base">{formatPrice(reg.amount_paid_cents)}</p>
@@ -216,6 +248,15 @@ export default function DashboardPage() {
                     ) : (
                       <p className="font-body text-xs text-gray-400">Pass used</p>
                     )}
+                    <button
+                      onClick={() => {
+                        if (confirm("Cancel this booking? This cannot be undone.")) cancelBooking(reg.id);
+                      }}
+                      disabled={cancellingId === reg.id}
+                      className="font-body text-xs text-red-400 hover:text-red-600 underline disabled:opacity-50"
+                    >
+                      {cancellingId === reg.id ? "Cancelling…" : "Cancel booking"}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -261,7 +302,8 @@ export default function DashboardPage() {
         <div className="flex flex-wrap gap-4">
           <Link href="/classes" className="btn-primary">Book Next Class</Link>
           <Link href="/passes" className="btn-secondary">Buy a Pass</Link>
-          <Link href="/videos" className="btn-secondary">Watch Recordings</Link>
+          <Link href="/videos" className="btn-secondary">Videos</Link>
+          <a href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t" target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Group</a>
         </div>
       </main>
       <Footer />

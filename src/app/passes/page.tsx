@@ -61,7 +61,7 @@ const PASS_OPTIONS: PassOption[] = [
     price: "$200",
     classes: "10 classes",
     validity: "1 year",
-    description: "$20 per class. Best value — commit to a year of dancing!",
+    description: "$20 per class. Best value.",
   },
 ];
 
@@ -73,6 +73,11 @@ export default function PassesPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isNewStudent, setIsNewStudent] = useState(true);
   const [buying, setBuying] = useState<string | null>(null);
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountInput, setDiscountInput] = useState("");
+  const [discountInfo, setDiscountInfo] = useState<{ type: string; value: number } | null>(null);
+  const [discountError, setDiscountError] = useState("");
+  const [validatingCode, setValidatingCode] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -100,6 +105,29 @@ export default function PassesPage() {
     setLoading(false);
   }
 
+  async function applyDiscount() {
+    if (!discountInput.trim()) return;
+    setValidatingCode(true);
+    setDiscountError("");
+    setDiscountInfo(null);
+
+    const res = await fetch("/api/discount/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: discountInput }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setDiscountError(data.error ?? "Invalid code");
+      setDiscountCode("");
+    } else {
+      setDiscountCode(discountInput.toUpperCase().trim());
+      setDiscountInfo({ type: data.discount_type, value: data.discount_value });
+    }
+    setValidatingCode(false);
+  }
+
   async function buyPass(passId: string) {
     if (!isLoggedIn) { router.push("/auth/login"); return; }
 
@@ -107,7 +135,7 @@ export default function PassesPage() {
     const res = await fetch("/api/stripe/pass-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passTypeId: passId }),
+      body: JSON.stringify({ passTypeId: passId, discountCode: discountCode || undefined }),
     });
     const { url, error } = await res.json();
     if (error) { alert(error); setBuying(null); return; }
@@ -154,6 +182,36 @@ export default function PassesPage() {
           </div>
         )}
 
+        {/* Discount code */}
+        {isLoggedIn && (
+          <div className="mb-8">
+            <p className="font-body text-sm text-gray-500 mb-2">Have a discount code?</p>
+            <div className="flex gap-2 max-w-sm">
+              <input
+                type="text"
+                className="input uppercase flex-1"
+                placeholder="Enter code"
+                value={discountInput}
+                onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(""); setDiscountInfo(null); setDiscountCode(""); }}
+                onKeyDown={e => e.key === "Enter" && applyDiscount()}
+              />
+              <button
+                onClick={applyDiscount}
+                disabled={validatingCode || !discountInput.trim()}
+                className="btn-secondary py-2 px-4 text-sm shrink-0"
+              >
+                {validatingCode ? "…" : "Apply"}
+              </button>
+            </div>
+            {discountError && <p className="font-body text-sm text-red-500 mt-2">{discountError}</p>}
+            {discountInfo && (
+              <p className="font-body text-sm text-green-600 mt-2">
+                Code applied: {discountInfo.type === "percentage" ? `${discountInfo.value}% off` : `$${(discountInfo.value / 100).toFixed(0)} off`} every pass!
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Pass options grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
           {PASS_OPTIONS.map((opt) => {
@@ -174,7 +232,7 @@ export default function PassesPage() {
                 {opt.newOnly && (
                   <div className="absolute -top-3 left-4">
                     <span className="bg-[#2041d8] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
-                      New students
+                      New members
                     </span>
                   </div>
                 )}
@@ -203,7 +261,7 @@ export default function PassesPage() {
                     className={`mt-auto w-full justify-center ${opt.highlight ? "btn-primary" : "btn-secondary"} ${isDisabled ? "cursor-not-allowed" : ""}`}
                   >
                     {isDisabled
-                      ? "New students only"
+                      ? "New members only"
                       : buying === opt.id
                       ? "Loading…"
                       : `Buy ${opt.name}`}

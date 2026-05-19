@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 const PASS_CONFIGS: Record<string, { name: string; price: number; classes: number; validityDays: number | null; newOnly: boolean }> = {
   casual:  { name: "Casual Class",   price: 2400,  classes: 1,  validityDays: null, newOnly: false },
@@ -15,7 +24,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { passTypeId, classId } = await req.json();
+  const { passTypeId, classId, discountCode } = await req.json();
   const config = PASS_CONFIGS[passTypeId];
   if (!config) return NextResponse.json({ error: "Invalid pass type" }, { status: 400 });
 
@@ -32,9 +41,34 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // For casual/double, classId is required
   if ((passTypeId === "casual" || passTypeId === "double") && !classId) {
     return NextResponse.json({ error: "Class ID required for casual/double" }, { status: 400 });
+  }
+
+  // Apply discount code if provided
+  let finalPrice = config.price;
+  let discountId: string | null = null;
+
+  if (discountCode) {
+    const admin = adminClient();
+    const { data: discount } = await admin
+      .from("discount_codes")
+      .select("*")
+      .eq("code", discountCode.toUpperCase().trim())
+      .eq("active", true)
+      .single();
+
+    if (discount &&
+      (!discount.expires_at || new Date(discount.expires_at) > new Date()) &&
+      (discount.max_uses === null || discount.uses_count < discount.max_uses)
+    ) {
+      discountId = discount.id;
+      if (discount.discount_type === "percentage") {
+        finalPrice = Math.round(config.price * (1 - discount.discount_value / 100));
+      } else {
+        finalPrice = Math.max(0, config.price - discount.discount_value);
+      }
+    }
   }
 
   const descriptions: Record<string, string> = {
@@ -58,7 +92,7 @@ export async function POST(req: NextRequest) {
           name: config.name,
           description: descriptions[passTypeId],
         },
-        unit_amount: config.price,
+        unit_amount: finalPrice,
       },
       quantity: 1,
     }],
@@ -71,6 +105,7 @@ export async function POST(req: NextRequest) {
       studentId: user.id,
       classId: classId ?? "",
       isDoublePass: passTypeId === "double" ? "true" : "false",
+      discountId: discountId ?? "",
     },
   });
 

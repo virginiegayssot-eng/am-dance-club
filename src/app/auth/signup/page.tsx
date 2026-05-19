@@ -3,13 +3,14 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [form, setForm] = useState({ fullName: "", email: "", password: "", phone: "", birthDate: "" });
+  const [form, setForm] = useState({ fullName: "", email: "", password: "", phone: "", birthMonth: "", birthDay: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -37,8 +38,8 @@ export default function SignupPage() {
     if (data.user) {
       await supabase.from("profiles").update({
         full_name: form.fullName,
-        phone: form.phone || null,
-        birth_date: form.birthDate || null,
+        phone: form.phone,
+        birth_date: form.birthMonth && form.birthDay ? `2000-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}` : null,
       }).eq("id", data.user.id);
     }
 
@@ -67,8 +68,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-6">
-            <span className="font-heading text-2xl text-black">THE A.M</span>
-            <span className="block font-body text-xs text-[#2041d8] uppercase tracking-widest">Dance Club</span>
+            <Image src="/logo-transparent.png" alt="THE A.M Dance Club" width={140} height={100} className="object-contain mx-auto" />
           </Link>
           <h1 className="font-heading text-3xl mb-2">Join the club</h1>
           <p className="font-body text-sm text-gray-500">Create your account to book classes</p>
@@ -89,13 +89,25 @@ export default function SignupPage() {
               <input type="password" className="input" placeholder="At least 6 characters" minLength={6} value={form.password} onChange={set("password")} required />
             </div>
             <div>
-              <label className="label">Phone</label>
-              <input type="tel" className="input" placeholder="+61 4xx xxx xxx" value={form.phone} onChange={set("phone")} />
+              <label className="label">Phone *</label>
+              <input type="tel" className="input" placeholder="+61 4xx xxx xxx" value={form.phone} onChange={set("phone")} required />
             </div>
             <div>
-              <label className="label">Date of Birth</label>
-              <input type="date" className="input" value={form.birthDate} onChange={set("birthDate")} />
-              <p className="font-body text-xs text-gray-400 mt-1">We'll celebrate your birthday 🎂</p>
+              <label className="label">Birthday *</label>
+              <div className="flex gap-2">
+                <select className="input flex-1" value={form.birthMonth} onChange={e => setForm(f => ({ ...f, birthMonth: e.target.value }))} required>
+                  <option value="">Month</option>
+                  {["January","February","March","April","May","June","July","August","September","October","November","December"].map((m, i) => (
+                    <option key={m} value={String(i + 1)}>{m}</option>
+                  ))}
+                </select>
+                <select className="input w-28" value={form.birthDay} onChange={e => setForm(f => ({ ...f, birthDay: e.target.value }))} required>
+                  <option value="">Day</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {error && (

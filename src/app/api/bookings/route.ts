@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient();
@@ -51,15 +54,32 @@ export async function POST(req: NextRequest) {
 
   if (existing) return NextResponse.json({ error: "Already registered" }, { status: 400 });
 
-  // Create registration and deduct pass credit
-  const { error: regError } = await supabase.from("registrations").insert({
-    class_id: classId,
-    student_id: user.id,
-    status: "confirmed",
-    pass_id: passId,
-    payment_type: "pass",
-    guest_count: 0,
-  });
+  // Check for existing cancelled registration to reactivate
+  const { data: cancelled } = await supabase
+    .from("registrations")
+    .select("id")
+    .eq("class_id", classId)
+    .eq("student_id", user.id)
+    .eq("status", "cancelled")
+    .single();
+
+  let regError;
+  if (cancelled) {
+    // Reactivate the cancelled registration
+    ({ error: regError } = await supabase
+      .from("registrations")
+      .update({ status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: 0 })
+      .eq("id", cancelled.id));
+  } else {
+    ({ error: regError } = await supabase.from("registrations").insert({
+      class_id: classId,
+      student_id: user.id,
+      status: "confirmed",
+      pass_id: passId,
+      payment_type: "pass",
+      guest_count: 0,
+    }));
+  }
 
   if (regError) return NextResponse.json({ error: regError.message }, { status: 500 });
 
@@ -67,6 +87,16 @@ export async function POST(req: NextRequest) {
     .from("passes")
     .update({ classes_remaining: pass.classes_remaining - 1 })
     .eq("id", passId);
+
+  // Notify instructor
+  const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();
+  const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  await resend.emails.send({
+    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+    subject: `New booking – ${profile?.full_name ?? "A student"}`,
+    html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass.</p>`,
+  }).catch(() => {});
 
   return NextResponse.json({ success: true });
 }

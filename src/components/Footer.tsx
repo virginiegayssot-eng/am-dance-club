@@ -27,15 +27,17 @@ export default function Footer() {
               {[
                 { href: "/classes", label: "Classes" },
                 { href: "/passes", label: "Passes & Pricing" },
-                { href: "/videos", label: "Recordings" },
+                { href: "/videos", label: "Videos" },
+                { href: "/playlists", label: "Playlists" },
                 { href: "/auth/login", label: "Log in" },
+                { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },
               ].map(({ href, label }) => (
                 <Link key={href} href={href} className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
                   {label}
                 </Link>
               ))}
               <a href="https://theamdance.com" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
-                Main Website ↗
+                Website
               </a>
             </div>
           </div>
@@ -44,9 +46,14 @@ export default function Footer() {
           <p className="font-body text-xs text-white/40">
             © {new Date().getFullYear()} THE A.M Dance Club. All rights reserved.
           </p>
-          <p className="font-body text-xs text-white/40">
-            Fridays · 7:00 AM · North Steyne Surf Club
-          </p>
+          <div className="flex gap-4">
+            <Link href="/cancellation-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
+              Cancellation Policy
+            </Link>
+            <Link href="/privacy-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

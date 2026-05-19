@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
@@ -43,8 +44,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-6">
-            <span className="font-heading text-2xl text-black">THE A.M</span>
-            <span className="block font-body text-xs text-[#2041d8] uppercase tracking-widest">Dance Club</span>
+            <Image src="/logo-transparent.png" alt="THE A.M Dance Club" width={140} height={100} className="object-contain mx-auto" />
           </Link>
           <h1 className="font-heading text-3xl mb-2">Welcome back</h1>
           <p className="font-body text-sm text-gray-500">Sign in to your account</p>

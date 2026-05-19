@@ -207,7 +207,7 @@ export default function ReportsPage() {
   const tabs = [
     { key: "revenue", label: "Revenue" },
     { key: "attendance", label: "Attendance" },
-    { key: "students", label: "Students" },
+    { key: "students", label: "Members" },
     { key: "birthdays", label: "Birthdays 🎂" },
   ] as const;
 
@@ -233,7 +233,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
             { label: "Total revenue", value: formatPrice(totalRevenue), color: "bg-[#a3bdfe]/20" },
-            { label: "Total students", value: totalStudents, color: "bg-[#e4c3cc]/20" },
+            { label: "Total members", value: totalStudents, color: "bg-[#e4c3cc]/20" },
             { label: "Active (90 days)", value: activeStudents, color: "bg-[#fff8f3]" },
             { label: "Avg attendance", value: `${avgAttendance}%`, color: "bg-[#fff8f3]" },
           ].map(stat => (
@@ -415,7 +415,7 @@ export default function ReportsPage() {
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Student</th>
+                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Contact</th>
                     <th className="text-center px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Classes</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Pass</th>
@@ -469,7 +469,7 @@ export default function ReportsPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <p className="font-body text-sm text-gray-500">
-                {upcomingBirthdays.length} student{upcomingBirthdays.length !== 1 ? "s" : ""} with birthdays on record
+                {upcomingBirthdays.length} member{upcomingBirthdays.length !== 1 ? "s" : ""} with birthdays on record
               </p>
               <button onClick={() => downloadCSV(
                 upcomingBirthdays.map(s => ({
@@ -486,7 +486,7 @@ export default function ReportsPage() {
             {upcomingBirthdays.length === 0 ? (
               <div className="card p-10 text-center">
                 <p className="text-4xl mb-3">🎂</p>
-                <p className="font-body text-gray-400">No birthdays on record yet. Encourage students to add their birth date in their profile.</p>
+                <p className="font-body text-gray-400">No birthdays on record yet. Encourage members to add their birth date in their profile.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

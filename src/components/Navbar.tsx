@@ -49,7 +49,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-end">
           {/* Logo — floats above the border line */}
-          <Link href="/" className="flex-shrink-0 flex items-end pb-0 mr-8">
+          <Link href={profile ? (isInstructor ? "/instructor" : "/dashboard") : "/"} className="flex-shrink-0 flex items-end pb-0 mr-8">
             <Image src="/logo.png" alt="THE A.M Dance Club" width={100} height={70} className="object-contain" />
           </Link>
 
@@ -60,7 +60,11 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-6">
               <Link href="/classes" className={`font-body text-sm transition-colors ${isActive("/classes")}`}>Classes</Link>
               <Link href="/passes" className={`font-body text-sm transition-colors ${isActive("/passes")}`}>Passes</Link>
-              <Link href="/videos" className={`font-body text-sm transition-colors ${isActive("/videos")}`}>Recordings</Link>
+              <Link href="/videos" className={`font-body text-sm transition-colors ${isActive("/videos")}`}>Videos</Link>
+              <a href="https://www.theamdance.com/s/shop" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-black hover:text-[#2041d8] transition-colors">Shop Merch</a>
+              {profile && (
+                <Link href="/playlists" className={`font-body text-sm transition-colors ${isActive("/playlists")}`}>Playlists</Link>
+              )}
 
               {profile && (
                 <>
@@ -117,7 +121,9 @@ export default function Navbar() {
             {[
               { href: "/classes", label: "Classes" },
               { href: "/passes", label: "Passes & Pricing" },
-              { href: "/videos", label: "Recordings" },
+              { href: "/videos", label: "Videos" },
+              { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },
+              ...(profile ? [{ href: "/playlists", label: "Playlists" }] : []),
               ...(profile ? [
                 { href: "/chat", label: `Chat${unread > 0 ? ` (${unread})` : ""}` },
                 { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
