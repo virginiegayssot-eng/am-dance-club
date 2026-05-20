@@ -2,7 +2,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["img.youtube.com"],
+    domains: ["img.youtube.com", "trsseitecjigqlqqscue.supabase.co"],
   },
   typescript: {
     ignoreBuildErrors: true,

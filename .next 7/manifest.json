@@ -1,0 +1,26 @@
+{
+  "name": "THE A.M Dance Club",
+  "short_name": "A.M Dance",
+  "description": "Morning dance classes at North Steyne Surf Club",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e4c3cc",
+  "theme_color": "#2041d8",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

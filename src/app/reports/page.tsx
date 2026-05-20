@@ -232,8 +232,8 @@ export default function ReportsPage() {
         {/* Summary stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Total revenue", value: formatPrice(totalRevenue), color: "bg-[#a3bdfe]/20" },
-            { label: "Total members", value: totalStudents, color: "bg-[#e4c3cc]/20" },
+            { label: "Total revenue", value: formatPrice(totalRevenue), color: "bg-[#fff8f3]" },
+            { label: "Total members", value: totalStudents, color: "bg-[#fff8f3]" },
             { label: "Active (90 days)", value: activeStudents, color: "bg-[#fff8f3]" },
             { label: "Avg attendance", value: `${avgAttendance}%`, color: "bg-[#fff8f3]" },
           ].map(stat => (

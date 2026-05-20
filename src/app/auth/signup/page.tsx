@@ -21,6 +21,10 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!form.phone.trim()) { setError("Phone number is required."); return; }
+    if (!form.birthMonth || !form.birthDay) { setError("Birthday is required."); return; }
+
     setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({
@@ -39,7 +43,7 @@ export default function SignupPage() {
       await supabase.from("profiles").update({
         full_name: form.fullName,
         phone: form.phone,
-        birth_date: form.birthMonth && form.birthDay ? `2000-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}` : null,
+        birth_date: `2000-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}`,
       }).eq("id", data.user.id);
     }
 
