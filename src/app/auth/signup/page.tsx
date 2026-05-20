@@ -22,7 +22,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
 
-    if (!form.phone.trim()) { setError("Phone number is required."); return; }
+    if (!/^\+?[\d\s\-]{8,15}$/.test(form.phone.trim())) { setError("Please enter a valid phone number."); return; }
     if (!form.birthMonth || !form.birthDay) { setError("Birthday is required."); return; }
 
     setLoading(true);
