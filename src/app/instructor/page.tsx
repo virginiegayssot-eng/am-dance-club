@@ -669,40 +669,31 @@ export default function InstructorPage() {
                   </div>
                 ) : (
                   <div className="card overflow-hidden">
-                    <table className="w-full text-sm font-body">
-                      <thead className="bg-[#fff8f3] border-b border-gray-100">
-                        <tr>
-                          <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
-                          <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Email</th>
-                          <th className="text-center px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Present</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                        {students.map((s) => (
-                          <tr key={s.id} className="hover:bg-gray-50/50">
-                            <td className="px-5 py-3 font-medium">
+                    <div className="divide-y divide-gray-50">
+                      {students.map((s) => (
+                        <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                          <div>
+                            <p className="font-medium text-sm font-body">
                               {s.full_name ?? "—"}
                               {s.guest_count > 0 && (
                                 <span className="ml-2 badge bg-[#e4c3cc]/50 text-black">+{s.guest_count} guest</span>
                               )}
-                            </td>
-                            <td className="px-5 py-3 text-gray-500">{s.email}</td>
-                            <td className="px-5 py-3 text-center">
-                              <button
-                                onClick={() => toggleAttendance(s.id, s.attended)}
-                                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                                  s.attended
-                                    ? "bg-[#2041d8] border-[#2041d8] text-white"
-                                    : "border-gray-300 hover:border-[#2041d8]"
-                                }`}
-                              >
-                                {s.attended ? "✓" : ""}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </p>
+                            <p className="text-xs text-gray-500 font-body">{s.email}</p>
+                          </div>
+                          <button
+                            onClick={() => toggleAttendance(s.id, s.attended)}
+                            className={`w-8 h-8 rounded-full border-2 transition-all shrink-0 ${
+                              s.attended
+                                ? "bg-[#2041d8] border-[#2041d8] text-white"
+                                : "border-gray-300 hover:border-[#2041d8]"
+                            }`}
+                          >
+                            {s.attended ? "✓" : ""}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -739,66 +730,39 @@ export default function InstructorPage() {
                 <p className="font-body text-gray-400">No passes purchased yet.</p>
               </div>
             ) : (
-              <div className="card overflow-hidden">
-                <table className="w-full text-sm font-body">
-                  <thead className="bg-[#fff8f3] border-b border-gray-100">
-                    <tr>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Pass</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Remaining</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Expires</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Payment</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Status</th>
-                      <th className="px-5 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {allPasses.map((p) => {
-                      const expired = p.expires_at && new Date(p.expires_at) < new Date();
-                      const used = p.classes_remaining === 0;
-                      const isActive = !expired && !used;
-                      const status = expired ? "Expired" : used ? "Used up" : "Active";
-                      const statusClass = expired || used ? "badge bg-gray-100 text-gray-500" : "badge-confirmed";
-                      return (
-                        <tr key={p.id} className="hover:bg-gray-50/50">
-                          <td className="px-5 py-3">
-                            <p className="font-medium">{p.profiles?.full_name ?? "—"}</p>
-                            <p className="text-gray-400 text-xs">{p.profiles?.email}</p>
-                          </td>
-                          <td className="px-5 py-3">{(p as any).pass_types?.name ?? p.pass_type_id}</td>
-                          <td className="px-5 py-3">{p.classes_remaining}/{p.classes_total}</td>
-                          <td className="px-5 py-3 text-gray-500">
-                            {p.expires_at
-                              ? new Date(p.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })
-                              : "No expiry"}
-                          </td>
-                          <td className="px-5 py-3">
-                            <span className="font-body text-xs text-gray-500">
-                              {(p as any).source === "cash" ? "💵 Cash"
-                                : (p as any).source === "card_manual" ? "💳 Card"
-                                : (p as any).source === "complimentary" ? "🎁 Compl."
-                                : "🔗 Stripe"}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3">
-                            <span className={statusClass}>{status}</span>
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            {isActive && (
-                              <button
-                                onClick={() => debitPass(p.id)}
-                                disabled={debitingPassId === p.id}
-                                className="font-body text-xs text-[#2041d8] hover:underline disabled:opacity-50"
-                              >
-                                {debitingPassId === p.id ? "…" : "Debit 1"}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {allPasses.map((p) => {
+                  const expired = p.expires_at && new Date(p.expires_at) < new Date();
+                  const used = p.classes_remaining === 0;
+                  const isActive = !expired && !used;
+                  const status = expired ? "Expired" : used ? "Used up" : "Active";
+                  const statusClass = expired || used ? "badge bg-gray-100 text-gray-500" : "badge-confirmed";
+                  return (
+                    <div key={p.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm font-body">{p.profiles?.full_name ?? "—"}</p>
+                        <p className="text-xs text-gray-400 font-body">{p.profiles?.email}</p>
+                        <div className="flex flex-wrap gap-2 mt-1.5 items-center">
+                          <span className="text-xs font-body text-gray-600">{(p as any).pass_types?.name ?? p.pass_type_id}</span>
+                          <span className="text-xs font-body text-gray-500">{p.classes_remaining}/{p.classes_total} left</span>
+                          <span className="text-xs font-body text-gray-500">
+                            {p.expires_at ? new Date(p.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" }) : "No expiry"}
+                          </span>
+                          <span className={statusClass}>{status}</span>
+                        </div>
+                      </div>
+                      {isActive && (
+                        <button
+                          onClick={() => debitPass(p.id)}
+                          disabled={debitingPassId === p.id}
+                          className="font-body text-xs text-[#2041d8] hover:underline disabled:opacity-50 shrink-0"
+                        >
+                          {debitingPassId === p.id ? "…" : "Debit 1"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -824,38 +788,22 @@ export default function InstructorPage() {
                 <button onClick={() => setShowAddStudentForm(true)} className="btn-primary">Invite Member</button>
               </div>
             ) : (
-              <div className="card overflow-hidden">
-                <table className="w-full text-sm font-body">
-                  <thead className="bg-[#fff8f3] border-b border-gray-100">
-                    <tr>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Name</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Email</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Phone</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Joined</th>
-                      <th className="px-5 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {allStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-gray-50/50">
-                        <td className="px-5 py-3 font-medium">{s.full_name ?? "—"}</td>
-                        <td className="px-5 py-3 text-gray-500">{s.email}</td>
-                        <td className="px-5 py-3 text-gray-500">{s.phone ?? "—"}</td>
-                        <td className="px-5 py-3 text-gray-400">
-                          {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                        </td>
-                        <td className="px-5 py-3 text-right">
-                          <button
-                            onClick={() => openAssignPass(s)}
-                            className="font-body text-xs text-[#2041d8] hover:underline"
-                          >
-                            Assign pass
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {allStudents.map((s) => (
+                  <div key={s.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
+                      <p className="text-xs text-gray-500 font-body">{s.email}</p>
+                      <p className="text-xs text-gray-400 font-body">{s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
+                    </div>
+                    <button
+                      onClick={() => openAssignPass(s)}
+                      className="font-body text-xs text-[#2041d8] hover:underline shrink-0"
+                    >
+                      Assign pass
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
