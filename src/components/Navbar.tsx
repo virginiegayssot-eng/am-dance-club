@@ -15,22 +15,60 @@ export default function Navbar() {
   const [unread, setUnread] = useState(0);
   const supabase = createClient();
 
+  async function loadUnread(userId: string) {
+    // Unread direct messages
+    const { count: dmCount } = await supabase
+      .from("messages")
+      .select("id", { count: "exact" })
+      .eq("channel", "direct")
+      .eq("recipient_id", userId)
+      .is("read_at", null);
+
+    // Unread group messages (since last time user visited /chat group)
+    const lastRead = localStorage.getItem("chat_group_last_read");
+    let groupCount = 0;
+    if (lastRead) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact" })
+        .eq("channel", "group")
+        .neq("sender_id", userId)
+        .gt("created_at", lastRead);
+      groupCount = count ?? 0;
+    }
+
+    setUnread((dmCount ?? 0) + groupCount);
+  }
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
       supabase.from("profiles").select("*").eq("id", user.id).single()
         .then(({ data }) => {
           setProfile(data);
-          supabase
-            .from("messages")
-            .select("id", { count: "exact" })
-            .eq("channel", "direct")
-            .eq("recipient_id", user.id)
-            .is("read_at", null)
-            .then(({ count }) => setUnread(count ?? 0));
+          loadUnread(user.id);
+
+          // Real-time subscription for new messages
+          const ch = supabase.channel("navbar-unread")
+            .on("postgres_changes" as any, {
+              event: "INSERT",
+              schema: "public",
+              table: "messages",
+            }, () => loadUnread(user.id))
+            .on("postgres_changes" as any, {
+              event: "UPDATE",
+              schema: "public",
+              table: "messages",
+            }, () => loadUnread(user.id));
+          ch.subscribe();
         });
     });
   }, []);
+
+  // Reset unread when visiting chat
+  useEffect(() => {
+    if (pathname === "/chat") setUnread(0);
+  }, [pathname]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -44,16 +82,21 @@ export default function Navbar() {
 
   const isInstructor = profile?.role === "instructor";
 
+  const UnreadBadge = ({ small }: { small?: boolean }) => unread > 0 ? (
+    <span className={`bg-[#2041d8] text-white font-heading rounded-full flex items-center justify-center ${small ? "text-[10px] w-4 h-4" : "text-xs w-5 h-5"}`}>
+      {unread > 9 ? "9+" : unread}
+    </span>
+  ) : null;
+
   return (
     <nav className="bg-[#e4c3cc] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-end">
-          {/* Logo — floats above the border line */}
+          {/* Logo */}
           <Link href={profile ? (isInstructor ? "/instructor" : "/dashboard") : "/"} className="flex-shrink-0 flex items-end pb-0 mr-8">
             <Image src="/logo.png" alt="THE A.M Dance Club" width={100} height={70} className="object-contain" />
           </Link>
 
-          {/* Nav links with border underneath — only this section gets the border */}
           <div className="flex-1 flex items-center justify-between border-b border-[#2041d8]/20 pb-3 pt-4">
 
             {/* Desktop nav */}
@@ -65,16 +108,11 @@ export default function Navbar() {
               {profile && (
                 <Link href="/playlists" className={`font-body text-sm transition-colors ${isActive("/playlists")}`}>Playlists</Link>
               )}
-
               {profile && (
                 <>
-                  <Link href="/chat" className={`font-body text-sm transition-colors relative ${isActive("/chat")}`}>
+                  <Link href="/chat" className={`font-body text-sm transition-colors relative flex items-center gap-1.5 ${isActive("/chat")}`}>
                     Chat
-                    {unread > 0 && (
-                      <span className="absolute -top-1 -right-2 bg-[#2041d8] text-white text-[10px] font-heading w-4 h-4 rounded-full flex items-center justify-center">
-                        {unread > 9 ? "9+" : unread}
-                      </span>
-                    )}
+                    <UnreadBadge small />
                   </Link>
                   <Link href={isInstructor ? "/instructor" : "/dashboard"} className={`font-body text-sm transition-colors ${isActive(isInstructor ? "/instructor" : "/dashboard")}`}>
                     {isInstructor ? "Dashboard" : "My Classes"}
@@ -109,7 +147,7 @@ export default function Navbar() {
               <div className="w-5 h-0.5 bg-black mb-1" />
               <div className="w-5 h-0.5 bg-black" />
               {unread > 0 && (
-                <span className="absolute top-1 right-1 bg-[#2041d8] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{unread}</span>
+                <span className="absolute top-1 right-1 bg-[#2041d8] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
               )}
             </button>
           </div>
@@ -124,17 +162,29 @@ export default function Navbar() {
               { href: "/videos", label: "Videos" },
               { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },
               ...(profile ? [{ href: "/playlists", label: "Playlists" }] : []),
-              ...(profile ? [
-                { href: "/chat", label: `Chat${unread > 0 ? ` (${unread})` : ""}` },
-                { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
-                ...(isInstructor ? [{ href: "/reports", label: "Reports" }] : []),
-                { href: "/profile", label: "My Profile" },
-              ] : []),
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#2041d8]" onClick={() => setMenuOpen(false)}>
                 {label}
               </Link>
             ))}
+
+            {profile && (
+              <Link href="/chat" className="flex items-center gap-2 font-body text-sm text-black py-2.5 px-1 hover:text-[#2041d8]" onClick={() => setMenuOpen(false)}>
+                Chat
+                <UnreadBadge />
+              </Link>
+            )}
+
+            {profile && [
+              { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
+              ...(isInstructor ? [{ href: "/reports", label: "Reports" }] : []),
+              { href: "/profile", label: "My Profile" },
+            ].map(({ href, label }) => (
+              <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#2041d8]" onClick={() => setMenuOpen(false)}>
+                {label}
+              </Link>
+            ))}
+
             <div className="pt-3 border-t border-[#2041d8]/20 flex flex-col gap-2">
               {profile ? (
                 <button onClick={handleSignOut} className="btn-secondary w-full justify-center py-2 text-xs">Sign out</button>

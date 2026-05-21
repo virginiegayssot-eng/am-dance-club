@@ -145,6 +145,8 @@ export default function ChatPage() {
       .order("created_at", { ascending: true })
       .limit(100);
     setMessages((data as Message[]) ?? []);
+    // Mark group chat as read
+    localStorage.setItem("chat_group_last_read", new Date().toISOString());
     setLoading(false);
   }
 
