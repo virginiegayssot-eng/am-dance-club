@@ -70,17 +70,17 @@ export default function ClassesPage() {
   }
 
   // Smart book: auto-use best pass, else show options
-  async function handleBook(cls: ClassWithMeta) {
+  async function handleBook(cls: ClassWithMeta, guestCount = 0) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
 
     // Auto-use first valid pass (sorted by soonest expiry)
     if (activePasses.length > 0) {
-      setActionId(cls.id);
+      setActionId(cls.id + (guestCount > 0 ? "-double" : ""));
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id }),
+        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount }),
       });
       const { error } = await res.json();
       if (error) { alert(error); setActionId(null); return; }
@@ -196,6 +196,17 @@ export default function ClassesPage() {
                               ? `Book · Use Pass (${bestPass.classes_remaining} left)`
                               : "Book · $24 Casual"}
                           </button>
+
+                          {/* Book for 2 with pass */}
+                          {hasPass && bestPass.classes_remaining >= 2 && (
+                            <button
+                              onClick={() => handleBook(cls, 1)}
+                              disabled={!!actionId}
+                              className="btn-secondary w-full justify-center text-sm py-2"
+                            >
+                              {actionId === cls.id + "-double" ? "Booking…" : "Book for 2 · Uses 2 credits"}
+                            </button>
+                          )}
 
                           {/* Show payment options toggle when no pass */}
                           {!hasPass && (

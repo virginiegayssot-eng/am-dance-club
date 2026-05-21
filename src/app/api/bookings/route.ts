@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { classId, passId } = await req.json();
+  const { classId, passId, guestCount = 0 } = await req.json();
+  const creditsNeeded = 1 + guestCount;
 
   // Verify the pass belongs to this user and has credits
   const { data: pass } = await supabase
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (!pass) return NextResponse.json({ error: "Pass not found" }, { status: 404 });
-  if (pass.classes_remaining <= 0) return NextResponse.json({ error: "No classes remaining on this pass" }, { status: 400 });
+  if (pass.classes_remaining < creditsNeeded) return NextResponse.json({ error: creditsNeeded > 1 ? "Not enough credits for 2 people" : "No classes remaining on this pass" }, { status: 400 });
   if (pass.expires_at && new Date(pass.expires_at) < new Date()) {
     return NextResponse.json({ error: "This pass has expired" }, { status: 400 });
   }
@@ -64,10 +65,9 @@ export async function POST(req: NextRequest) {
 
   let regError;
   if (cancelled) {
-    // Reactivate the cancelled registration
     ({ error: regError } = await supabase
       .from("registrations")
-      .update({ status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: 0 })
+      .update({ status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: guestCount })
       .eq("id", cancelled.id));
   } else {
     ({ error: regError } = await supabase.from("registrations").insert({
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       status: "confirmed",
       pass_id: passId,
       payment_type: "pass",
-      guest_count: 0,
+      guest_count: guestCount,
     }));
   }
 
@@ -84,18 +84,19 @@ export async function POST(req: NextRequest) {
 
   await supabase
     .from("passes")
-    .update({ classes_remaining: pass.classes_remaining - 1 })
+    .update({ classes_remaining: pass.classes_remaining - creditsNeeded })
     .eq("id", passId);
 
   // Notify instructor
   const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  await resend.emails.send({
+  const emailResult = await resend.emails.send({
     from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
     subject: `New booking – ${profile?.full_name ?? "A student"}`,
-    html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass.</p>`,
-  }).catch(() => {});
+    html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass${guestCount > 0 ? ` <strong>(+${guestCount} guest)</strong>` : ""}.</p>`,
+  }).catch((e) => { console.error("Email error:", e); return null; });
+  console.log("Email result:", JSON.stringify(emailResult));
 
   return NextResponse.json({ success: true });
 }
