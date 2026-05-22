@@ -39,6 +39,8 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
 
   useEffect(() => { init(); }, []);
 
@@ -52,6 +54,15 @@ export default function ChatPage() {
     // Set up realtime subscription
     const channelName = activeChannel === "group" ? "group-chat" : `dm-${activeChannel}`;
     const ch = supabase.channel(channelName);
+
+    ch.on("postgres_changes" as any, {
+      event: "UPDATE",
+      schema: "public",
+      table: "messages",
+    }, (payload: any) => {
+      const msg = payload.new as Message;
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, body: msg.body } : m));
+    });
 
     ch.on("postgres_changes" as any, {
       event: "INSERT",
@@ -195,6 +206,13 @@ export default function ChatPage() {
     setBody("");
     setSending(false);
     inputRef.current?.focus();
+  }
+
+  async function saveEdit(msgId: string) {
+    if (!editBody.trim()) return;
+    await supabase.from("messages").update({ body: editBody.trim() }).eq("id", msgId).eq("sender_id", me!.id);
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, body: editBody.trim() } : m));
+    setEditingId(null);
   }
 
   function selectDM(profile: Profile) {
@@ -394,19 +412,49 @@ export default function ChatPage() {
                 const senderName = isMe ? (me?.full_name ?? me?.email ?? "You") : (msg.profiles?.full_name ?? msg.profiles?.email ?? "Unknown");
                 const time = new Date(msg.created_at).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" });
                 const date = new Date(msg.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+                const canEdit = isMe && (Date.now() - new Date(msg.created_at).getTime()) < 5 * 60 * 1000;
+                const isEditing = editingId === msg.id;
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                  <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
                     <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
                       {activeChannel === "group" && (
                         <span className="font-heading text-xs text-gray-400 px-1">{senderName}</span>
                       )}
-                      <div className={`px-4 py-2.5 rounded-2xl font-body text-sm leading-relaxed ${
-                        isMe
-                          ? "bg-[#2041d8] text-white rounded-br-sm"
-                          : "bg-[#e4c3cc]/25 text-black rounded-bl-sm"
-                      }`}>
-                        {msg.body}
-                      </div>
+                      {isEditing ? (
+                        <div className="flex gap-2 items-center">
+                          <input
+                            autoFocus
+                            className="input text-sm py-1.5 px-3 min-w-[180px]"
+                            value={editBody}
+                            onChange={e => setEditBody(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === "Enter") saveEdit(msg.id);
+                              if (e.key === "Escape") setEditingId(null);
+                            }}
+                          />
+                          <button onClick={() => saveEdit(msg.id)} className="font-body text-xs text-[#2041d8] hover:underline">Save</button>
+                          <button onClick={() => setEditingId(null)} className="font-body text-xs text-gray-400 hover:underline">Cancel</button>
+                        </div>
+                      ) : (
+                        <div className="flex items-end gap-1.5">
+                          {canEdit && isMe && (
+                            <button
+                              onClick={() => { setEditingId(msg.id); setEditBody(msg.body); }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-500 text-xs pb-1 order-first"
+                              title="Edit message"
+                            >
+                              ✏️
+                            </button>
+                          )}
+                          <div className={`px-4 py-2.5 rounded-2xl font-body text-sm leading-relaxed ${
+                            isMe
+                              ? "bg-[#2041d8] text-white rounded-br-sm"
+                              : "bg-[#e4c3cc]/25 text-black rounded-bl-sm"
+                          }`}>
+                            {msg.body}
+                          </div>
+                        </div>
+                      )}
                       <span className="font-body text-xs text-gray-300 px-1">{date} · {time}</span>
                     </div>
                   </div>
