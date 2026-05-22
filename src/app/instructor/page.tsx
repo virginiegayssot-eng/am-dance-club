@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,6 +29,7 @@ export default function InstructorPage() {
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
@@ -157,6 +158,7 @@ export default function InstructorPage() {
     }));
     setStudents(rows);
     setActiveTab("attendance");
+    setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
   async function toggleAttendance(studentId: string, attended: boolean) {
@@ -576,7 +578,7 @@ export default function InstructorPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 border-b border-gray-200 overflow-x-auto">
+        <div ref={tabsRef} className="flex gap-1 mb-8 border-b border-gray-200 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.key}
