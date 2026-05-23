@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { studentId, passTypeId, source } = await req.json();
+  const { studentId, passTypeId, source, amountPaidCents } = await req.json();
   if (!studentId || !passTypeId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
   const admin = adminClient();
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt,
     stripe_session_id: null,
     source: source ?? "cash",
+    amount_paid_cents: amountPaidCents ?? passType.price_cents,
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

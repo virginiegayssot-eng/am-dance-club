@@ -66,6 +66,8 @@ export type Pass = {
   classes_remaining: number;
   expires_at: string | null;
   stripe_session_id: string | null;
+  source: string | null;
+  amount_paid_cents: number | null;
   created_at: string;
   pass_types?: PassType;
 };

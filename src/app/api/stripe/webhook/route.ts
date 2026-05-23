@@ -60,6 +60,8 @@ export async function POST(req: NextRequest) {
         classes_remaining: config.classes,
         expires_at: expiresAt,
         stripe_session_id: session.id,
+        source: "stripe",
+        amount_paid_cents: session.amount_total,
       })
       .select()
       .single();

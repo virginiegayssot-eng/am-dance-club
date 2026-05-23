@@ -75,6 +75,7 @@ export default function InstructorPage() {
   const [assignPassTarget, setAssignPassTarget] = useState<Profile | null>(null);
   const [assignPassTypeId, setAssignPassTypeId] = useState("");
   const [assignPassSource, setAssignPassSource] = useState("cash");
+  const [assignPassAmount, setAssignPassAmount] = useState("");
   const [assignPassLoading, setAssignPassLoading] = useState(false);
 
   // Debit pass
@@ -106,6 +107,14 @@ export default function InstructorPage() {
       registered_count: regCounts?.find((rc) => rc.class_id === c.id)?.registered_count ?? 0,
     }));
     setClasses(enriched);
+
+    // Clear selectedClass if it's in the past (e.g. tab left open overnight)
+    const todayStr = new Date().toISOString().split("T")[0];
+    setSelectedClass(prev => {
+      if (!prev) return null;
+      if (prev.class_date < todayStr) return null;
+      return enriched.find(c => c.id === prev.id) ?? null;
+    });
 
     const { data: vids } = await supabase.from("videos").select("*").order("created_at", { ascending: false });
     setVideos(vids ?? []);
@@ -419,7 +428,12 @@ export default function InstructorPage() {
     const res = await fetch("/api/instructor/assign-pass", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId: assignPassTarget.id, passTypeId: assignPassTypeId, source: assignPassSource }),
+      body: JSON.stringify({
+        studentId: assignPassTarget.id,
+        passTypeId: assignPassTypeId,
+        source: assignPassSource,
+        amountPaidCents: assignPassAmount ? Math.round(parseFloat(assignPassAmount) * 100) : null,
+      }),
     });
     const data = await res.json();
 
@@ -432,6 +446,7 @@ export default function InstructorPage() {
     setShowAssignPassForm(false);
     setAssignPassTarget(null);
     setAssignPassTypeId("");
+    setAssignPassAmount("");
     loadData();
     setAssignPassLoading(false);
   }
@@ -475,6 +490,7 @@ export default function InstructorPage() {
     setAssignPassTarget(student);
     setAssignPassTypeId(passTypes[0]?.id ?? "");
     setAssignPassSource("cash");
+    setAssignPassAmount("");
     setShowAssignPassForm(true);
   }
 
@@ -1439,6 +1455,28 @@ export default function InstructorPage() {
                   <option value="complimentary">Complimentary</option>
                 </select>
               </div>
+              {assignPassSource !== "complimentary" && (
+                <div>
+                  <label className="label">
+                    Amount paid (AUD)
+                    {passTypes.find(pt => pt.id === assignPassTypeId) && (
+                      <span className="font-body text-xs text-gray-400 ml-1">
+                        — full price ${(passTypes.find(pt => pt.id === assignPassTypeId)!.price_cents / 100).toFixed(0)}
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 130.00"
+                    value={assignPassAmount}
+                    onChange={e => setAssignPassAmount(e.target.value)}
+                  />
+                  <p className="font-body text-xs text-gray-400 mt-1">Leave blank to use full price. Enter discounted amount if applicable.</p>
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowAssignPassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={assignPassLoading}>

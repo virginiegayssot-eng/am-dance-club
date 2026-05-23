@@ -48,6 +48,7 @@ export default function ReportsPage() {
   const [students, setStudents] = useState<StudentReport[]>([]);
   const [classes, setClasses] = useState<ClassReport[]>([]);
   const [revenue, setRevenue] = useState<RevenueRow[]>([]);
+  const [passesSold, setPassesSold] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<"3m" | "6m" | "12m">("3m");
 
@@ -83,7 +84,14 @@ export default function ReportsPage() {
 
     // Passes
     const { data: passes } = await supabase
-      .from("passes").select("*, pass_types(name)");
+      .from("passes").select("*, pass_types(name, price_cents)");
+
+    // All passes sold (for revenue report)
+    const { data: allPasses } = await supabase
+      .from("passes")
+      .select("*, pass_types(name, price_cents), profiles(full_name, email)")
+      .order("created_at", { ascending: false });
+    setPassesSold(allPasses ?? []);
 
     // Classes
     const { data: classData } = await supabase
@@ -304,6 +312,57 @@ export default function ReportsPage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Pass Sales */}
+            <div className="flex items-center justify-between mb-4 mt-8">
+              <h3 className="font-heading text-base">Pass Sales</h3>
+              <button onClick={() => downloadCSV(
+                passesSold.map(p => ({
+                  date: new Date(p.created_at).toLocaleDateString("en-AU"),
+                  student: p.profiles?.full_name ?? p.profiles?.email ?? "—",
+                  pass: p.pass_types?.name ?? p.pass_type_id,
+                  source: p.source ?? "stripe",
+                  amount_aud: ((p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0) / 100).toFixed(2),
+                })),
+                "pass-sales.csv"
+              )} className="font-body text-xs text-[#2041d8] hover:underline">Export CSV</button>
+            </div>
+            <div className="card overflow-hidden mb-8">
+              <table className="w-full text-sm font-body">
+                <thead className="bg-[#fff8f3] border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
+                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
+                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Pass</th>
+                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Source</th>
+                    <th className="text-right px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {passesSold.length === 0 ? (
+                    <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400 font-body text-sm">No passes sold yet.</td></tr>
+                  ) : passesSold.map(p => {
+                    const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
+                    const source = p.source ?? "stripe";
+                    const sourceLabel = source === "stripe" ? "💳 Stripe" : source === "cash" ? "💵 Cash" : source === "card_manual" ? "💳 Card" : source === "complimentary" ? "🎁 Comp" : source;
+                    return (
+                      <tr key={p.id} className="hover:bg-gray-50/50">
+                        <td className="px-5 py-3 text-gray-500">
+                          {new Date(p.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                        </td>
+                        <td className="px-5 py-3">
+                          <p className="font-medium">{p.profiles?.full_name ?? "—"}</p>
+                          <p className="text-xs text-gray-400">{p.profiles?.email}</p>
+                        </td>
+                        <td className="px-5 py-3">{p.pass_types?.name ?? p.pass_type_id}</td>
+                        <td className="px-5 py-3 text-xs">{sourceLabel}</td>
+                        <td className="px-5 py-3 text-right font-heading">{formatPrice(amount)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
             {/* Revenue by class */}

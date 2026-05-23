@@ -22,7 +22,12 @@ export default function ClassesPage() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+    const onVisible = () => { if (!document.hidden) loadData(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
