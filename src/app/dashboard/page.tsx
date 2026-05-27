@@ -123,9 +123,8 @@ export default function DashboardPage() {
         {/* Location change notice */}
         <div className="bg-[#2041d8] text-white rounded-2xl p-5 mb-6">
           <div className="flex items-start gap-3">
-            <span className="text-2xl shrink-0">📍</span>
             <div>
-              <p className="font-heading text-base mb-1">New Location — 3 Classes</p>
+              <p className="font-heading text-base mb-1">📍 Temporary Location Alert</p>
               <p className="font-body text-sm text-white/90 mb-2">
                 The following classes will be held at <strong>St Matthews Anglican Church (St Matts)</strong>, 1 Darley Road, Manly NSW 2095:
               </p>
