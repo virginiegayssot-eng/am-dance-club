@@ -120,6 +120,24 @@ export default function DashboardPage() {
           </h1>
         </div>
 
+        {/* Location change notice */}
+        <div className="bg-[#2041d8] text-white rounded-2xl p-5 mb-6">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl shrink-0">📍</span>
+            <div>
+              <p className="font-heading text-base mb-1">New Location — 3 Classes</p>
+              <p className="font-body text-sm text-white/90 mb-2">
+                The following classes will be held at <strong>St Matthews Anglican Church (St Matts)</strong>, 1 Darley Road, Manly NSW 2095:
+              </p>
+              <ul className="font-body text-sm text-white/90 space-y-0.5 list-disc list-inside">
+                <li>Friday 12 June</li>
+                <li>Friday 19 June</li>
+                <li>Friday 10 July</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* Success banners */}
         {justBooked && (
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 font-body text-sm text-green-700 flex items-center gap-3">
