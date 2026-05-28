@@ -740,21 +740,17 @@ export default function InstructorPage() {
         {/* PASSES TAB */}
         {activeTab === "passes" && (
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <p className="font-body text-sm text-gray-500">{allPasses.length} passes in total</p>
-            </div>
-            {allPasses.length === 0 ? (
-              <div className="card p-10 text-center">
-                <p className="font-body text-gray-400">No passes purchased yet.</p>
-              </div>
-            ) : (
-              <div className="card divide-y divide-gray-50 overflow-hidden">
-                {allPasses.map((p) => {
-                  const expired = p.expires_at && new Date(p.expires_at) < new Date();
-                  const used = p.classes_remaining === 0;
-                  const isActive = !expired && !used;
-                  const status = expired ? "Expired" : used ? "Used up" : "Active";
-                  const statusClass = expired || used ? "badge bg-gray-100 text-gray-500" : "badge-confirmed";
+            {(() => {
+              const activePasses = allPasses.filter(p => p.classes_remaining > 0 && (!p.expires_at || new Date(p.expires_at) > new Date()));
+              const inactivePasses = allPasses.filter(p => p.classes_remaining === 0 || (p.expires_at && new Date(p.expires_at) <= new Date()));
+              const PassList = ({ passes }: { passes: typeof allPasses }) => (
+                <div className="card divide-y divide-gray-50 overflow-hidden">
+                  {passes.map((p) => {
+                    const expired = p.expires_at && new Date(p.expires_at) < new Date();
+                    const used = p.classes_remaining === 0;
+                    const isActive = !expired && !used;
+                    const status = expired ? "Expired" : used ? "Used up" : "Active";
+                    const statusClass = expired || used ? "badge bg-gray-100 text-gray-500" : "badge-confirmed";
                   return (
                     <div key={p.id} className="px-5 py-4 flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -782,7 +778,28 @@ export default function InstructorPage() {
                   );
                 })}
               </div>
-            )}
+              );
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-5">
+                    <p className="font-body text-sm text-gray-500">{activePasses.length} active · {inactivePasses.length} used/expired</p>
+                  </div>
+                  {activePasses.length === 0 ? (
+                    <div className="card p-8 text-center mb-6">
+                      <p className="font-body text-gray-400">No active passes.</p>
+                    </div>
+                  ) : (
+                    <PassList passes={activePasses} />
+                  )}
+                  {inactivePasses.length > 0 && (
+                    <>
+                      <h3 className="font-heading text-xs uppercase tracking-widest text-gray-400 mt-8 mb-3">Used / Expired</h3>
+                      <PassList passes={inactivePasses} />
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 
