@@ -81,6 +81,15 @@ export default function InstructorPage() {
   // Debit pass
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
 
+  // Book for member
+  const [showBookForMember, setShowBookForMember] = useState(false);
+  const [bookForClass, setBookForClass] = useState<ClassWithCount | null>(null);
+  const [bookForStudentId, setBookForStudentId] = useState("");
+  const [bookForPassId, setBookForPassId] = useState("");
+  const [bookForLoading, setBookForLoading] = useState(false);
+  const [bookForError, setBookForError] = useState("");
+  const [memberPasses, setMemberPasses] = useState<any[]>([]);
+
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
@@ -486,6 +495,47 @@ export default function InstructorPage() {
     setSendingReviews(false);
   }
 
+  async function openBookForMember(cls: ClassWithCount) {
+    setBookForClass(cls);
+    setBookForStudentId("");
+    setBookForPassId("");
+    setBookForError("");
+    setMemberPasses([]);
+    setShowBookForMember(true);
+  }
+
+  async function loadMemberPasses(studentId: string) {
+    setBookForStudentId(studentId);
+    setBookForPassId("");
+    if (!studentId) { setMemberPasses([]); return; }
+    const { data } = await supabase
+      .from("passes").select("*, pass_types(name)")
+      .eq("student_id", studentId)
+      .gt("classes_remaining", 0)
+      .order("expires_at", { ascending: true, nullsFirst: false });
+    const active = (data ?? []).filter((p: any) => !p.expires_at || new Date(p.expires_at) > new Date());
+    setMemberPasses(active);
+    if (active.length > 0) setBookForPassId(active[0].id);
+  }
+
+  async function bookForMember(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bookForClass || !bookForStudentId) return;
+    setBookForLoading(true);
+    setBookForError("");
+
+    const res = await fetch("/api/instructor/book-for-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId: bookForClass.id, studentId: bookForStudentId, passId: bookForPassId || null }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setBookForError(data.error ?? "Something went wrong"); setBookForLoading(false); return; }
+    setShowBookForMember(false);
+    loadData();
+    setBookForLoading(false);
+  }
+
   function openAssignPass(student: Profile) {
     setAssignPassTarget(student);
     setAssignPassTypeId(passTypes[0]?.id ?? "");
@@ -622,7 +672,7 @@ export default function InstructorPage() {
               <div className="space-y-4">
                 <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400">Upcoming</h3>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onBookForMember={() => openBookForMember(cls)} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
@@ -1438,6 +1488,63 @@ export default function InstructorPage() {
           </Modal>
         )}
 
+        {/* BOOK FOR MEMBER MODAL */}
+        {showBookForMember && bookForClass && (
+          <Modal title={`Book a Member — ${new Date(bookForClass.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`} onClose={() => setShowBookForMember(false)}>
+            <form onSubmit={bookForMember} className="space-y-4">
+              <div>
+                <label className="label">Select Member</label>
+                <select
+                  className="input"
+                  value={bookForStudentId}
+                  onChange={e => loadMemberPasses(e.target.value)}
+                  required
+                >
+                  <option value="">— Choose a member —</option>
+                  {allStudents.map(s => (
+                    <option key={s.id} value={s.id}>{s.full_name ?? s.email}</option>
+                  ))}
+                </select>
+              </div>
+
+              {bookForStudentId && (
+                <div>
+                  <label className="label">Pass to use</label>
+                  {memberPasses.length === 0 ? (
+                    <p className="font-body text-sm text-gray-500 bg-gray-50 rounded-xl px-4 py-3">
+                      No active pass — will be booked as <strong>complimentary</strong>.
+                    </p>
+                  ) : (
+                    <select
+                      className="input"
+                      value={bookForPassId}
+                      onChange={e => setBookForPassId(e.target.value)}
+                    >
+                      {memberPasses.map((p: any) => (
+                        <option key={p.id} value={p.id}>
+                          {p.pass_types?.name} — {p.classes_remaining} class{p.classes_remaining !== 1 ? "es" : ""} left
+                        </option>
+                      ))}
+                      <option value="">Book as complimentary (no pass)</option>
+                    </select>
+                  )}
+                </div>
+              )}
+
+              {bookForError && (
+                <p className="font-body text-sm text-red-500">{bookForError}</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowBookForMember(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={bookForLoading || !bookForStudentId}>
+                  {bookForLoading ? "Booking…" : "Confirm Booking"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
         {/* ASSIGN PASS MODAL */}
         {showAssignPassForm && assignPassTarget && (
           <Modal title={`Assign Pass — ${assignPassTarget.full_name ?? assignPassTarget.email}`} onClose={() => setShowAssignPassForm(false)}>
@@ -1509,10 +1616,11 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, onAttendance, onCancel, past, isToday }: {
+function ClassRow({ cls, onAttendance, onCancel, onBookForMember, past, isToday }: {
   cls: ClassWithCount;
   onAttendance: () => void;
   onCancel: () => void;
+  onBookForMember?: () => void;
   past?: boolean;
   isToday?: boolean;
 }) {
@@ -1547,6 +1655,11 @@ function ClassRow({ cls, onAttendance, onCancel, past, isToday }: {
           <p className="font-body text-xs text-gray-400">per person</p>
         </div>
         <div className="flex gap-2">
+          {onBookForMember && (
+            <button onClick={onBookForMember} className="btn-secondary py-1.5 px-3 text-xs">
+              + Book Member
+            </button>
+          )}
           <button onClick={onAttendance} className={`py-1.5 px-3 text-xs ${isToday ? "btn-primary" : "btn-secondary"}`}>
             {isToday ? "Take Roll" : "Attendance"}
           </button>
