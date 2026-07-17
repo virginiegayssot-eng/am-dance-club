@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { classId, passId, guestCount = 0 } = await req.json();
-  const creditsNeeded = 1 + guestCount;
 
   // Verify the pass belongs to this user and has credits
   const { data: pass } = await supabase
@@ -20,6 +19,10 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (!pass) return NextResponse.json({ error: "Pass not found" }, { status: 404 });
+
+  // A pass's max_guests allowance (e.g. Double Pass) covers guests within the same credit
+  const maxGuests = (pass as any).pass_types?.max_guests ?? 0;
+  const creditsNeeded = 1 + Math.max(0, guestCount - maxGuests);
   if (pass.classes_remaining < creditsNeeded) return NextResponse.json({ error: creditsNeeded > 1 ? "Not enough credits for 2 people" : "No classes remaining on this pass" }, { status: 400 });
   if (pass.expires_at && new Date(pass.expires_at) < new Date()) {
     return NextResponse.json({ error: "This pass has expired" }, { status: 400 });

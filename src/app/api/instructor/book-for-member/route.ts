@@ -31,20 +31,37 @@ export async function POST(req: NextRequest) {
   if ((regCount?.registered_count ?? 0) >= cls.capacity) return NextResponse.json({ error: "Class is full" }, { status: 400 });
 
   // Check not already registered
-  const { data: existing } = await admin.from("registrations").select("id")
+  const { data: existing } = await admin.from("registrations").select("id, guest_count, pass_id")
     .eq("class_id", classId).eq("student_id", studentId).not("status", "eq", "cancelled").single();
+
+  // If already booked and adding guests, update guest count and deduct extra credits
+  if (existing && guestCount > (existing.guest_count ?? 0)) {
+    if (passId) {
+      const { data: pass } = await admin.from("passes").select("*, pass_types(*)").eq("id", passId).eq("student_id", studentId).single();
+      if (!pass) return NextResponse.json({ error: "Pass not found" }, { status: 404 });
+      const maxGuests = (pass as any).pass_types?.max_guests ?? 0;
+      const extraCredits = Math.max(0, guestCount - maxGuests) - Math.max(0, (existing.guest_count ?? 0) - maxGuests);
+      if (pass.classes_remaining < extraCredits) return NextResponse.json({ error: "Not enough credits on this pass" }, { status: 400 });
+      await admin.from("registrations").update({ guest_count: guestCount, pass_id: passId }).eq("id", existing.id);
+      await admin.from("passes").update({ classes_remaining: pass.classes_remaining - extraCredits }).eq("id", passId);
+    } else {
+      await admin.from("registrations").update({ guest_count: guestCount }).eq("id", existing.id);
+    }
+    return NextResponse.json({ success: true });
+  }
+
   if (existing) return NextResponse.json({ error: "Member is already booked for this class" }, { status: 400 });
 
   // Check for cancelled registration to reactivate
   const { data: cancelled } = await admin.from("registrations").select("id")
     .eq("class_id", classId).eq("student_id", studentId).eq("status", "cancelled").single();
 
-  const creditsNeeded = 1 + guestCount;
-
   // Deduct pass if provided
   if (passId) {
-    const { data: pass } = await admin.from("passes").select("*").eq("id", passId).eq("student_id", studentId).single();
+    const { data: pass } = await admin.from("passes").select("*, pass_types(*)").eq("id", passId).eq("student_id", studentId).single();
     if (!pass) return NextResponse.json({ error: "Pass not found" }, { status: 404 });
+    const maxGuests = (pass as any).pass_types?.max_guests ?? 0;
+    const creditsNeeded = 1 + Math.max(0, guestCount - maxGuests);
     if (pass.classes_remaining < creditsNeeded) return NextResponse.json({ error: "Not enough credits on this pass" }, { status: 400 });
 
     if (cancelled) {
