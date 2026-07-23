@@ -13,7 +13,7 @@ function adminClient() {
 
 const PASS_CONFIGS: Record<string, { name: string; price: number; classes: number; validityDays: number | null; newOnly: boolean }> = {
   casual:  { name: "Casual Class",   price: 2400,  classes: 1,  validityDays: null, newOnly: false },
-  double:  { name: "Double Pass",    price: 3800,  classes: 1,  validityDays: null, newOnly: false },
+  double:  { name: "Double Pass",    price: 3800,  classes: 2,  validityDays: null, newOnly: false },
   intro:   { name: "Intro Pass",     price: 3900,  classes: 3,  validityDays: 90,   newOnly: true  },
   five:    { name: "5-Class Pass",   price: 10000, classes: 5,  validityDays: 180,  newOnly: false },
   ten:     { name: "10-Class Pass",  price: 20000, classes: 10, validityDays: 365,  newOnly: false },
@@ -39,10 +39,6 @@ export async function POST(req: NextRequest) {
     if (existingRegs && existingRegs.length > 0) {
       return NextResponse.json({ error: "Intro Pass is for new students only" }, { status: 400 });
     }
-  }
-
-  if ((passTypeId === "casual" || passTypeId === "double") && !classId) {
-    return NextResponse.json({ error: "Class ID required for casual/double" }, { status: 400 });
   }
 
   // Apply discount code if provided

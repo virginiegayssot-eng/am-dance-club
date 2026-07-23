@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [registrations, setRegistrations] = useState<RegistrationWithClass[]>([]);
   const [attendance, setAttendance] = useState<AttendanceWithClass[]>([]);
   const [passes, setPasses] = useState<Pass[]>([]);
+  const [newsPosts, setNewsPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [justBooked, setJustBooked] = useState(false);
   const [justBoughtPass, setJustBoughtPass] = useState(false);
@@ -88,6 +89,10 @@ export default function DashboardPage() {
     setRegistrations((regs as RegistrationWithClass[]) ?? []);
     setAttendance((att as AttendanceWithClass[]) ?? []);
     setPasses(myPasses ?? []);
+
+    const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
+    setNewsPosts(np ?? []);
+
     setLoading(false);
   }
 
@@ -120,22 +125,24 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        {/* Location change notice */}
-        <div className="bg-[#2041d8] text-white rounded-2xl p-5 mb-6">
-          <div className="flex items-start gap-3">
-            <div>
-              <p className="font-heading text-base mb-1">📍 Temporary Location Alert</p>
-              <p className="font-body text-sm text-white/90 mb-2">
-                The following classes will be held at <strong>St Matthews Anglican Church (St Matts)</strong>, 1 Darley Road, Manly NSW 2095:
-              </p>
-              <ul className="font-body text-sm text-white/90 space-y-0.5 list-disc list-inside">
-                <li>Friday 12 June</li>
-                <li>Friday 19 June</li>
-                <li>Friday 10 July</li>
-              </ul>
-            </div>
+        {/* Club News */}
+        {newsPosts.length > 0 && (
+          <div className="mb-8 space-y-3">
+            {newsPosts.map(post => {
+              const catColor: Record<string, string> = { location: "bg-[#2041d8] text-white", event: "bg-[#e4c3cc] text-black border border-[#d4a8b4]", routine: "bg-[#fff8f3] text-black border border-[#e8d5c4]", general: "bg-[#fff8f3] text-black border border-[#e8d5c4]" };
+              const catIcon: Record<string, string> = { general: "📢", location: "📍", event: "🎉", routine: "💃" };
+              const colorClass = catColor[post.category] ?? catColor.general;
+              const icon = catIcon[post.category] ?? "📢";
+              return (
+                <div key={post.id} className={`rounded-2xl p-5 ${colorClass}`}>
+                  <p className="font-heading text-base mb-1">{icon} {post.title}</p>
+                  <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}>{post.body}</p>
+                  <p className={`font-body text-xs mt-2 ${post.category === "location" ? "text-white/60" : "text-gray-400"}`}>{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</p>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
 
         {/* Success banners */}
         {justBooked && (

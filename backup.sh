@@ -4,7 +4,7 @@
 # Run this occasionally to export your data to CSV files
 
 DATE=$(date +%Y-%m-%d)
-DIR="$HOME/Desktop/AM_Dance_Backups/$DATE"
+DIR="$HOME/Desktop/THE AM BACKUP/AM_Dance_Backups/$DATE"
 mkdir -p "$DIR"
 
 SUPABASE_URL="https://trsseitecjigqlqqscue.supabase.co"

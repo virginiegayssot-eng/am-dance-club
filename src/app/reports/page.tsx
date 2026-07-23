@@ -58,7 +58,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     if (!loading) buildRevenue();
-  }, [period, classes]);
+  }, [period, passesSold, loading]);
 
   async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -154,13 +154,16 @@ export default function ReportsPage() {
     for (let i = months - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = d.toLocaleDateString("en-AU", { month: "short", year: "numeric" });
-      const start = d.toISOString().split("T")[0];
-      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split("T")[0];
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
 
-      const monthClasses = classes.filter(c => c.class_date >= start && c.class_date <= end);
-      const casual = monthClasses.reduce((s, c) => s + c.revenue, 0);
+      const monthPasses = passesSold.filter(p => {
+        const created = new Date(p.created_at);
+        return created >= start && created <= end && p.source !== "complimentary";
+      });
+      const total = monthPasses.reduce((s, p) => s + (p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0), 0);
 
-      rows.push({ month: label, casual, passes: 0, total: casual });
+      rows.push({ month: label, casual: 0, passes: total, total });
     }
 
     setRevenue(rows);
@@ -200,7 +203,9 @@ export default function ReportsPage() {
     .sort((a, b) => a.daysUntil - b.daysUntil)
     .slice(0, 20);
 
-  const totalRevenue = classes.reduce((s, c) => s + c.revenue, 0);
+  const totalRevenue = passesSold
+    .filter(p => p.source !== "complimentary")
+    .reduce((s, p) => s + (p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0), 0);
   const totalStudents = students.length;
   const activeStudents = students.filter(s => {
     if (!s.last_class) return false;

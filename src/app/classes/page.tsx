@@ -114,6 +114,7 @@ export default function ClassesPage() {
 
   const hasPass = activePasses.length > 0;
   const bestPass = activePasses[0];
+  const isDoublePass = hasPass && (bestPass as any).pass_types?.name?.toLowerCase().includes("double");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -191,19 +192,21 @@ export default function ClassesPage() {
                         <div className="space-y-2">
                           {/* Primary book button */}
                           <button
-                            onClick={() => handleBook(cls)}
+                            onClick={() => handleBook(cls, isDoublePass ? 1 : 0)}
                             disabled={!!actionId}
                             className="btn-primary w-full justify-center"
                           >
-                            {isLoading && actionId === cls.id
+                            {isLoading
                               ? "Booking…"
                               : hasPass
-                              ? `Book · Use Pass (${bestPass.classes_remaining} left)`
+                              ? isDoublePass
+                                ? `Book for 2 · Use Pass (${bestPass.classes_remaining} left)`
+                                : `Book · Use Pass (${bestPass.classes_remaining} left)`
                               : "Book · $24 Casual"}
                           </button>
 
-                          {/* Book for 2 with pass */}
-                          {hasPass && bestPass.classes_remaining >= 2 && (
+                          {/* Book for 2 — only show for non-double passes */}
+                          {hasPass && !isDoublePass && bestPass.classes_remaining >= 2 && (
                             <button
                               onClick={() => handleBook(cls, 1)}
                               disabled={!!actionId}

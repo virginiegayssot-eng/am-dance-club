@@ -27,23 +27,25 @@ export default function SignupPage() {
 
     setLoading(true);
 
+    const birthDate = `2000-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}`;
+
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
-        data: { full_name: form.fullName },
-        emailRedirectTo: `${location.origin}/dashboard`,
+        data: { full_name: form.fullName, phone: form.phone, birth_date: birthDate },
+        emailRedirectTo: `${location.origin}/auth/callback?next=/dashboard`,
       },
     });
 
     if (error) { setError(error.message); setLoading(false); return; }
 
-    // Update profile with phone + birth_date
+    // Also try updating profile directly (belt and suspenders)
     if (data.user) {
       await supabase.from("profiles").update({
         full_name: form.fullName,
         phone: form.phone,
-        birth_date: `2000-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}`,
+        birth_date: birthDate,
       }).eq("id", data.user.id);
     }
 

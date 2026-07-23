@@ -49,7 +49,7 @@ export default function PlaylistsPage() {
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Members only</p>
           <h1 className="section-title mb-3">Class Playlists</h1>
           <p className="font-body text-gray-500">
-            The music we dance to — listen before class to get in the zone.
+            The music we dance to. Your Friday soundtrack starts here.
           </p>
         </div>
 

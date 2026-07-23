@@ -15,6 +15,8 @@ type Message = {
   body: string;
   created_at: string;
   profiles?: { full_name: string | null; email: string };
+  likeCount?: number;
+  likedByMe?: boolean;
 };
 
 type Conversation = {
@@ -41,6 +43,7 @@ export default function ChatPage() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const meRef = useRef<Profile | null>(null);
 
   useEffect(() => { init(); }, []);
 
@@ -102,6 +105,7 @@ export default function ChatPage() {
 
     const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     setMe(prof);
+    meRef.current = prof;
 
     if (prof?.role === "instructor") {
       const { data: studs } = await supabase
@@ -147,6 +151,18 @@ export default function ChatPage() {
     setConversations(convos);
   }
 
+  async function attachLikes(msgs: Message[]): Promise<Message[]> {
+    if (msgs.length === 0) return msgs;
+    const ids = msgs.map(m => m.id);
+    const { data: likes } = await supabase.from("message_likes").select("message_id, user_id").in("message_id", ids);
+    const myId = meRef.current?.id;
+    return msgs.map(m => ({
+      ...m,
+      likeCount: likes?.filter(l => l.message_id === m.id).length ?? 0,
+      likedByMe: likes?.some(l => l.message_id === m.id && l.user_id === myId) ?? false,
+    }));
+  }
+
   async function loadGroupMessages() {
     setLoading(true);
     const { data } = await supabase
@@ -155,8 +171,8 @@ export default function ChatPage() {
       .eq("channel", "group")
       .order("created_at", { ascending: true })
       .limit(100);
-    setMessages((data as Message[]) ?? []);
-    // Mark group chat as read
+    const withLikes = await attachLikes((data as Message[]) ?? []);
+    setMessages(withLikes);
     localStorage.setItem("chat_group_last_read", new Date().toISOString());
     setLoading(false);
   }
@@ -175,7 +191,8 @@ export default function ChatPage() {
       .order("created_at", { ascending: true })
       .limit(100);
 
-    setMessages((data as Message[]) ?? []);
+    const withLikes = await attachLikes((data as Message[]) ?? []);
+    setMessages(withLikes);
 
     // Mark received messages as read
     await supabase
@@ -189,6 +206,22 @@ export default function ChatPage() {
     setLoading(false);
   }
 
+
+  async function toggleLike(msgId: string, likedByMe: boolean) {
+    const myId = meRef.current?.id;
+    if (!myId) return;
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === msgId ? {
+      ...m,
+      likedByMe: !likedByMe,
+      likeCount: (m.likeCount ?? 0) + (likedByMe ? -1 : 1),
+    } : m));
+    if (likedByMe) {
+      await supabase.from("message_likes").delete().eq("message_id", msgId).eq("user_id", myId);
+    } else {
+      await supabase.from("message_likes").insert({ message_id: msgId, user_id: myId });
+    }
+  }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -455,7 +488,16 @@ export default function ChatPage() {
                           </div>
                         </div>
                       )}
-                      <span className="font-body text-xs text-gray-300 px-1">{date} · {time}</span>
+                      <div className={`flex items-center gap-2 px-1 ${isMe ? "justify-end" : "justify-start"}`}>
+                        <button
+                          onClick={() => toggleLike(msg.id, msg.likedByMe ?? false)}
+                          className={`flex items-center gap-1 text-xs transition-all ${msg.likedByMe ? "text-red-500" : "text-gray-300 hover:text-red-400"}`}
+                        >
+                          {msg.likedByMe ? "❤️" : "🤍"}
+                          {(msg.likeCount ?? 0) > 0 && <span className="font-body">{msg.likeCount}</span>}
+                        </button>
+                        <span className="font-body text-xs text-gray-300">{date} · {time}</span>
+                      </div>
                     </div>
                   </div>
                 );

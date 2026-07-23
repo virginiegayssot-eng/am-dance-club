@@ -11,7 +11,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 
 type ClassWithCount = Class & { registered_count: number };
-type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number };
+type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
 type PassRow = Pass & { profiles: { full_name: string | null; email: string } };
 
 export default function InstructorPage() {
@@ -25,7 +25,7 @@ export default function InstructorPage() {
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts">("classes");
+  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news">("classes");
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,11 +48,21 @@ export default function InstructorPage() {
   const [bulkResults, setBulkResults] = useState<{ email: string; name: string; status: string; reason?: string }[] | null>(null);
   const [bulkParseError, setBulkParseError] = useState("");
 
+  // Club News
+  const [newsPosts, setNewsPosts] = useState<any[]>([]);
+  const [showNewsForm, setShowNewsForm] = useState(false);
+  const [newsForm, setNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
+  const [editNewsForm, setEditNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
+
   // Discount codes
   const [discountCodes, setDiscountCodes] = useState<any[]>([]);
   const [showDiscountForm, setShowDiscountForm] = useState(false);
   const [discountForm, setDiscountForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "" });
   const [discountFormLoading, setDiscountFormLoading] = useState(false);
+  const [editingDiscountId, setEditingDiscountId] = useState<string | null>(null);
+  const [editDiscountExpiresAt, setEditDiscountExpiresAt] = useState("");
 
   // Playlist form
   const [showPlaylistForm, setShowPlaylistForm] = useState(false);
@@ -86,9 +96,23 @@ export default function InstructorPage() {
   const [bookForClass, setBookForClass] = useState<ClassWithCount | null>(null);
   const [bookForStudentId, setBookForStudentId] = useState("");
   const [bookForPassId, setBookForPassId] = useState("");
+  const [bookForGuestCount, setBookForGuestCount] = useState(0);
   const [bookForLoading, setBookForLoading] = useState(false);
   const [bookForError, setBookForError] = useState("");
   const [memberPasses, setMemberPasses] = useState<any[]>([]);
+
+  // Walk-ins
+  const [walkIns, setWalkIns] = useState<{ id: string; name: string; payment_type: string }[]>([]);
+  const [showAddToRoll, setShowAddToRoll] = useState(false);
+  const [addToRollMode, setAddToRollMode] = useState<"member" | "walkin">("member");
+  const [walkInName, setWalkInName] = useState("");
+  const [walkInPassStudentId, setWalkInPassStudentId] = useState("");
+  const [walkInPassId, setWalkInPassId] = useState("");
+  const [walkInPasses, setWalkInPasses] = useState<any[]>([]);
+  const [walkInPaymentType, setWalkInPaymentType] = useState("casual");
+  const [memberNoPassPaymentType, setMemberNoPassPaymentType] = useState("casual");
+  const [walkInLoading, setWalkInLoading] = useState(false);
+  const [walkInError, setWalkInError] = useState("");
 
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
@@ -150,14 +174,46 @@ export default function InstructorPage() {
     const { data: dcs } = await supabase.from("discount_codes").select("*").order("created_at", { ascending: false });
     setDiscountCodes(dcs ?? []);
 
+    const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
+    setNewsPosts(np ?? []);
+
     setLoading(false);
+  }
+
+  async function submitNewsPost(e: React.FormEvent) {
+    e.preventDefault();
+    setNewsLoading(true);
+    await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned });
+    setNewsForm({ title: "", body: "", category: "general", pinned: false });
+    setShowNewsForm(false);
+    setNewsLoading(false);
+    const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
+    setNewsPosts(np ?? []);
+  }
+
+  async function saveEditNewsPost(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingNewsId) return;
+    await supabase.from("news_posts").update({ title: editNewsForm.title, body: editNewsForm.body, category: editNewsForm.category, pinned: editNewsForm.pinned }).eq("id", editingNewsId);
+    setNewsPosts(prev => prev.map(p => p.id === editingNewsId ? { ...p, ...editNewsForm } : p).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)));
+    setEditingNewsId(null);
+  }
+
+  async function deleteNewsPost(id: string) {
+    await supabase.from("news_posts").delete().eq("id", id);
+    setNewsPosts(prev => prev.filter(p => p.id !== id));
+  }
+
+  async function togglePin(id: string, pinned: boolean) {
+    await supabase.from("news_posts").update({ pinned: !pinned }).eq("id", id);
+    setNewsPosts(prev => prev.map(p => p.id === id ? { ...p, pinned: !pinned } : p).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)));
   }
 
   async function loadStudents(cls: ClassWithCount) {
     setSelectedClass(cls);
     const { data: regs } = await supabase
       .from("registrations")
-      .select("id, student_id, profiles(id, full_name, email)")
+      .select("id, student_id, pass_id, payment_type, guest_count, profiles(id, full_name, email)")
       .eq("class_id", cls.id)
       .eq("status", "confirmed");
 
@@ -173,10 +229,89 @@ export default function InstructorPage() {
       attended: att?.find((a) => a.student_id === r.profiles.id)?.attended ?? false,
       reg_id: r.id,
       guest_count: r.guest_count ?? 0,
+      pass_id: r.pass_id ?? null,
+      payment_type: r.payment_type ?? null,
     }));
     setStudents(rows);
+
+    // Load walk-ins for this class
+    const { data: wis } = await supabase.from("walk_ins").select("id, name, payment_type").eq("class_id", cls.id);
+    setWalkIns(wis ?? []);
+
     setActiveTab("attendance");
     setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+
+  async function cancelMemberBooking(student: StudentRow) {
+    if (!confirm(`Cancel ${student.full_name ?? student.email}'s booking and refund their pass credit?`)) return;
+    const res = await fetch("/api/instructor/cancel-booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ regId: student.reg_id, passId: student.pass_id, guestCount: student.guest_count }),
+    });
+    if (res.ok) {
+      setStudents(prev => prev.filter(s => s.reg_id !== student.reg_id));
+    } else {
+      const data = await res.json();
+      alert(data.error ?? "Something went wrong");
+    }
+  }
+
+  async function loadWalkInPasses(studentId: string) {
+    setWalkInPassStudentId(studentId);
+    setWalkInPassId("");
+    if (!studentId) { setWalkInPasses([]); return; }
+    const { data } = await supabase.from("passes").select("*, pass_types(name)")
+      .eq("student_id", studentId).gt("classes_remaining", 0)
+      .order("expires_at", { ascending: true, nullsFirst: false });
+    const active = (data ?? []).filter((p: any) => !p.expires_at || new Date(p.expires_at) > new Date());
+    setWalkInPasses(active);
+    if (active.length > 0) setWalkInPassId(active[0].id);
+  }
+
+  async function submitAddToRoll(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedClass) return;
+    setWalkInLoading(true);
+    setWalkInError("");
+
+    if (addToRollMode === "member") {
+      // Book existing member + mark attended
+      const res = await fetch("/api/instructor/book-for-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: selectedClass.id, studentId: bookForStudentId, passId: bookForPassId || null, guestCount: bookForGuestCount, paymentType: bookForPassId ? "pass" : memberNoPassPaymentType }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setWalkInError(data.error ?? "Something went wrong"); setWalkInLoading(false); return; }
+      // Mark them attended immediately
+      await supabase.from("attendance").upsert(
+        { class_id: selectedClass.id, student_id: bookForStudentId, attended: true },
+        { onConflict: "class_id,student_id" }
+      );
+      await loadStudents(selectedClass);
+    } else {
+      // Walk-in
+      const res = await fetch("/api/instructor/add-walk-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: selectedClass.id, name: walkInName, passId: walkInPassId || null, paymentType: walkInPassId ? "pass" : walkInPaymentType }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setWalkInError(data.error ?? "Something went wrong"); setWalkInLoading(false); return; }
+      const { data: wis } = await supabase.from("walk_ins").select("id, name, payment_type").eq("class_id", selectedClass.id);
+      setWalkIns(wis ?? []);
+    }
+
+    setShowAddToRoll(false);
+    setWalkInName("");
+    setWalkInPassStudentId("");
+    setWalkInPassId("");
+    setWalkInPasses([]);
+    setBookForStudentId("");
+    setBookForPassId("");
+    setBookForGuestCount(0);
+    setWalkInLoading(false);
   }
 
   async function toggleAttendance(studentId: string, attended: boolean) {
@@ -357,6 +492,13 @@ export default function InstructorPage() {
     setDiscountFormLoading(false);
   }
 
+  async function saveDiscountExpiry(id: string) {
+    const expires_at = editDiscountExpiresAt ? new Date(editDiscountExpiresAt).toISOString() : null;
+    await supabase.from("discount_codes").update({ expires_at }).eq("id", id);
+    setDiscountCodes(prev => prev.map(d => d.id === id ? { ...d, expires_at } : d));
+    setEditingDiscountId(null);
+  }
+
   async function toggleDiscountActive(id: string, active: boolean) {
     await supabase.from("discount_codes").update({ active: !active }).eq("id", id);
     setDiscountCodes(prev => prev.map(d => d.id === id ? { ...d, active: !active } : d));
@@ -527,7 +669,7 @@ export default function InstructorPage() {
     const res = await fetch("/api/instructor/book-for-member", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classId: bookForClass.id, studentId: bookForStudentId, passId: bookForPassId || null }),
+      body: JSON.stringify({ classId: bookForClass.id, studentId: bookForStudentId, passId: bookForPassId || null, guestCount: bookForGuestCount }),
     });
     const data = await res.json();
     if (!res.ok) { setBookForError(data.error ?? "Something went wrong"); setBookForLoading(false); return; }
@@ -564,6 +706,7 @@ export default function InstructorPage() {
     { key: "students", label: "Members" },
     { key: "playlists", label: "Playlists" },
     { key: "discounts", label: "Discounts" },
+    { key: "news", label: "Club News" },
   ] as const;
 
   if (loading) {
@@ -627,6 +770,40 @@ export default function InstructorPage() {
             </button>
           </div>
         )}
+
+        {/* Upcoming Birthdays */}
+        {(() => {
+          const today = new Date();
+          const upcoming = allStudents.filter(s => {
+            if (!s.birth_date) return false;
+            const bd = new Date(s.birth_date);
+            const thisYear = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+            const diff = (thisYear.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24);
+            return diff >= 0 && diff <= 7;
+          }).sort((a, b) => {
+            const dayOf = (s: typeof a) => { const bd = new Date(s.birth_date!); return new Date(new Date().getFullYear(), bd.getMonth(), bd.getDate()).getTime(); };
+            return dayOf(a) - dayOf(b);
+          });
+          if (upcoming.length === 0) return null;
+          return (
+            <div className="bg-[#fff0f5] border border-[#e4c3cc] rounded-2xl px-5 py-4 mb-6">
+              <p className="font-heading text-sm mb-2">🎂 Upcoming Birthdays</p>
+              <div className="space-y-1">
+                {upcoming.map(s => {
+                  const bd = new Date(s.birth_date!);
+                  const thisYear = new Date(new Date().getFullYear(), bd.getMonth(), bd.getDate());
+                  const diff = Math.round((thisYear.getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+                  const label = diff === 0 ? "🎉 Today!" : diff === 1 ? "Tomorrow" : `in ${diff} days`;
+                  return (
+                    <p key={s.id} className="font-body text-sm">
+                      <strong>{s.full_name ?? s.email}</strong> — {bd.toLocaleDateString("en-AU", { day: "numeric", month: "long" })} <span className="text-[#2041d8]">({label})</span>
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -711,16 +888,22 @@ export default function InstructorPage() {
                       <p className="font-body text-sm text-gray-500">
                         {new Date(selectedClass.class_date + "T00:00:00").toLocaleDateString("en-AU", {
                           weekday: "long", day: "numeric", month: "long"
-                        })} · {students.filter(s => s.attended).length}/{students.length} attended
+                        })} · {students.filter(s => s.attended).reduce((sum, s) => sum + 1 + s.guest_count, 0) + walkIns.length}/{students.reduce((sum, s) => sum + 1 + s.guest_count, 0) + walkIns.length} attended
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                     {reviewsSent !== null && (
                       <p className="font-body text-sm text-green-600">
                         {reviewsSent === 0 ? "No first-timers today" : `${reviewsSent} review email${reviewsSent !== 1 ? "s" : ""} sent!`}
                       </p>
                     )}
+                    <button
+                      onClick={() => { setShowAddToRoll(true); setAddToRollMode("member"); setWalkInError(""); setBookForStudentId(""); setBookForPassId(""); setBookForGuestCount(0); setWalkInName(""); setWalkInPassStudentId(""); setWalkInPassId(""); setWalkInPasses([]); setWalkInPaymentType("casual"); setMemberNoPassPaymentType("casual"); }}
+                      className="btn-primary py-1.5 px-3 text-xs"
+                    >
+                      + Add to Roll
+                    </button>
                     <button
                       onClick={sendReviewEmails}
                       disabled={sendingReviews}
@@ -731,7 +914,7 @@ export default function InstructorPage() {
                   </div>
                 </div>
 
-                {students.length === 0 ? (
+                {students.length === 0 && walkIns.length === 0 ? (
                   <div className="card p-8 text-center">
                     <p className="font-body text-gray-400">No registered members for this class.</p>
                   </div>
@@ -739,8 +922,8 @@ export default function InstructorPage() {
                   <div className="card overflow-hidden">
                     <div className="divide-y divide-gray-50">
                       {students.map((s) => (
-                        <div key={s.id} className="flex items-center justify-between px-5 py-3">
-                          <div>
+                        <div key={s.id} className="flex items-center justify-between px-5 py-3 group">
+                          <div className="min-w-0">
                             <p className="font-medium text-sm font-body">
                               {s.full_name ?? "—"}
                               {s.guest_count > 0 && (
@@ -749,16 +932,38 @@ export default function InstructorPage() {
                             </p>
                             <p className="text-xs text-gray-500 font-body">{s.email}</p>
                           </div>
-                          <button
-                            onClick={() => toggleAttendance(s.id, s.attended)}
-                            className={`w-8 h-8 rounded-full border-2 transition-all shrink-0 ${
-                              s.attended
-                                ? "bg-[#2041d8] border-[#2041d8] text-white"
-                                : "border-gray-300 hover:border-[#2041d8]"
-                            }`}
-                          >
-                            {s.attended ? "✓" : ""}
-                          </button>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <button
+                              onClick={() => cancelMemberBooking(s)}
+                              className="font-body text-xs text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Cancel booking & refund pass"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => toggleAttendance(s.id, s.attended)}
+                              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                s.attended
+                                  ? "bg-[#2041d8] border-[#2041d8] text-white"
+                                  : "border-gray-300 hover:border-[#2041d8]"
+                              }`}
+                            >
+                              {s.attended ? "✓" : ""}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {walkIns.map((w) => (
+                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#fff8f3]">
+                          <div>
+                            <p className="font-medium text-sm font-body">
+                              {w.name}
+                              <span className="ml-2 badge bg-[#e4c3cc]/50 text-black text-xs">Walk-in</span>
+                              {w.payment_type === "pass" && <span className="ml-1 badge bg-blue-100 text-blue-700 text-xs">Pass deducted</span>}
+                            </p>
+                            <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-[#2041d8] border-2 border-[#2041d8] text-white flex items-center justify-center text-sm shrink-0">✓</div>
                         </div>
                       ))}
                     </div>
@@ -879,7 +1084,10 @@ export default function InstructorPage() {
                     <div className="min-w-0">
                       <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
                       <p className="text-xs text-gray-500 font-body">{s.email}</p>
-                      <p className="text-xs text-gray-400 font-body">{s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
+                      <p className="text-xs text-gray-400 font-body">
+                        {s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                        {s.birth_date && ` · 🎂 ${new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`}
+                      </p>
                     </div>
                     <button
                       onClick={() => openAssignPass(s)}
@@ -934,7 +1142,16 @@ export default function InstructorPage() {
                           {d.uses_count}{d.max_uses ? `/${d.max_uses}` : ""}
                         </td>
                         <td className="px-5 py-3 text-gray-500">
-                          {d.expires_at ? new Date(d.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "Never"}
+                          {editingDiscountId === d.id ? (
+                            <input
+                              type="date"
+                              className="input py-1 px-2 text-xs w-36"
+                              value={editDiscountExpiresAt}
+                              onChange={e => setEditDiscountExpiresAt(e.target.value)}
+                            />
+                          ) : (
+                            d.expires_at ? new Date(d.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "Never"
+                          )}
                         </td>
                         <td className="px-5 py-3">
                           <span className={d.active ? "badge-confirmed" : "badge bg-gray-100 text-gray-500"}>
@@ -942,6 +1159,14 @@ export default function InstructorPage() {
                           </span>
                         </td>
                         <td className="px-5 py-3 text-right flex items-center gap-3 justify-end">
+                          {editingDiscountId === d.id ? (
+                            <>
+                              <button onClick={() => saveDiscountExpiry(d.id)} className="font-body text-xs text-green-600 hover:underline">Save</button>
+                              <button onClick={() => setEditingDiscountId(null)} className="font-body text-xs text-gray-400 hover:underline">Cancel</button>
+                            </>
+                          ) : (
+                            <button onClick={() => { setEditingDiscountId(d.id); setEditDiscountExpiresAt(d.expires_at ? d.expires_at.split("T")[0] : ""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
+                          )}
                           <button onClick={() => toggleDiscountActive(d.id, d.active)} className="font-body text-xs text-[#2041d8] hover:underline">
                             {d.active ? "Disable" : "Enable"}
                           </button>
@@ -953,6 +1178,104 @@ export default function InstructorPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CLUB NEWS TAB */}
+        {activeTab === "news" && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-body text-sm text-gray-500">{newsPosts.length} post{newsPosts.length !== 1 ? "s" : ""}</p>
+              <button onClick={() => setShowNewsForm(true)} className="btn-primary py-2 px-4 text-sm">+ New Post</button>
+            </div>
+
+            {showNewsForm && (
+              <div className="card p-6 mb-6">
+                <h3 className="font-heading text-base mb-4">New Post</h3>
+                <form onSubmit={submitNewsPost} className="space-y-4">
+                  <div>
+                    <label className="label">Title</label>
+                    <input className="input" placeholder="e.g. New location for June 12" value={newsForm.title} onChange={e => setNewsForm(f => ({ ...f, title: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <label className="label">Message</label>
+                    <textarea className="input min-h-[100px]" placeholder="Write your announcement here…" value={newsForm.body} onChange={e => setNewsForm(f => ({ ...f, body: e.target.value }))} required />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="label">Category</label>
+                      <select className="input" value={newsForm.category} onChange={e => setNewsForm(f => ({ ...f, category: e.target.value }))}>
+                        <option value="general">📢 General</option>
+                        <option value="location">📍 Location Change</option>
+                        <option value="event">🎉 Event</option>
+                        <option value="routine">💃 New Routine</option>
+                      </select>
+                    </div>
+                    <div className="flex items-end pb-1 gap-2">
+                      <input type="checkbox" id="pinned" checked={newsForm.pinned} onChange={e => setNewsForm(f => ({ ...f, pinned: e.target.checked }))} className="w-4 h-4" />
+                      <label htmlFor="pinned" className="font-body text-sm">Pin to top</label>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button type="button" onClick={() => setShowNewsForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                    <button type="submit" className="btn-primary flex-1 justify-center" disabled={newsLoading}>{newsLoading ? "Posting…" : "Publish"}</button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {newsPosts.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400 mb-4">No posts yet.</p>
+                <button onClick={() => setShowNewsForm(true)} className="btn-primary">Create First Post</button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {newsPosts.map(post => {
+                  const catIcon = { general: "📢", location: "📍", event: "🎉", routine: "💃" }[post.category as string] ?? "📢";
+                  const isEditing = editingNewsId === post.id;
+                  return (
+                    <div key={post.id} className={`card p-5 ${post.pinned ? "border-2 border-[#2041d8]" : ""}`}>
+                      {isEditing ? (
+                        <form onSubmit={saveEditNewsPost} className="space-y-3">
+                          <input className="input" value={editNewsForm.title} onChange={e => setEditNewsForm(f => ({ ...f, title: e.target.value }))} required />
+                          <textarea className="input min-h-[100px]" value={editNewsForm.body} onChange={e => setEditNewsForm(f => ({ ...f, body: e.target.value }))} required />
+                          <div className="flex gap-4">
+                            <select className="input flex-1" value={editNewsForm.category} onChange={e => setEditNewsForm(f => ({ ...f, category: e.target.value }))}>
+                              <option value="general">📢 General</option>
+                              <option value="location">📍 Location Change</option>
+                              <option value="event">🎉 Event</option>
+                              <option value="routine">💃 New Routine</option>
+                            </select>
+                            <div className="flex items-center gap-2">
+                              <input type="checkbox" checked={editNewsForm.pinned} onChange={e => setEditNewsForm(f => ({ ...f, pinned: e.target.checked }))} className="w-4 h-4" />
+                              <label className="font-body text-sm">Pinned</label>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => setEditingNewsId(null)} className="btn-secondary flex-1 justify-center py-1.5 text-sm">Cancel</button>
+                            <button type="submit" className="btn-primary flex-1 justify-center py-1.5 text-sm">Save</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-heading text-base">{catIcon} {post.title} {post.pinned && <span className="ml-1 badge bg-[#2041d8] text-white text-xs">Pinned</span>}</p>
+                            <p className="font-body text-sm text-gray-600 mt-1 whitespace-pre-wrap">{post.body}</p>
+                            <p className="font-body text-xs text-gray-400 mt-2">{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <button onClick={() => { setEditingNewsId(post.id); setEditNewsForm({ title: post.title, body: post.body, category: post.category, pinned: post.pinned }); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
+                            <button onClick={() => togglePin(post.id, post.pinned)} className="font-body text-xs text-[#2041d8] hover:underline">{post.pinned ? "Unpin" : "Pin"}</button>
+                            <button onClick={() => deleteNewsPost(post.id)} className="font-body text-xs text-red-500 hover:underline">Delete</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1531,6 +1854,22 @@ export default function InstructorPage() {
                 </div>
               )}
 
+              {bookForStudentId && (
+                <div>
+                  <label className="label">Extra guests (e.g. family member sharing pass)</label>
+                  <select
+                    className="input"
+                    value={bookForGuestCount}
+                    onChange={e => setBookForGuestCount(Number(e.target.value))}
+                  >
+                    <option value={0}>No guests</option>
+                    <option value={1}>+ 1 guest (2 credits total)</option>
+                    <option value={2}>+ 2 guests (3 credits total)</option>
+                    <option value={3}>+ 3 guests (4 credits total)</option>
+                  </select>
+                </div>
+              )}
+
               {bookForError && (
                 <p className="font-body text-sm text-red-500">{bookForError}</p>
               )}
@@ -1539,6 +1878,115 @@ export default function InstructorPage() {
                 <button type="button" onClick={() => setShowBookForMember(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={bookForLoading || !bookForStudentId}>
                   {bookForLoading ? "Booking…" : "Confirm Booking"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* ADD TO ROLL MODAL */}
+        {showAddToRoll && selectedClass && (
+          <Modal title={`Add to Roll — ${new Date(selectedClass.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`} onClose={() => setShowAddToRoll(false)}>
+            {/* Mode toggle */}
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 mb-4">
+              <button type="button" onClick={() => setAddToRollMode("member")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "member" ? "bg-[#2041d8] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
+                Existing Member
+              </button>
+              <button type="button" onClick={() => setAddToRollMode("walkin")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "walkin" ? "bg-[#2041d8] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
+                Walk-in (no account)
+              </button>
+            </div>
+
+            <form onSubmit={submitAddToRoll} className="space-y-4">
+              {addToRollMode === "member" ? (
+                <>
+                  <div>
+                    <label className="label">Select Member</label>
+                    <select className="input" value={bookForStudentId} onChange={e => loadMemberPasses(e.target.value)} required>
+                      <option value="">— Choose a member —</option>
+                      {allStudents.map(s => <option key={s.id} value={s.id}>{s.full_name ?? s.email}</option>)}
+                    </select>
+                  </div>
+                  {bookForStudentId && (
+                    <div>
+                      <label className="label">Pass to use</label>
+                      {memberPasses.length === 0 ? (
+                        <p className="font-body text-sm text-gray-500 bg-gray-50 rounded-xl px-4 py-3">No active pass — will be booked as <strong>complimentary</strong>.</p>
+                      ) : (
+                        <select className="input" value={bookForPassId} onChange={e => setBookForPassId(e.target.value)}>
+                          {memberPasses.map((p: any) => <option key={p.id} value={p.id}>{p.pass_types?.name} — {p.classes_remaining} left</option>)}
+                          <option value="">Paid on spot / Complimentary</option>
+                        </select>
+                      )}
+                      {bookForStudentId && !bookForPassId && memberPasses.length > 0 && (
+                        <div className="mt-2">
+                          <label className="label">Payment type</label>
+                          <select className="input" value={memberNoPassPaymentType} onChange={e => setMemberNoPassPaymentType(e.target.value)}>
+                            <option value="casual">💵 Casual (paid on spot)</option>
+                            <option value="complimentary">🎁 Complimentary</option>
+                          </select>
+                        </div>
+                      )}
+                      {bookForStudentId && memberPasses.length === 0 && (
+                        <div className="mt-2">
+                          <label className="label">Payment type</label>
+                          <select className="input" value={memberNoPassPaymentType} onChange={e => setMemberNoPassPaymentType(e.target.value)}>
+                            <option value="casual">💵 Casual (paid on spot)</option>
+                            <option value="complimentary">🎁 Complimentary</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {bookForStudentId && (
+                    <div>
+                      <label className="label">Extra guests</label>
+                      <select className="input" value={bookForGuestCount} onChange={e => setBookForGuestCount(Number(e.target.value))}>
+                        <option value={0}>No guests</option>
+                        <option value={1}>+ 1 guest (2 credits total)</option>
+                        <option value={2}>+ 2 guests (3 credits total)</option>
+                      </select>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="label">Name</label>
+                    <input className="input" placeholder="e.g. Christine" value={walkInName} onChange={e => setWalkInName(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="label">Payment type</label>
+                    <select className="input" value={walkInPaymentType} onChange={e => setWalkInPaymentType(e.target.value)}>
+                      <option value="casual">💵 Casual (paid on spot)</option>
+                      <option value="complimentary">🎁 Complimentary</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Deduct from a member's pass? (optional)</label>
+                    <select className="input" value={walkInPassStudentId} onChange={e => loadWalkInPasses(e.target.value)}>
+                      <option value="">— No pass to deduct —</option>
+                      {allStudents.map(s => <option key={s.id} value={s.id}>{s.full_name ?? s.email}</option>)}
+                    </select>
+                  </div>
+                  {walkInPasses.length > 0 && (
+                    <div>
+                      <label className="label">Pass to deduct from</label>
+                      <select className="input" value={walkInPassId} onChange={e => setWalkInPassId(e.target.value)}>
+                        {walkInPasses.map((p: any) => <option key={p.id} value={p.id}>{p.pass_types?.name} — {p.classes_remaining} left</option>)}
+                        <option value="">Don't deduct</option>
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {walkInError && <p className="font-body text-sm text-red-500">{walkInError}</p>}
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowAddToRoll(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={walkInLoading || (addToRollMode === "member" && !bookForStudentId) || (addToRollMode === "walkin" && !walkInName)}>
+                  {walkInLoading ? "Adding…" : "Add to Roll"}
                 </button>
               </div>
             </form>
