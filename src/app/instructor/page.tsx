@@ -242,6 +242,21 @@ export default function InstructorPage() {
     setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
+  async function deleteMember(student: Profile) {
+    if (!confirm(`Remove ${student.full_name ?? student.email} from the app? This permanently deletes their account, bookings, passes, and chat history. This cannot be undone.`)) return;
+    const res = await fetch("/api/instructor/delete-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    });
+    if (res.ok) {
+      setAllStudents(prev => prev.filter(s => s.id !== student.id));
+    } else {
+      const data = await res.json();
+      alert(data.error ?? "Something went wrong");
+    }
+  }
+
   async function cancelMemberBooking(student: StudentRow) {
     if (!confirm(`Cancel ${student.full_name ?? student.email}'s booking and refund their pass credit?`)) return;
     const res = await fetch("/api/instructor/cancel-booking", {
@@ -1089,12 +1104,20 @@ export default function InstructorPage() {
                         {s.birth_date && ` · 🎂 ${new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`}
                       </p>
                     </div>
-                    <button
-                      onClick={() => openAssignPass(s)}
-                      className="font-body text-xs text-[#2041d8] hover:underline shrink-0"
-                    >
-                      Assign pass
-                    </button>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <button
+                        onClick={() => openAssignPass(s)}
+                        className="font-body text-xs text-[#2041d8] hover:underline"
+                      >
+                        Assign pass
+                      </button>
+                      <button
+                        onClick={() => deleteMember(s)}
+                        className="font-body text-xs text-red-500 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
