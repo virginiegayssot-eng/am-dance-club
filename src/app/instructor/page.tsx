@@ -118,6 +118,7 @@ export default function InstructorPage() {
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewModalClassId, setReviewModalClassId] = useState("");
   const [loadingReviewCandidates, setLoadingReviewCandidates] = useState(false);
   const [reviewCandidates, setReviewCandidates] = useState<{ id: string; full_name: string | null; email: string }[]>([]);
   const [selectedReviewIds, setSelectedReviewIds] = useState<Set<string>>(new Set());
@@ -643,21 +644,29 @@ export default function InstructorPage() {
     setDebitingPassId(null);
   }
 
-  async function openReviewModal() {
-    if (!selectedClass) return;
-    setLoadingReviewCandidates(true);
+  function openReviewModal(classId?: string) {
     setReviewsSent(null);
+    setReviewCandidates([]);
+    setSelectedReviewIds(new Set());
+    setReviewPreviewHtml("");
+    setReviewModalClassId(classId ?? selectedClass?.id ?? "");
+    setShowReviewModal(true);
+    if (classId ?? selectedClass?.id) loadReviewCandidates(classId ?? selectedClass!.id);
+  }
+
+  async function loadReviewCandidates(classId: string) {
+    setReviewModalClassId(classId);
+    setLoadingReviewCandidates(true);
     const res = await fetch("/api/instructor/review-candidates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classId: selectedClass.id }),
+      body: JSON.stringify({ classId }),
     });
     const data = await res.json();
     setReviewCandidates(data.candidates ?? []);
     setSelectedReviewIds(new Set((data.candidates ?? []).map((c: any) => c.id)));
     setReviewPreviewHtml(data.previewHtml ?? "");
     setLoadingReviewCandidates(false);
-    setShowReviewModal(true);
   }
 
   function toggleReviewRecipient(id: string) {
@@ -669,12 +678,12 @@ export default function InstructorPage() {
   }
 
   async function confirmSendReviews() {
-    if (!selectedClass || selectedReviewIds.size === 0) return;
+    if (!reviewModalClassId || selectedReviewIds.size === 0) return;
     setSendingReviews(true);
     const res = await fetch("/api/instructor/send-review-emails", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classId: selectedClass.id, studentIds: Array.from(selectedReviewIds) }),
+      body: JSON.stringify({ classId: reviewModalClassId, studentIds: Array.from(selectedReviewIds) }),
     });
     const data = await res.json();
     setReviewsSent(data.sent ?? 0);
@@ -790,6 +799,9 @@ export default function InstructorPage() {
             </button>
             <button onClick={() => setShowBulkForm(true)} className="btn-secondary py-2 px-4 text-sm">
               + Bulk Fridays
+            </button>
+            <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
+              Send Review Emails
             </button>
             <button onClick={() => setShowClassForm(true)} className="btn-primary py-2 px-4 text-sm">
               + New Class
@@ -950,7 +962,7 @@ export default function InstructorPage() {
                       + Add to Roll
                     </button>
                     <button
-                      onClick={openReviewModal}
+                      onClick={() => openReviewModal(selectedClass.id)}
                       disabled={loadingReviewCandidates}
                       className="btn-secondary py-1.5 px-3 text-xs"
                     >
@@ -2115,7 +2127,30 @@ export default function InstructorPage() {
         {showReviewModal && (
           <Modal title="Send Review Emails" onClose={() => setShowReviewModal(false)}>
             <div className="space-y-4">
-              {reviewCandidates.length === 0 ? (
+              {!reviewModalClassId ? (
+                <div>
+                  <label className="label">Choose a class</label>
+                  <select
+                    className="input"
+                    defaultValue=""
+                    onChange={e => e.target.value && loadReviewCandidates(e.target.value)}
+                  >
+                    <option value="" disabled>Select a class…</option>
+                    {todaysClass && (
+                      <option value={todaysClass.id}>
+                        Today — {todaysClass.title}
+                      </option>
+                    )}
+                    {pastClasses.map(cls => (
+                      <option key={cls.id} value={cls.id}>
+                        {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short" })} — {cls.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : loadingReviewCandidates ? (
+                <p className="font-body text-sm text-gray-500">Loading…</p>
+              ) : reviewCandidates.length === 0 ? (
                 <p className="font-body text-sm text-gray-500">No first-time attendees eligible for a review email from this class.</p>
               ) : (
                 <>
