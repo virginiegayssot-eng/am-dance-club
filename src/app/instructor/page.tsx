@@ -117,6 +117,11 @@ export default function InstructorPage() {
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [loadingReviewCandidates, setLoadingReviewCandidates] = useState(false);
+  const [reviewCandidates, setReviewCandidates] = useState<{ id: string; full_name: string | null; email: string }[]>([]);
+  const [selectedReviewIds, setSelectedReviewIds] = useState<Set<string>>(new Set());
+  const [reviewPreviewHtml, setReviewPreviewHtml] = useState("");
 
   useEffect(() => { loadData(); }, []);
 
@@ -638,18 +643,43 @@ export default function InstructorPage() {
     setDebitingPassId(null);
   }
 
-  async function sendReviewEmails() {
+  async function openReviewModal() {
     if (!selectedClass) return;
-    setSendingReviews(true);
+    setLoadingReviewCandidates(true);
     setReviewsSent(null);
-    const res = await fetch("/api/instructor/send-review-emails", {
+    const res = await fetch("/api/instructor/review-candidates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ classId: selectedClass.id }),
     });
     const data = await res.json();
+    setReviewCandidates(data.candidates ?? []);
+    setSelectedReviewIds(new Set((data.candidates ?? []).map((c: any) => c.id)));
+    setReviewPreviewHtml(data.previewHtml ?? "");
+    setLoadingReviewCandidates(false);
+    setShowReviewModal(true);
+  }
+
+  function toggleReviewRecipient(id: string) {
+    setSelectedReviewIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function confirmSendReviews() {
+    if (!selectedClass || selectedReviewIds.size === 0) return;
+    setSendingReviews(true);
+    const res = await fetch("/api/instructor/send-review-emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId: selectedClass.id, studentIds: Array.from(selectedReviewIds) }),
+    });
+    const data = await res.json();
     setReviewsSent(data.sent ?? 0);
     setSendingReviews(false);
+    setShowReviewModal(false);
   }
 
   async function openBookForMember(cls: ClassWithCount) {
@@ -920,11 +950,11 @@ export default function InstructorPage() {
                       + Add to Roll
                     </button>
                     <button
-                      onClick={sendReviewEmails}
-                      disabled={sendingReviews}
+                      onClick={openReviewModal}
+                      disabled={loadingReviewCandidates}
                       className="btn-secondary py-1.5 px-3 text-xs"
                     >
-                      {sendingReviews ? "Sending…" : "Send Review Emails"}
+                      {loadingReviewCandidates ? "Loading…" : "Send Review Emails"}
                     </button>
                   </div>
                 </div>
@@ -2079,6 +2109,55 @@ export default function InstructorPage() {
                 </button>
               </div>
             </form>
+          </Modal>
+        )}
+
+        {showReviewModal && (
+          <Modal title="Send Review Emails" onClose={() => setShowReviewModal(false)}>
+            <div className="space-y-4">
+              {reviewCandidates.length === 0 ? (
+                <p className="font-body text-sm text-gray-500">No first-time attendees eligible for a review email from this class.</p>
+              ) : (
+                <>
+                  <p className="font-body text-sm text-gray-500">
+                    Select who should receive the review email:
+                  </p>
+                  <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3">
+                    {reviewCandidates.map(c => (
+                      <label key={c.id} className="flex items-center gap-2 font-body text-sm">
+                        <input
+                          type="checkbox"
+                          checked={selectedReviewIds.has(c.id)}
+                          onChange={() => toggleReviewRecipient(c.id)}
+                        />
+                        <span>{c.full_name ?? c.email}</span>
+                        <span className="text-xs text-gray-400">{c.email}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div>
+                    <p className="font-body text-xs uppercase tracking-wide text-gray-400 mb-2">Preview</p>
+                    <div
+                      className="border border-gray-100 rounded-xl overflow-x-auto"
+                      dangerouslySetInnerHTML={{ __html: reviewPreviewHtml }}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={() => setShowReviewModal(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                    <button
+                      type="button"
+                      onClick={confirmSendReviews}
+                      disabled={sendingReviews || selectedReviewIds.size === 0}
+                      className="btn-primary flex-1 justify-center"
+                    >
+                      {sendingReviews ? "Sending…" : `Send to ${selectedReviewIds.size}`}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </Modal>
         )}
       </main>
