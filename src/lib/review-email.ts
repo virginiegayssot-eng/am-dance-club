@@ -14,7 +14,7 @@ export function buildReviewEmailHtml(firstName: string) {
             So happy you joined us this morning for your first class at THE A.M Dance Club!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you enjoyed it, we'd love it if you could take 30 seconds to leave us a Google review — it means the world to us and helps other dancers find us! 🙏
+            If you enjoyed it, we'd love it if you could take 30 seconds to leave us a Google review. It means the world to us and helps other dancers find us! 🙏
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.GOOGLE_REVIEW_URL}" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
