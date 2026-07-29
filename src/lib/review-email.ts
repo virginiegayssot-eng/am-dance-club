@@ -22,7 +22,7 @@ export function buildReviewEmailHtml(firstName: string) {
             </a>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you next Friday! 💃</p>
-          <p style="color:#444;font-size:16px;margin:0;">— Virginie &amp; THE A.M Dance Club team</p>
+          <p style="color:#444;font-size:16px;margin:0;">— Ginny &amp; THE A.M Dance Club team</p>
         </div>
         <div style="background:#e4c3cc;padding:20px;text-align:center;">
           <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
