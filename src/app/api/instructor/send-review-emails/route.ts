@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
   if (!attended || attended.length === 0) return NextResponse.json({ sent: 0 });
 
   let sent = 0;
+  const errors: string[] = [];
 
   for (const record of attended) {
     const profile = record.profiles as any;
@@ -35,14 +36,19 @@ export async function POST(req: NextRequest) {
 
     const firstName = (profile?.full_name ?? "dancer").split(" ")[0];
 
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: `THE A.M Dance Club <${process.env.RESEND_FROM}>`,
       to: email,
       subject: "How was your first class? 🎵",
       html: buildReviewEmailHtml(firstName),
     });
+
+    if (error) {
+      errors.push(`${email}: ${error.message}`);
+      continue;
+    }
     sent++;
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, errors: errors.length > 0 ? errors : undefined });
 }

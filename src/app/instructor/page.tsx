@@ -117,6 +117,7 @@ export default function InstructorPage() {
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
+  const [reviewSendErrors, setReviewSendErrors] = useState<string[]>([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewModalClassId, setReviewModalClassId] = useState("");
   const [loadingReviewCandidates, setLoadingReviewCandidates] = useState(false);
@@ -687,6 +688,7 @@ export default function InstructorPage() {
     });
     const data = await res.json();
     setReviewsSent(data.sent ?? 0);
+    setReviewSendErrors(data.errors ?? []);
     setSendingReviews(false);
     setShowReviewModal(false);
   }
@@ -953,6 +955,11 @@ export default function InstructorPage() {
                     {reviewsSent !== null && (
                       <p className="font-body text-sm text-green-600">
                         {reviewsSent === 0 ? "No first-timers today" : `${reviewsSent} review email${reviewsSent !== 1 ? "s" : ""} sent!`}
+                      </p>
+                    )}
+                    {reviewSendErrors.length > 0 && (
+                      <p className="font-body text-sm text-red-500">
+                        {reviewSendErrors.length} failed: {reviewSendErrors.join("; ")}
                       </p>
                     )}
                     <button
