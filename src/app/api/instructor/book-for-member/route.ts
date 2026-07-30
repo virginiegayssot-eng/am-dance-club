@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
+import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
+import { Resend } from "resend";
 
 function adminClient() {
   return createClient(
@@ -8,6 +10,25 @@ function adminClient() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
+}
+
+async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, studentId: string, classId: string, guestCount: number) {
+  const { data: profile } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
+  if (!profile?.email) return;
+
+  const { data: cls } = await admin.from("classes").select("title, class_date").eq("id", classId).single();
+  if (!cls) return;
+
+  const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    to: profile.email,
+    subject: `You're booked – ${cls.title}`,
+    html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+  }).catch((e) => console.error("Booking confirmation email error:", e));
 }
 
 export async function POST(req: NextRequest) {
@@ -78,6 +99,8 @@ export async function POST(req: NextRequest) {
       await admin.from("registrations").insert({ class_id: classId, student_id: studentId, status: "confirmed", pass_id: null, payment_type: "complimentary", guest_count: guestCount });
     }
   }
+
+  await sendBookingConfirmation(admin, studentId, classId, guestCount);
 
   return NextResponse.json({ success: true });
 }

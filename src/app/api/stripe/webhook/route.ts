@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
+import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
 import { Resend } from "resend";
 import Stripe from "stripe";
 
@@ -96,6 +97,17 @@ export async function POST(req: NextRequest) {
       if (cls) {
         const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         emailBody += ` They are booked in for <strong>${cls.title}</strong> on ${classDate}.`;
+
+        if (profile?.email && (passTypeId === "casual" || passTypeId === "double")) {
+          const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+          const guestCount = isDoublePass === "true" ? 1 : 0;
+          await resend.emails.send({
+            from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+            to: profile.email,
+            subject: `You're booked – ${cls.title}`,
+            html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+          }).catch((e) => console.error("Booking confirmation email error:", e));
+        }
       }
     }
     emailBody += `</p>`;
