@@ -111,12 +111,13 @@ export async function POST(req: NextRequest) {
       }
     }
     emailBody += `</p>`;
-    await resend.emails.send({
+    const { error: instructorEmailError } = await resend.emails.send({
       from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
       subject: `New booking – ${profile?.full_name ?? "A student"}`,
       html: emailBody,
-    }).catch(() => {});
+    }).catch((e) => ({ error: e }));
+    if (instructorEmailError) console.error("Instructor notification email error:", instructorEmailError);
 
     // Increment discount code usage
     if (discountId) {
