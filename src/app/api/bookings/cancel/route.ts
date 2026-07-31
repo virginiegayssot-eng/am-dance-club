@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
+import { Resend } from "resend";
 
 export async function POST(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -11,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   const { data: reg } = await supabase
     .from("registrations")
-    .select("*, classes(class_date, class_time)")
+    .select("*, classes(title, class_date, class_time)")
     .eq("id", registrationId)
     .eq("student_id", user.id)
     .single();
@@ -44,6 +47,28 @@ export async function POST(req: NextRequest) {
       passRefunded = true;
     }
   }
+
+  const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();
+  const classDate = new Date(reg.classes.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  if (profile?.email) {
+    const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+    const { error } = await resend.emails.send({
+      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      to: profile.email,
+      subject: `Booking cancelled – ${reg.classes.title}`,
+      html: buildBookingCancellationEmailHtml({ firstName, classTitle: reg.classes.title, classDate, passRefunded }),
+    }).catch((e) => ({ error: e }));
+    if (error) console.error("Cancellation confirmation email error:", error);
+  }
+
+  const { error: instructorEmailError } = await resend.emails.send({
+    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+    subject: `Cancellation – ${profile?.full_name ?? "A student"}`,
+    html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) cancelled their booking for <strong>${reg.classes.title}</strong> on ${classDate}.${passRefunded ? " Their class credit was refunded." : ""}</p>`,
+  }).catch((e) => ({ error: e }));
+  if (instructorEmailError) console.error("Instructor cancellation notification error:", instructorEmailError);
 
   return NextResponse.json({ cancelled: true, isRefundable, passRefunded });
 }
