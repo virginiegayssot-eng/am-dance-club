@@ -966,7 +966,7 @@ export default function InstructorPage() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400">Upcoming</h3>
+                  <h3 className="font-heading text-sm uppercase tracking-widest text-[#2041d8]">Upcoming</h3>
                   <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
                     Remove All Upcoming
                   </button>
@@ -2374,7 +2374,7 @@ function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past
           })} · 7:00 AM
         </p>
       </div>
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-4 flex-wrap shrink-0">
         <div className="text-center">
           <p className="font-heading text-base">{cls.registered_count}/{cls.capacity}</p>
           <p className="font-body text-xs text-gray-400">booked</p>
@@ -2393,11 +2393,11 @@ function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past
             {isToday ? "Take Roll" : "Attendance"}
           </button>
           {!cls.is_cancelled && !past && (
-            <button onClick={onCancel} className="font-body text-xs text-red-400 hover:text-red-600 px-2">
+            <button onClick={onCancel} className="font-body text-xs text-red-400 hover:text-red-600 underline">
               Cancel
             </button>
           )}
-          <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600 px-2">
+          <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600 underline">
             Delete
           </button>
         </div>
