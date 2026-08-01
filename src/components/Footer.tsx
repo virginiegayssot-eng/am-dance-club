@@ -39,8 +39,19 @@ export default function Footer() {
               <a href="https://theamdance.com" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
                 Website
               </a>
-              <a href="https://www.instagram.com/theamdance" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
-                Instagram @theamdance
+              <a
+                href="https://www.instagram.com/theamdance"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram @theamdance"
+                title="Instagram @theamdance"
+                className="text-white/70 hover:text-[#e4c3cc] transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="17.4" cy="6.6" r="1.2" fill="currentColor" />
+                </svg>
               </a>
             </div>
           </div>
