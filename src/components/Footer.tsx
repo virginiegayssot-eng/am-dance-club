@@ -25,6 +25,7 @@ export default function Footer() {
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e4c3cc]">Quick Links</h4>
             <div className="flex flex-col gap-2">
               {[
+                { href: "/how-to-use", label: "How to Use" },
                 { href: "/classes", label: "Classes" },
                 { href: "/passes", label: "Passes & Pricing" },
                 { href: "/videos", label: "Videos" },
