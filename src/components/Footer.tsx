@@ -39,6 +39,9 @@ export default function Footer() {
               <a href="https://theamdance.com" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
                 Website
               </a>
+              <a href="https://www.instagram.com/theamdance" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
+                Instagram @theamdance
+              </a>
             </div>
           </div>
         </div>
