@@ -11,10 +11,10 @@ export function buildReviewEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">Hey ${firstName}! 👋</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            So happy you joined us this morning for your first class at THE A.M Dance Club!
+            So happy you joined me this morning for your first class at THE A.M Dance Club!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you enjoyed it, we'd love it if you could take 30 seconds to leave us a Google review. It means the world to us and helps other dancers find us! 🙏
+            If you enjoyed it, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other dancers find me! 🙏
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.GOOGLE_REVIEW_URL}" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
@@ -22,7 +22,7 @@ export function buildReviewEmailHtml(firstName: string) {
             </a>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you next Friday! 💃</p>
-          <p style="color:#444;font-size:16px;margin:0;">Ginny &amp; THE A.M Dance Club team</p>
+          <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
         </div>
         <div style="background:#e4c3cc;padding:20px;text-align:center;">
           <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
@@ -46,10 +46,10 @@ export function buildGenericReviewEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">Hey ${firstName}! 👋</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            We love having you as part of THE A.M Dance Club family!
+            I love having you as part of THE A.M Dance Club family!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you've been enjoying our Friday classes, we'd love it if you could take 30 seconds to leave us a Google review. It means the world to us and helps other dancers find us! 🙏
+            If you've been enjoying our Friday classes, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other dancers find me! 🙏
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.GOOGLE_REVIEW_URL}" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
@@ -57,7 +57,7 @@ export function buildGenericReviewEmailHtml(firstName: string) {
             </a>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you next Friday! 💃</p>
-          <p style="color:#444;font-size:16px;margin:0;">Ginny &amp; THE A.M Dance Club team</p>
+          <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
         </div>
         <div style="background:#e4c3cc;padding:20px;text-align:center;">
           <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
