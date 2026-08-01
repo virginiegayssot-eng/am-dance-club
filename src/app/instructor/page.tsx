@@ -420,6 +420,26 @@ export default function InstructorPage() {
     loadData();
   }
 
+  async function deleteClass(cls: ClassWithCount) {
+    const warning = cls.registered_count > 0
+      ? `"${cls.title}" has ${cls.registered_count} member${cls.registered_count !== 1 ? "s" : ""} registered. Deleting it will permanently remove those registrations and any attendance records for this class. This cannot be undone. Delete anyway?`
+      : `Permanently delete "${cls.title}"? This cannot be undone.`;
+    if (!confirm(warning)) return;
+    await supabase.from("classes").delete().eq("id", cls.id);
+    loadData();
+  }
+
+  async function deleteAllUpcomingClasses() {
+    if (upcomingClasses.length === 0) return;
+    const totalRegistrations = upcomingClasses.reduce((sum, c) => sum + c.registered_count, 0);
+    const warning = totalRegistrations > 0
+      ? `Delete all ${upcomingClasses.length} upcoming classes? This includes ${totalRegistrations} member registration${totalRegistrations !== 1 ? "s" : ""} across them, which will be permanently removed along with any attendance records. This cannot be undone.`
+      : `Delete all ${upcomingClasses.length} upcoming classes? This cannot be undone.`;
+    if (!confirm(warning)) return;
+    await supabase.from("classes").delete().in("id", upcomingClasses.map(c => c.id));
+    loadData();
+  }
+
   async function addVideo(e: React.FormEvent) {
     e.preventDefault();
     setVideoFormLoading(true);
@@ -944,15 +964,20 @@ export default function InstructorPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400">Upcoming</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400">Upcoming</h3>
+                  <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
+                    Remove All Upcoming
+                  </button>
+                </div>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onBookForMember={() => openBookForMember(cls)} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
                     <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
-                      <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} past />
+                      <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} past />
                     ))}
                   </>
                 )}
@@ -2318,10 +2343,11 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, onAttendance, onCancel, onBookForMember, past, isToday }: {
+function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past, isToday }: {
   cls: ClassWithCount;
   onAttendance: () => void;
   onCancel: () => void;
+  onDelete: () => void;
   onBookForMember?: () => void;
   past?: boolean;
   isToday?: boolean;
@@ -2370,6 +2396,9 @@ function ClassRow({ cls, onAttendance, onCancel, onBookForMember, past, isToday 
               Cancel
             </button>
           )}
+          <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600 px-2">
+            Delete
+          </button>
         </div>
       </div>
     </div>
