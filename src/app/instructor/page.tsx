@@ -117,6 +117,7 @@ export default function InstructorPage() {
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
+  const [reviewSendErrors, setReviewSendErrors] = useState<string[]>([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewMode, setReviewMode] = useState<"class" | "any">("class");
   const [reviewModalClassId, setReviewModalClassId] = useState("");
@@ -648,6 +649,7 @@ export default function InstructorPage() {
 
   function openReviewModal(classId?: string) {
     setReviewsSent(null);
+    setReviewSendErrors([]);
     setReviewMode("class");
     setReviewCandidates([]);
     setSelectedReviewIds(new Set());
@@ -660,6 +662,8 @@ export default function InstructorPage() {
 
   function switchReviewMode(mode: "class" | "any") {
     setReviewMode(mode);
+    setReviewsSent(null);
+    setReviewSendErrors([]);
     setSelectedReviewIds(new Set());
     if (mode === "any") {
       setReviewModalClassId("");
@@ -721,8 +725,10 @@ export default function InstructorPage() {
     });
     const data = await res.json();
     setReviewsSent(data.sent ?? 0);
+    setReviewSendErrors(data.errors ?? []);
     setSendingReviews(false);
-    setShowReviewModal(false);
+    // Keep the modal open so the result (including any errors) is visible;
+    // the instructor closes it manually once they've seen the outcome.
   }
 
   async function openBookForMember(cls: ClassWithCount) {
@@ -987,6 +993,11 @@ export default function InstructorPage() {
                     {reviewsSent !== null && (
                       <p className="font-body text-sm text-green-600">
                         {reviewsSent === 0 ? "No first-timers today" : `${reviewsSent} review email${reviewsSent !== 1 ? "s" : ""} sent!`}
+                      </p>
+                    )}
+                    {reviewSendErrors.length > 0 && (
+                      <p className="font-body text-sm text-red-500">
+                        {reviewSendErrors.length} failed: {reviewSendErrors.join("; ")}
                       </p>
                     )}
                     <button
@@ -2268,16 +2279,33 @@ export default function InstructorPage() {
                     />
                   </div>
 
+                  {reviewsSent !== null && (
+                    <div className="space-y-1">
+                      <p className="font-body text-sm text-green-600">
+                        {reviewsSent === 0 ? "No emails sent." : `${reviewsSent} review email${reviewsSent !== 1 ? "s" : ""} sent successfully.`}
+                      </p>
+                      {reviewSendErrors.length > 0 && (
+                        <p className="font-body text-sm text-red-500">
+                          {reviewSendErrors.length} failed: {reviewSendErrors.join("; ")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setShowReviewModal(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
-                    <button
-                      type="button"
-                      onClick={confirmSendReviews}
-                      disabled={sendingReviews || selectedReviewIds.size === 0}
-                      className="btn-primary flex-1 justify-center"
-                    >
-                      {sendingReviews ? "Sending…" : `Send to ${selectedReviewIds.size}`}
+                    <button type="button" onClick={() => setShowReviewModal(false)} className="btn-secondary flex-1 justify-center">
+                      {reviewsSent !== null ? "Close" : "Cancel"}
                     </button>
+                    {reviewsSent === null && (
+                      <button
+                        type="button"
+                        onClick={confirmSendReviews}
+                        disabled={sendingReviews || selectedReviewIds.size === 0}
+                        className="btn-primary flex-1 justify-center"
+                      >
+                        {sendingReviews ? "Sending…" : `Send to ${selectedReviewIds.size}`}
+                      </button>
+                    )}
                   </div>
                 </>
               )}

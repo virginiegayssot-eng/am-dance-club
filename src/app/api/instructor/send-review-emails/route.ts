@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   let sent = 0;
+  const errors: string[] = [];
 
   for (const profile of recipients) {
     const email = profile?.email;
@@ -52,9 +53,13 @@ export async function POST(req: NextRequest) {
       subject: generic ? "Loving THE A.M Dance Club? 🎵" : "How was your first class? 🎵",
       html: generic ? buildGenericReviewEmailHtml(firstName) : buildReviewEmailHtml(firstName),
     });
-    if (error) continue;
+
+    if (error) {
+      errors.push(`${email}: ${error.message}`);
+      continue;
+    }
     sent++;
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, errors: errors.length > 0 ? errors : undefined });
 }

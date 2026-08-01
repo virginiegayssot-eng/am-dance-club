@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
 import { Resend } from "resend";
 
 export async function POST(req: NextRequest) {
@@ -100,6 +101,17 @@ export async function POST(req: NextRequest) {
     html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass${guestCount > 0 ? ` <strong>(+${guestCount} guest)</strong>` : ""}.</p>`,
   }).catch((e) => { console.error("Email error:", e); return null; });
   console.log("Email result:", JSON.stringify(emailResult));
+
+  // Confirm booking to the student
+  if (profile?.email) {
+    const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+    await resend.emails.send({
+      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      to: profile.email,
+      subject: `You're booked – ${cls.title}`,
+      html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+    }).catch((e) => console.error("Booking confirmation email error:", e));
+  }
 
   return NextResponse.json({ success: true });
 }
