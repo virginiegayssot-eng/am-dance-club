@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { buildReviewEmailHtml } from "@/lib/review-email";
+import { buildReviewEmailHtml, buildGenericReviewEmailHtml } from "@/lib/review-email";
 import { Resend } from "resend";
 
 export async function POST(req: NextRequest) {
@@ -12,35 +12,47 @@ export async function POST(req: NextRequest) {
   const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { classId, studentIds } = await req.json();
-  if (!classId || !Array.isArray(studentIds) || studentIds.length === 0) {
-    return NextResponse.json({ error: "Missing classId or studentIds" }, { status: 400 });
+  const { classId, studentIds, generic } = await req.json();
+  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    return NextResponse.json({ error: "Missing studentIds" }, { status: 400 });
+  }
+  if (!generic && !classId) {
+    return NextResponse.json({ error: "Missing classId" }, { status: 400 });
   }
 
-  const { data: attended } = await supabase
-    .from("attendance")
-    .select("student_id, profiles(full_name, email)")
-    .eq("class_id", classId)
-    .eq("attended", true)
-    .in("student_id", studentIds);
+  let recipients: { email: string; full_name: string | null }[];
 
-  if (!attended || attended.length === 0) return NextResponse.json({ sent: 0 });
+  if (generic) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .in("id", studentIds);
+    recipients = profiles ?? [];
+  } else {
+    const { data: attended } = await supabase
+      .from("attendance")
+      .select("student_id, profiles(full_name, email)")
+      .eq("class_id", classId)
+      .eq("attended", true)
+      .in("student_id", studentIds);
+    recipients = (attended ?? []).map(record => record.profiles as any);
+  }
 
   let sent = 0;
 
-  for (const record of attended) {
-    const profile = record.profiles as any;
+  for (const profile of recipients) {
     const email = profile?.email;
     if (!email) continue;
 
     const firstName = (profile?.full_name ?? "dancer").split(" ")[0];
 
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: `THE A.M Dance Club <${process.env.RESEND_FROM}>`,
       to: email,
-      subject: "How was your first class? 🎵",
-      html: buildReviewEmailHtml(firstName),
+      subject: generic ? "Loving THE A.M Dance Club? 🎵" : "How was your first class? 🎵",
+      html: generic ? buildGenericReviewEmailHtml(firstName) : buildReviewEmailHtml(firstName),
     });
+    if (error) continue;
     sent++;
   }
 

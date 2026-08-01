@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { buildReviewEmailHtml } from "@/lib/review-email";
+import { buildReviewEmailHtml, buildGenericReviewEmailHtml } from "@/lib/review-email";
 
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient();
@@ -10,7 +10,12 @@ export async function POST(req: NextRequest) {
   const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { classId } = await req.json();
+  const { classId, generic } = await req.json();
+
+  if (generic) {
+    return NextResponse.json({ candidates: [], previewHtml: buildGenericReviewEmailHtml("Dancer") });
+  }
+
   if (!classId) return NextResponse.json({ error: "Missing classId" }, { status: 400 });
 
   const { data: attended } = await supabase

@@ -118,11 +118,13 @@ export default function InstructorPage() {
   const [sendingReviews, setSendingReviews] = useState(false);
   const [reviewsSent, setReviewsSent] = useState<number | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewMode, setReviewMode] = useState<"class" | "any">("class");
   const [reviewModalClassId, setReviewModalClassId] = useState("");
   const [loadingReviewCandidates, setLoadingReviewCandidates] = useState(false);
   const [reviewCandidates, setReviewCandidates] = useState<{ id: string; full_name: string | null; email: string }[]>([]);
   const [selectedReviewIds, setSelectedReviewIds] = useState<Set<string>>(new Set());
   const [reviewPreviewHtml, setReviewPreviewHtml] = useState("");
+  const [memberSearch, setMemberSearch] = useState("");
 
   useEffect(() => { loadData(); }, []);
 
@@ -646,12 +648,39 @@ export default function InstructorPage() {
 
   function openReviewModal(classId?: string) {
     setReviewsSent(null);
+    setReviewMode("class");
     setReviewCandidates([]);
     setSelectedReviewIds(new Set());
     setReviewPreviewHtml("");
+    setMemberSearch("");
     setReviewModalClassId(classId ?? selectedClass?.id ?? "");
     setShowReviewModal(true);
     if (classId ?? selectedClass?.id) loadReviewCandidates(classId ?? selectedClass!.id);
+  }
+
+  function switchReviewMode(mode: "class" | "any") {
+    setReviewMode(mode);
+    setSelectedReviewIds(new Set());
+    if (mode === "any") {
+      setReviewModalClassId("");
+      loadGenericReviewPreview();
+    } else {
+      setReviewPreviewHtml("");
+      setReviewModalClassId(selectedClass?.id ?? "");
+      if (selectedClass?.id) loadReviewCandidates(selectedClass.id);
+    }
+  }
+
+  async function loadGenericReviewPreview() {
+    setLoadingReviewCandidates(true);
+    const res = await fetch("/api/instructor/review-candidates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ generic: true }),
+    });
+    const data = await res.json();
+    setReviewPreviewHtml(data.previewHtml ?? "");
+    setLoadingReviewCandidates(false);
   }
 
   async function loadReviewCandidates(classId: string) {
@@ -678,12 +707,17 @@ export default function InstructorPage() {
   }
 
   async function confirmSendReviews() {
-    if (!reviewModalClassId || selectedReviewIds.size === 0) return;
+    if (selectedReviewIds.size === 0) return;
+    if (reviewMode === "class" && !reviewModalClassId) return;
     setSendingReviews(true);
     const res = await fetch("/api/instructor/send-review-emails", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classId: reviewModalClassId, studentIds: Array.from(selectedReviewIds) }),
+      body: JSON.stringify(
+        reviewMode === "any"
+          ? { generic: true, studentIds: Array.from(selectedReviewIds) }
+          : { classId: reviewModalClassId, studentIds: Array.from(selectedReviewIds) }
+      ),
     });
     const data = await res.json();
     setReviewsSent(data.sent ?? 0);
@@ -2127,50 +2161,105 @@ export default function InstructorPage() {
         {showReviewModal && (
           <Modal title="Send Review Emails" onClose={() => setShowReviewModal(false)}>
             <div className="space-y-4">
-              {!reviewModalClassId ? (
-                <div>
-                  <label className="label">Choose a class</label>
-                  <select
-                    className="input"
-                    defaultValue=""
-                    onChange={e => e.target.value && loadReviewCandidates(e.target.value)}
-                  >
-                    <option value="" disabled>Select a class…</option>
-                    {todaysClass && (
-                      <option value={todaysClass.id}>
-                        Today — {todaysClass.title}
-                      </option>
-                    )}
-                    {pastClasses.map(cls => (
-                      <option key={cls.id} value={cls.id}>
-                        {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short" })} — {cls.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : loadingReviewCandidates ? (
-                <p className="font-body text-sm text-gray-500">Loading…</p>
-              ) : reviewCandidates.length === 0 ? (
-                <p className="font-body text-sm text-gray-500">No first-time attendees eligible for a review email from this class.</p>
+              <div className="flex gap-2 border border-gray-200 rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => switchReviewMode("class")}
+                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "class" ? "bg-[#2041d8] text-white" : "text-gray-500"}`}
+                >
+                  First-timers by class
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchReviewMode("any")}
+                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "any" ? "bg-[#2041d8] text-white" : "text-gray-500"}`}
+                >
+                  Any members
+                </button>
+              </div>
+
+              {reviewMode === "class" ? (
+                !reviewModalClassId ? (
+                  <div>
+                    <label className="label">Choose a class</label>
+                    <select
+                      className="input"
+                      defaultValue=""
+                      onChange={e => e.target.value && loadReviewCandidates(e.target.value)}
+                    >
+                      <option value="" disabled>Select a class…</option>
+                      {todaysClass && (
+                        <option value={todaysClass.id}>
+                          Today — {todaysClass.title}
+                        </option>
+                      )}
+                      {pastClasses.map(cls => (
+                        <option key={cls.id} value={cls.id}>
+                          {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short" })} — {cls.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : loadingReviewCandidates ? (
+                  <p className="font-body text-sm text-gray-500">Loading…</p>
+                ) : reviewCandidates.length === 0 ? (
+                  <p className="font-body text-sm text-gray-500">No first-time attendees eligible for a review email from this class.</p>
+                ) : (
+                  <>
+                    <p className="font-body text-sm text-gray-500">
+                      Select who should receive the review email:
+                    </p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3">
+                      {reviewCandidates.map(c => (
+                        <label key={c.id} className="flex items-center gap-2 font-body text-sm">
+                          <input
+                            type="checkbox"
+                            checked={selectedReviewIds.has(c.id)}
+                            onChange={() => toggleReviewRecipient(c.id)}
+                          />
+                          <span>{c.full_name ?? c.email}</span>
+                          <span className="text-xs text-gray-400">{c.email}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                )
               ) : (
                 <>
                   <p className="font-body text-sm text-gray-500">
-                    Select who should receive the review email:
+                    Select any members to send the review email to:
                   </p>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Search members…"
+                    value={memberSearch}
+                    onChange={e => setMemberSearch(e.target.value)}
+                  />
                   <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3">
-                    {reviewCandidates.map(c => (
-                      <label key={c.id} className="flex items-center gap-2 font-body text-sm">
-                        <input
-                          type="checkbox"
-                          checked={selectedReviewIds.has(c.id)}
-                          onChange={() => toggleReviewRecipient(c.id)}
-                        />
-                        <span>{c.full_name ?? c.email}</span>
-                        <span className="text-xs text-gray-400">{c.email}</span>
-                      </label>
-                    ))}
+                    {allStudents
+                      .filter(s => {
+                        const q = memberSearch.trim().toLowerCase();
+                        if (!q) return true;
+                        return (s.full_name ?? "").toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
+                      })
+                      .map(s => (
+                        <label key={s.id} className="flex items-center gap-2 font-body text-sm">
+                          <input
+                            type="checkbox"
+                            checked={selectedReviewIds.has(s.id)}
+                            onChange={() => toggleReviewRecipient(s.id)}
+                          />
+                          <span>{s.full_name ?? s.email}</span>
+                          <span className="text-xs text-gray-400">{s.email}</span>
+                        </label>
+                      ))}
                   </div>
+                </>
+              )}
 
+              {reviewPreviewHtml && ((reviewMode === "class" && reviewModalClassId && reviewCandidates.length > 0) || reviewMode === "any") && (
+                <>
                   <div>
                     <p className="font-body text-xs uppercase tracking-wide text-gray-400 mb-2">Preview</p>
                     <div
