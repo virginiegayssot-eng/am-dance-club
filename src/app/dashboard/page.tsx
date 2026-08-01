@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
 import Link from "next/link";
+import Linkify from "@/components/Linkify";
 
 type RegistrationWithClass = Registration & { classes: Class };
 type AttendanceWithClass = Attendance & { classes: Class };
@@ -136,7 +137,7 @@ export default function DashboardPage() {
               return (
                 <div key={post.id} className={`rounded-2xl p-5 ${colorClass}`}>
                   <p className="font-heading text-base mb-1">{icon} {post.title}</p>
-                  <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}>{post.body}</p>
+                  <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}><Linkify text={post.body} /></p>
                   <p className={`font-body text-xs mt-2 ${post.category === "location" ? "text-white/60" : "text-gray-400"}`}>{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</p>
                 </div>
               );

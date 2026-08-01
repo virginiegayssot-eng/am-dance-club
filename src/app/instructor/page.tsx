@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice, getYouTubeId } from "@/lib/stripe";
 import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
+import Linkify from "@/components/Linkify";
 
 type ClassWithCount = Class & { registered_count: number };
 type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
@@ -1398,7 +1399,7 @@ export default function InstructorPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="font-heading text-base">{catIcon} {post.title} {post.pinned && <span className="ml-1 badge bg-[#2041d8] text-white text-xs">Pinned</span>}</p>
-                            <p className="font-body text-sm text-gray-600 mt-1 whitespace-pre-wrap">{post.body}</p>
+                            <p className="font-body text-sm text-gray-600 mt-1 whitespace-pre-wrap"><Linkify text={post.body} /></p>
                             <p className="font-body text-xs text-gray-400 mt-2">{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</p>
                           </div>
                           <div className="flex gap-2 shrink-0">
