@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
+import { Mail } from "lucide-react";
 
 // Implicit flow client — Supabase sends OTP-style link (no PKCE verifier needed)
 function resetClient() {
@@ -54,7 +55,7 @@ export default function ForgotPasswordPage() {
         <div className="card p-8">
           {sent ? (
             <div className="text-center space-y-4">
-              <div className="text-5xl">📧</div>
+              <Mail className="w-12 h-12 mx-auto text-[#2041d8]" strokeWidth={1.5} />
               <p className="font-heading text-lg">Check your email</p>
               <p className="font-body text-sm text-gray-500">
                 We sent a reset link to <strong>{email}</strong>. Click it to set a new password.

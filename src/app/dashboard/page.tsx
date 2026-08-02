@@ -9,6 +9,9 @@ import { formatPrice } from "@/lib/stripe";
 import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
+import { Megaphone, MapPin, PartyPopper, Music2, X, Ticket, type LucideIcon } from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
 type RegistrationWithClass = Registration & { classes: Class };
 type AttendanceWithClass = Attendance & { classes: Class };
@@ -122,7 +125,7 @@ export default function DashboardPage() {
         <div className="mb-10">
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Your account</p>
           <h1 className="section-title">
-            Hey, {profile?.full_name?.split(" ")[0] ?? "dancer"} 👋
+            Hey, {profile?.full_name?.split(" ")[0] ?? "dancer"}
           </h1>
         </div>
 
@@ -131,12 +134,14 @@ export default function DashboardPage() {
           <div className="mb-8 space-y-3">
             {newsPosts.map(post => {
               const catColor: Record<string, string> = { location: "bg-[#2041d8] text-white", event: "bg-[#e4c3cc] text-black border border-[#d4a8b4]", routine: "bg-[#fff8f3] text-black border border-[#e8d5c4]", general: "bg-[#fff8f3] text-black border border-[#e8d5c4]" };
-              const catIcon: Record<string, string> = { general: "📢", location: "📍", event: "🎉", routine: "💃" };
               const colorClass = catColor[post.category] ?? catColor.general;
-              const icon = catIcon[post.category] ?? "📢";
+              const Icon = CATEGORY_ICONS[post.category] ?? Megaphone;
               return (
                 <div key={post.id} className={`rounded-2xl p-5 ${colorClass}`}>
-                  <p className="font-heading text-base mb-1">{icon} {post.title}</p>
+                  <p className="font-heading text-base mb-1 flex items-center gap-2">
+                    <Icon className={`w-4 h-4 shrink-0 ${post.category === "location" ? "text-white" : "text-[#2041d8]"}`} strokeWidth={1.75} />
+                    {post.title}
+                  </p>
                   <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}><Linkify text={post.body} /></p>
                   <p className={`font-body text-xs mt-2 ${post.category === "location" ? "text-white/60" : "text-gray-400"}`}>{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</p>
                 </div>
@@ -148,19 +153,21 @@ export default function DashboardPage() {
         {/* Success banners */}
         {justBooked && (
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 font-body text-sm text-green-700 flex items-center gap-3">
-            <span className="text-xl">🎉</span>
+            <PartyPopper className="w-5 h-5 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
             You're booked! See you on the dancefloor.
           </div>
         )}
         {cancelResult && (
           <div className={`rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3 ${cancelResult.type === "success" ? "bg-green-50 border border-green-200 text-green-700" : "bg-red-50 border border-red-200 text-red-700"}`}>
             {cancelResult.message}
-            <button onClick={() => setCancelResult(null)} className="ml-auto text-current opacity-50 hover:opacity-100">✕</button>
+            <button onClick={() => setCancelResult(null)} className="ml-auto text-current opacity-50 hover:opacity-100">
+              <X className="w-4 h-4" strokeWidth={1.75} />
+            </button>
           </div>
         )}
         {justBoughtPass && (
           <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
-            <span className="text-xl">🎟️</span>
+            <Ticket className="w-5 h-5 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
             Pass purchased! Head to <Link href="/classes" className="text-[#2041d8] underline font-medium">Classes</Link> to book your first session.
           </div>
         )}

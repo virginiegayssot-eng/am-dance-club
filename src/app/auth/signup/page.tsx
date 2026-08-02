@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { Mail } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-[#fff8f3] flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
-          <div className="text-6xl mb-6">💌</div>
+          <Mail className="w-14 h-14 mx-auto mb-6 text-[#2041d8]" strokeWidth={1.5} />
           <h2 className="font-heading text-2xl mb-3">Check your email!</h2>
           <p className="font-body text-gray-500 mb-6">
             We've sent a confirmation link to <strong>{form.email}</strong>.<br />

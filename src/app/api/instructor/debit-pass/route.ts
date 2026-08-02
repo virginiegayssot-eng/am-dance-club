@@ -49,11 +49,11 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: student.email,
-      subject: "Class recorded — see you on the dancefloor! 🕺",
+      subject: "Class recorded — see you on the dancefloor!",
       html: `<p>Hi ${student.full_name?.split(" ")[0] ?? "dancer"},</p>
 <p>1 class has been deducted from your <strong>${passType?.name ?? "pass"}</strong>.</p>
 <p>You have <strong>${newRemaining} class${newRemaining !== 1 ? "es" : ""} remaining</strong>.</p>
-<p>See you next Friday! 💙</p>
+<p>See you next Friday!</p>
 <p>— Ginny & THE A.M Dance Club</p>`,
     }).catch(() => {});
   }

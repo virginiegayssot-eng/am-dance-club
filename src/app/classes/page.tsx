@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import type { Class, Pass, Profile } from "@/lib/supabase";
+import { Clock, MapPin, Users, Check } from "lucide-react";
 
 type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number };
 
@@ -151,7 +152,7 @@ export default function ClassesPage() {
           </div>
         ) : classes.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">🕖</div>
+            <Clock className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">No upcoming classes</h3>
             <p className="font-body text-gray-500">Check back soon for new Friday sessions.</p>
           </div>
@@ -174,17 +175,17 @@ export default function ClassesPage() {
 
                   <div className="p-5 flex flex-col flex-1">
                     <div className="space-y-1.5 mb-5">
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><span>🕖</span>7:00 AM · 45 min</div>
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><span>📍</span>{cls.location}</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />7:00 AM · 45 min</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
                       {isFull && (
-                        <div className="flex items-center gap-2 text-sm font-body text-red-500"><span>👥</span>Class full</div>
+                        <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
                       )}
                     </div>
 
                     <div className="border-t border-gray-100 pt-4">
                       {cls.is_registered ? (
-                        <span className="badge-confirmed px-3 py-1.5 rounded-full text-sm">
-                          Booked {cls.guest_count > 0 ? `(+${cls.guest_count} guest)` : "✓"}
+                        <span className="badge-confirmed px-3 py-1.5 rounded-full text-sm inline-flex items-center gap-1.5">
+                          Booked {cls.guest_count > 0 ? `(+${cls.guest_count} guest)` : <Check className="w-3.5 h-3.5" strokeWidth={2} />}
                         </span>
                       ) : isFull ? (
                         <p className="font-body text-sm text-gray-400 text-center">Class is full</p>

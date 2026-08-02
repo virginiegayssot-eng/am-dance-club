@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const { error } = await resend.emails.send({
       from: `THE A.M Dance Club <${process.env.RESEND_FROM}>`,
       to: email,
-      subject: generic ? "Loving THE A.M Dance Club? 🎵" : "How was your first class? 🎵",
+      subject: generic ? "Loving THE A.M Dance Club?" : "How was your first class?",
       html: generic ? buildGenericReviewEmailHtml(firstName) : buildReviewEmailHtml(firstName),
     });
 

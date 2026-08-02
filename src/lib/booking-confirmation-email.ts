@@ -19,7 +19,7 @@ export function buildBookingConfirmationEmailHtml({
           <p style="color:#ffffff;margin:4px 0 0;font-size:14px;letter-spacing:1px;">DANCE CLUB</p>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">You're booked, ${firstName}! 🎉</h2>
+          <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">You're booked, ${firstName}!</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">
             <strong>${classTitle}</strong>
           </p>

@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Video } from "@/lib/supabase";
+import { Film } from "lucide-react";
 
 export default function VideosPage() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function VideosPage() {
           </div>
         ) : videos.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">🎬</div>
+            <Film className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">No recordings yet</h3>
             <p className="font-body text-gray-500">Check back after your first class!</p>
           </div>

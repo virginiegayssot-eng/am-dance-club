@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Playlist } from "@/lib/supabase";
+import { Music } from "lucide-react";
 
 function getSpotifyId(url: string): string | null {
   const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
@@ -55,7 +56,7 @@ export default function PlaylistsPage() {
 
         {playlists.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">🎵</div>
+            <Music className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">No playlists yet</h3>
             <p className="font-body text-gray-500">Check back soon!</p>
           </div>

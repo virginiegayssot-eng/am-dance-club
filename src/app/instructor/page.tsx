@@ -10,6 +10,9 @@ import { formatPrice, getYouTubeId } from "@/lib/stripe";
 import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, type LucideIcon } from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
 type ClassWithCount = Class & { registered_count: number };
 type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
@@ -948,13 +951,15 @@ export default function InstructorPage() {
           if (upcoming.length === 0) return null;
           return (
             <div className="bg-[#fff0f5] border border-[#e4c3cc] rounded-2xl px-5 py-4 mb-6">
-              <p className="font-heading text-sm mb-2">🎂 Upcoming Birthdays</p>
+              <p className="font-heading text-sm mb-2 flex items-center gap-1.5">
+                <Cake className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} /> Upcoming Birthdays
+              </p>
               <div className="space-y-1">
                 {upcoming.map(s => {
                   const bd = new Date(s.birth_date!);
                   const thisYear = new Date(new Date().getFullYear(), bd.getMonth(), bd.getDate());
                   const diff = Math.round((thisYear.getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-                  const label = diff === 0 ? "🎉 Today!" : diff === 1 ? "Tomorrow" : `in ${diff} days`;
+                  const label = diff === 0 ? "Today!" : diff === 1 ? "Tomorrow" : `in ${diff} days`;
                   return (
                     <p key={s.id} className="font-body text-sm">
                       <strong>{s.full_name ?? s.email}</strong> — {bd.toLocaleDateString("en-AU", { day: "numeric", month: "long" })} <span className="text-[#2041d8]">({label})</span>
@@ -1119,7 +1124,7 @@ export default function InstructorPage() {
                                   : "border-gray-300 hover:border-[#2041d8]"
                               }`}
                             >
-                              {s.attended ? "✓" : ""}
+                              {s.attended ? <Check className="w-4 h-4 mx-auto" strokeWidth={2.5} /> : ""}
                             </button>
                           </div>
                         </div>
@@ -1134,7 +1139,7 @@ export default function InstructorPage() {
                             </p>
                             <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-[#2041d8] border-2 border-[#2041d8] text-white flex items-center justify-center text-sm shrink-0">✓</div>
+                          <div className="w-8 h-8 rounded-full bg-[#2041d8] border-2 border-[#2041d8] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
                         </div>
                       ))}
                     </div>
@@ -1303,9 +1308,11 @@ export default function InstructorPage() {
                     <div className="min-w-0">
                       <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
                       <p className="text-xs text-gray-500 font-body">{s.email}</p>
-                      <p className="text-xs text-gray-400 font-body">
+                      <p className="text-xs text-gray-400 font-body inline-flex items-center gap-1">
                         {s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                        {s.birth_date && ` · 🎂 ${new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`}
+                        {s.birth_date && (
+                          <> · <Cake className="w-3 h-3 text-[#2041d8]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -1434,10 +1441,10 @@ export default function InstructorPage() {
                     <div className="flex-1">
                       <label className="label">Category</label>
                       <select className="input" value={newsForm.category} onChange={e => setNewsForm(f => ({ ...f, category: e.target.value }))}>
-                        <option value="general">📢 General</option>
-                        <option value="location">📍 Location Change</option>
-                        <option value="event">🎉 Event</option>
-                        <option value="routine">💃 New Routine</option>
+                        <option value="general">General</option>
+                        <option value="location">Location Change</option>
+                        <option value="event">Event</option>
+                        <option value="routine">New Routine</option>
                       </select>
                     </div>
                     <div className="flex items-end pb-1 gap-2">
@@ -1461,7 +1468,7 @@ export default function InstructorPage() {
             ) : (
               <div className="space-y-4">
                 {newsPosts.map(post => {
-                  const catIcon = { general: "📢", location: "📍", event: "🎉", routine: "💃" }[post.category as string] ?? "📢";
+                  const CatIcon = CATEGORY_ICONS[post.category as string] ?? Megaphone;
                   const isEditing = editingNewsId === post.id;
                   return (
                     <div key={post.id} className={`card p-5 ${post.pinned ? "border-2 border-[#2041d8]" : ""}`}>
@@ -1471,10 +1478,10 @@ export default function InstructorPage() {
                           <textarea className="input min-h-[100px]" value={editNewsForm.body} onChange={e => setEditNewsForm(f => ({ ...f, body: e.target.value }))} required />
                           <div className="flex gap-4">
                             <select className="input flex-1" value={editNewsForm.category} onChange={e => setEditNewsForm(f => ({ ...f, category: e.target.value }))}>
-                              <option value="general">📢 General</option>
-                              <option value="location">📍 Location Change</option>
-                              <option value="event">🎉 Event</option>
-                              <option value="routine">💃 New Routine</option>
+                              <option value="general">General</option>
+                              <option value="location">Location Change</option>
+                              <option value="event">Event</option>
+                              <option value="routine">New Routine</option>
                             </select>
                             <div className="flex items-center gap-2">
                               <input type="checkbox" checked={editNewsForm.pinned} onChange={e => setEditNewsForm(f => ({ ...f, pinned: e.target.checked }))} className="w-4 h-4" />
@@ -1489,7 +1496,10 @@ export default function InstructorPage() {
                       ) : (
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-heading text-base">{catIcon} {post.title} {post.pinned && <span className="ml-1 badge bg-[#2041d8] text-white text-xs">Pinned</span>}</p>
+                            <p className="font-heading text-base flex items-center gap-1.5">
+                              <CatIcon className="w-4 h-4 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
+                              {post.title} {post.pinned && <span className="ml-1 badge bg-[#2041d8] text-white text-xs">Pinned</span>}
+                            </p>
                             <p className="font-body text-sm text-gray-600 mt-1 whitespace-pre-wrap"><Linkify text={post.body} /></p>
                             <p className="font-body text-xs text-gray-400 mt-2">{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</p>
                           </div>
@@ -2029,11 +2039,11 @@ export default function InstructorPage() {
                     {bulkResults.map((r, i) => (
                       <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 font-body text-sm">
                         <span>{r.name} <span className="text-gray-400 text-xs">({r.email})</span></span>
-                        <span className={
+                        <span className={`inline-flex items-center gap-1 ${
                           r.status === "invited" ? "text-green-600 font-medium" :
                           r.status === "skipped" ? "text-gray-400" : "text-red-500"
-                        }>
-                          {r.status === "invited" ? "✓ Invited" : r.status === "skipped" ? "Already exists" : `✗ ${r.reason}`}
+                        }`}>
+                          {r.status === "invited" ? <><Check className="w-3.5 h-3.5" strokeWidth={2.5} /> Invited</> : r.status === "skipped" ? "Already exists" : <><X className="w-3.5 h-3.5" strokeWidth={2.5} /> {r.reason}</>}
                         </span>
                       </div>
                     ))}
@@ -2212,8 +2222,8 @@ export default function InstructorPage() {
                         <div className="mt-2">
                           <label className="label">Payment type</label>
                           <select className="input" value={memberNoPassPaymentType} onChange={e => setMemberNoPassPaymentType(e.target.value)}>
-                            <option value="casual">💵 Casual (paid on spot)</option>
-                            <option value="complimentary">🎁 Complimentary</option>
+                            <option value="casual">Casual (paid on spot)</option>
+                            <option value="complimentary">Complimentary</option>
                           </select>
                         </div>
                       )}
@@ -2221,8 +2231,8 @@ export default function InstructorPage() {
                         <div className="mt-2">
                           <label className="label">Payment type</label>
                           <select className="input" value={memberNoPassPaymentType} onChange={e => setMemberNoPassPaymentType(e.target.value)}>
-                            <option value="casual">💵 Casual (paid on spot)</option>
-                            <option value="complimentary">🎁 Complimentary</option>
+                            <option value="casual">Casual (paid on spot)</option>
+                            <option value="complimentary">Complimentary</option>
                           </select>
                         </div>
                       )}
@@ -2248,8 +2258,8 @@ export default function InstructorPage() {
                   <div>
                     <label className="label">Payment type</label>
                     <select className="input" value={walkInPaymentType} onChange={e => setWalkInPaymentType(e.target.value)}>
-                      <option value="casual">💵 Casual (paid on spot)</option>
-                      <option value="complimentary">🎁 Complimentary</option>
+                      <option value="casual">Casual (paid on spot)</option>
+                      <option value="complimentary">Complimentary</option>
                     </select>
                   </div>
                   <div>
@@ -2605,7 +2615,7 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <h2 className="font-heading text-lg">{title}</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500">
-            ✕
+            <X className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
         <div className="p-6">{children}</div>

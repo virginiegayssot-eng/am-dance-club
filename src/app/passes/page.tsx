@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Pass } from "@/lib/supabase";
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 type PassOption = {
   id: string;
@@ -245,11 +246,11 @@ export default function PassesPage() {
                 <div className="p-6 flex flex-col flex-1">
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center gap-2 font-body text-sm">
-                      <span className="text-[#2041d8]">✓</span>
+                      <Check className="w-4 h-4 text-[#2041d8] shrink-0" strokeWidth={2} />
                       <span>{opt.classes}</span>
                     </div>
                     <div className="flex items-center gap-2 font-body text-sm">
-                      <span className="text-[#2041d8]">✓</span>
+                      <Check className="w-4 h-4 text-[#2041d8] shrink-0" strokeWidth={2} />
                       <span>Valid: {opt.validity}</span>
                     </div>
                     <p className="font-body text-xs text-gray-500 mt-2 leading-relaxed">{opt.description}</p>

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
+import { MessageCircle, GraduationCap, Pencil, Heart } from "lucide-react";
 
 type Message = {
   id: string;
@@ -274,9 +275,9 @@ export default function ChatPage() {
           <div className="md:hidden flex flex-row gap-2 px-3 pt-3 shrink-0">
             <button
               onClick={() => { setActiveChannel("group"); setDmTarget(null); }}
-              className={`flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-white border border-gray-200 text-black"}`}
+              className={`flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-white border border-gray-200 text-black"}`}
             >
-              💬 Group Chat
+              <MessageCircle className="w-4 h-4" strokeWidth={1.75} /> Group Chat
             </button>
             <button
               onClick={async () => {
@@ -304,9 +305,9 @@ export default function ChatPage() {
             <div className="flex overflow-x-auto gap-2 px-3 pt-3 pb-2 scrollbar-hide">
               <button
                 onClick={() => { setActiveChannel("group"); setDmTarget(null); }}
-                className={`flex-shrink-0 px-4 py-2 rounded-xl font-body text-sm transition-colors ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-gray-100 text-black"}`}
+                className={`flex-shrink-0 px-4 py-2 rounded-xl font-body text-sm transition-colors inline-flex items-center gap-1.5 ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "bg-gray-100 text-black"}`}
               >
-                💬 Group
+                <MessageCircle className="w-4 h-4" strokeWidth={1.75} /> Group
               </button>
               {students.map(s => {
                 const isActive = activeChannel === s.id;
@@ -337,8 +338,8 @@ export default function ChatPage() {
             onClick={() => { setActiveChannel("group"); setDmTarget(null); }}
             className={`flex items-center gap-3 px-4 py-3.5 text-left border-b border-gray-50 transition-colors ${activeChannel === "group" ? "bg-[#2041d8] text-white" : "hover:bg-gray-50"}`}
           >
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-heading shrink-0 ${activeChannel === "group" ? "bg-white/20" : "bg-[#a3bdfe]/30"}`}>
-              💬
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${activeChannel === "group" ? "bg-white/20" : "bg-[#a3bdfe]/30"}`}>
+              <MessageCircle className={`w-4 h-4 ${activeChannel === "group" ? "text-white" : "text-[#2041d8]"}`} strokeWidth={1.75} />
             </div>
             <div>
               <p className={`font-heading text-sm ${activeChannel === "group" ? "text-white" : ""}`}>Group Chat</p>
@@ -386,8 +387,8 @@ export default function ChatPage() {
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${activeChannel !== "group" ? "bg-[#e4c3cc]/30" : "hover:bg-gray-50"}`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#2041d8]/10 flex items-center justify-center text-xs font-heading">
-                    👩‍🏫
+                  <div className="w-8 h-8 rounded-full bg-[#2041d8]/10 flex items-center justify-center">
+                    <GraduationCap className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} />
                   </div>
                   <p className="font-body text-sm">Message Instructor</p>
                 </button>
@@ -402,7 +403,7 @@ export default function ChatPage() {
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-lg">💬</span>
+            <MessageCircle className="w-5 h-5 text-[#2041d8] shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <p className="font-heading text-xs">WhatsApp Group</p>
               <p className="font-body text-xs text-gray-400">Polls & community</p>
@@ -416,7 +417,7 @@ export default function ChatPage() {
           {/* Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-[#fff8f3]">
             <div className="w-9 h-9 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-sm font-heading">
-              {activeChannel === "group" ? "💬" : (dmTarget?.full_name ?? "?")[0]?.toUpperCase()}
+              {activeChannel === "group" ? <MessageCircle className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} /> : (dmTarget?.full_name ?? "?")[0]?.toUpperCase()}
             </div>
             <div>
               <p className="font-heading text-sm">{activeName}</p>
@@ -434,7 +435,7 @@ export default function ChatPage() {
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-2">
-                <span className="text-4xl">👋</span>
+                <MessageCircle className="w-9 h-9 text-[#2041d8]" strokeWidth={1.5} />
                 <p className="font-heading text-sm text-gray-400">
                   {activeChannel === "group" ? "Start the group conversation!" : "Send a message to get started"}
                 </p>
@@ -476,7 +477,7 @@ export default function ChatPage() {
                               className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-500 text-xs pb-1 order-first"
                               title="Edit message"
                             >
-                              ✏️
+                              <Pencil className="w-3 h-3" strokeWidth={1.75} />
                             </button>
                           )}
                           <div className={`px-4 py-2.5 rounded-2xl font-body text-sm leading-relaxed ${
@@ -493,7 +494,7 @@ export default function ChatPage() {
                           onClick={() => toggleLike(msg.id, msg.likedByMe ?? false)}
                           className={`flex items-center gap-1 text-xs transition-all ${msg.likedByMe ? "text-red-500" : "text-gray-300 hover:text-red-400"}`}
                         >
-                          {msg.likedByMe ? "❤️" : "🤍"}
+                          <Heart className="w-3.5 h-3.5" strokeWidth={1.75} fill={msg.likedByMe ? "currentColor" : "none"} />
                           {(msg.likeCount ?? 0) > 0 && <span className="font-body">{msg.likeCount}</span>}
                         </button>
                         <span className="font-body text-xs text-gray-300">{date} · {time}</span>

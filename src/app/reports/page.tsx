@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import Link from "next/link";
+import { Cake, PartyPopper, Calendar, CreditCard, Banknote, Gift } from "lucide-react";
 
 type StudentReport = {
   id: string;
@@ -221,7 +222,7 @@ export default function ReportsPage() {
     { key: "revenue", label: "Revenue" },
     { key: "attendance", label: "Attendance" },
     { key: "students", label: "Members" },
-    { key: "birthdays", label: "Birthdays 🎂" },
+    { key: "birthdays", label: "Birthdays" },
   ] as const;
 
   if (loading) return (
@@ -350,7 +351,8 @@ export default function ReportsPage() {
                   ) : passesSold.map(p => {
                     const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
                     const source = p.source ?? "stripe";
-                    const sourceLabel = source === "stripe" ? "💳 Stripe" : source === "cash" ? "💵 Cash" : source === "card_manual" ? "💳 Card" : source === "complimentary" ? "🎁 Comp" : source;
+                    const SourceIcon = source === "stripe" || source === "card_manual" ? CreditCard : source === "cash" ? Banknote : source === "complimentary" ? Gift : null;
+                    const sourceLabel = source === "stripe" ? "Stripe" : source === "cash" ? "Cash" : source === "card_manual" ? "Card" : source === "complimentary" ? "Comp" : source;
                     return (
                       <tr key={p.id} className="hover:bg-gray-50/50">
                         <td className="px-5 py-3 text-gray-500">
@@ -361,7 +363,12 @@ export default function ReportsPage() {
                           <p className="text-xs text-gray-400">{p.profiles?.email}</p>
                         </td>
                         <td className="px-5 py-3">{p.pass_types?.name ?? p.pass_type_id}</td>
-                        <td className="px-5 py-3 text-xs">{sourceLabel}</td>
+                        <td className="px-5 py-3 text-xs">
+                          <span className="inline-flex items-center gap-1">
+                            {SourceIcon && <SourceIcon className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} />}
+                            {sourceLabel}
+                          </span>
+                        </td>
                         <td className="px-5 py-3 text-right font-heading">{formatPrice(amount)}</td>
                       </tr>
                     );
@@ -497,7 +504,7 @@ export default function ReportsPage() {
                       <td className="px-5 py-3 text-gray-500 text-xs">
                         {s.phone && <p>{s.phone}</p>}
                         {s.birth_date && (
-                          <p>🎂 {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</p>
+                          <p className="inline-flex items-center gap-1"><Cake className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</p>
                         )}
                       </td>
                       <td className="px-5 py-3 text-center">
@@ -549,7 +556,7 @@ export default function ReportsPage() {
 
             {upcomingBirthdays.length === 0 ? (
               <div className="card p-10 text-center">
-                <p className="text-4xl mb-3">🎂</p>
+                <Cake className="w-10 h-10 mx-auto mb-3 text-[#2041d8]" strokeWidth={1.5} />
                 <p className="font-body text-gray-400">No birthdays on record yet. Encourage members to add their birth date in their profile.</p>
               </div>
             ) : (
@@ -564,13 +571,13 @@ export default function ReportsPage() {
                           <p className="font-heading text-sm">{s.full_name ?? s.email}</p>
                           {s.phone && <p className="font-body text-xs text-gray-400 mt-0.5">{s.phone}</p>}
                         </div>
-                        <span className="text-2xl">{isToday ? "🎉" : isThisWeek ? "🎂" : "🗓️"}</span>
+                        {isToday ? <PartyPopper className="w-6 h-6 text-[#2041d8]" strokeWidth={1.5} /> : isThisWeek ? <Cake className="w-6 h-6 text-[#2041d8]" strokeWidth={1.5} /> : <Calendar className="w-6 h-6 text-gray-300" strokeWidth={1.5} />}
                       </div>
                       <p className="font-body text-xs text-gray-500">
                         {new Date(s.birth_date!).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}
                       </p>
                       <p className={`font-heading text-sm mt-1 ${isToday ? "text-[#2041d8]" : isThisWeek ? "text-[#e4c3cc]" : "text-gray-400"}`}>
-                        {isToday ? "🎊 Today!" : `In ${s.daysUntil} day${s.daysUntil !== 1 ? "s" : ""}`}
+                        {isToday ? "Today!" : `In ${s.daysUntil} day${s.daysUntil !== 1 ? "s" : ""}`}
                       </p>
                       <Link
                         href={`/chat?dm=${s.id}`}
