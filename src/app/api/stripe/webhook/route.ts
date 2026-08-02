@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
+import { buildMerchOrderEmailHtml } from "@/lib/merch-order-email";
 import { Resend } from "resend";
 import Stripe from "stripe";
 
@@ -38,6 +39,39 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.CheckoutSession;
     const meta = session.metadata ?? {};
+
+    if (meta.type === "merch") {
+      const { productId, studentId: merchStudentId, size } = meta;
+
+      await supabase
+        .from("merch_orders")
+        .update({ status: "paid", amount_paid_cents: session.amount_total })
+        .eq("stripe_session_id", session.id);
+
+      const { data: product } = await supabase.from("merch_products").select("title").eq("id", productId).single();
+      const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", merchStudentId).single();
+
+      if (profile?.email && product) {
+        const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+        await resend.emails.send({
+          from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+          to: profile.email,
+          subject: `Order confirmed – ${product.title}`,
+          html: buildMerchOrderEmailHtml({ firstName, productTitle: product.title, size: size || null, amountPaidCents: session.amount_total }),
+        }).catch((e) => console.error("Merch order confirmation email error:", e));
+      }
+
+      const { error: merchInstructorEmailError } = await resend.emails.send({
+        from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+        subject: `New merch order – ${profile?.full_name ?? "A student"}`,
+        html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just bought <strong>${product?.title ?? "a product"}</strong>${size ? ` (Size ${size})` : ""}.</p>`,
+      }).catch((e) => ({ error: e }));
+      if (merchInstructorEmailError) console.error("Instructor merch notification email error:", merchInstructorEmailError);
+
+      return NextResponse.json({ received: true });
+    }
+
     const { passTypeId, studentId, classId, isDoublePass, discountId } = meta;
 
     if (!passTypeId || !studentId) {

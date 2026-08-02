@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, getYouTubeId } from "@/lib/stripe";
-import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
+import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 
@@ -26,7 +26,7 @@ export default function InstructorPage() {
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news">("classes");
+  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch">("classes");
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +74,12 @@ export default function InstructorPage() {
   const [showVideoForm, setShowVideoForm] = useState(false);
   const [videoForm, setVideoForm] = useState({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
   const [videoFormLoading, setVideoFormLoading] = useState(false);
+
+  // Merch products
+  const [products, setProducts] = useState<MerchProduct[]>([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [productForm, setProductForm] = useState({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+  const [productFormLoading, setProductFormLoading] = useState(false);
 
   // Add student form
   const [showAddStudentForm, setShowAddStudentForm] = useState(false);
@@ -161,6 +167,9 @@ export default function InstructorPage() {
 
     const { data: vids } = await supabase.from("videos").select("*").order("created_at", { ascending: false });
     setVideos(vids ?? []);
+
+    const { data: prods } = await supabase.from("merch_products").select("*").order("created_at", { ascending: false });
+    setProducts((prods as MerchProduct[]) ?? []);
 
     const { data: passes } = await supabase
       .from("passes")
@@ -465,6 +474,39 @@ export default function InstructorPage() {
     setVideoForm({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
     loadData();
     setVideoFormLoading(false);
+  }
+
+  async function addProduct(e: React.FormEvent) {
+    e.preventDefault();
+    setProductFormLoading(true);
+
+    const sizes = productForm.sizes.trim()
+      ? productForm.sizes.split(",").map(s => s.trim()).filter(Boolean)
+      : null;
+
+    await supabase.from("merch_products").insert({
+      title: productForm.title,
+      description: productForm.description || null,
+      price_cents: Math.round(parseFloat(productForm.price_cents) * 100),
+      image_url: productForm.image_url || null,
+      sizes,
+    });
+
+    setShowProductForm(false);
+    setProductForm({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+    loadData();
+    setProductFormLoading(false);
+  }
+
+  async function toggleProductActive(product: MerchProduct) {
+    await supabase.from("merch_products").update({ active: !product.active }).eq("id", product.id);
+    loadData();
+  }
+
+  async function deleteProduct(id: string) {
+    if (!confirm("Delete this product? This cannot be undone.")) return;
+    await supabase.from("merch_products").delete().eq("id", id);
+    loadData();
   }
 
   function parseCSV(text: string) {
@@ -822,6 +864,7 @@ export default function InstructorPage() {
     { key: "playlists", label: "Playlists" },
     { key: "discounts", label: "Discounts" },
     { key: "news", label: "Club News" },
+    { key: "merch", label: "Merch" },
   ] as const;
 
   if (loading) {
@@ -1114,6 +1157,54 @@ export default function InstructorPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {videos.map((v) => (
                   <VideoCard key={v.id} video={v} onDelete={() => deleteVideo(v.id)} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* MERCH TAB */}
+        {activeTab === "merch" && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-body text-sm text-gray-500">{products.length} product{products.length !== 1 ? "s" : ""}</p>
+              <button onClick={() => setShowProductForm(true)} className="btn-primary py-2 px-4 text-sm">+ Add Product</button>
+            </div>
+            {products.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400 mb-4">No products yet. Add your first one!</p>
+                <button onClick={() => setShowProductForm(true)} className="btn-primary">Add Product</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((p) => (
+                  <div key={p.id} className={`card overflow-hidden flex flex-col ${!p.active ? "opacity-50" : ""}`}>
+                    {p.image_url && (
+                      <div className="aspect-square bg-[#fff8f3]">
+                        <img src={p.image_url} alt={p.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={p.active ? "badge-confirmed" : "badge bg-gray-100 text-gray-500"}>
+                          {p.active ? "Active" : "Hidden"}
+                        </span>
+                      </div>
+                      <h3 className="font-heading text-base">{p.title}</h3>
+                      <p className="font-heading text-lg text-[#2041d8] mt-1">{formatPrice(p.price_cents)}</p>
+                      {p.sizes && p.sizes.length > 0 && (
+                        <p className="font-body text-xs text-gray-400 mt-1">Sizes: {p.sizes.join(", ")}</p>
+                      )}
+                      <div className="flex gap-3 mt-auto pt-4">
+                        <button onClick={() => toggleProductActive(p)} className="font-body text-xs text-[#2041d8] hover:underline">
+                          {p.active ? "Hide" : "Unhide"}
+                        </button>
+                        <button onClick={() => deleteProduct(p.id)} className="font-body text-xs text-red-400 hover:text-red-600 underline">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -1672,6 +1763,69 @@ export default function InstructorPage() {
                 <button type="button" onClick={() => setShowVideoForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={videoFormLoading}>
                   {videoFormLoading ? "Adding…" : "Add Recording"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {showProductForm && (
+          <Modal title="Add Product" onClose={() => setShowProductForm(false)}>
+            <form onSubmit={addProduct} className="space-y-4">
+              <div>
+                <label className="label">Title</label>
+                <input
+                  className="input"
+                  placeholder="e.g. Club Hoodie"
+                  value={productForm.title}
+                  onChange={e => setProductForm(f => ({ ...f, title: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Description</label>
+                <textarea
+                  className="input resize-none"
+                  rows={2}
+                  placeholder="Fabric, fit, anything members should know"
+                  value={productForm.description}
+                  onChange={e => setProductForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Price (AUD)</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={productForm.price_cents}
+                  onChange={e => setProductForm(f => ({ ...f, price_cents: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Image URL (optional)</label>
+                <input
+                  className="input"
+                  placeholder="https://..."
+                  value={productForm.image_url}
+                  onChange={e => setProductForm(f => ({ ...f, image_url: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Sizes (optional, comma-separated)</label>
+                <input
+                  className="input"
+                  placeholder="e.g. S, M, L, XL"
+                  value={productForm.sizes}
+                  onChange={e => setProductForm(f => ({ ...f, sizes: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowProductForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={productFormLoading}>
+                  {productFormLoading ? "Adding…" : "Add Product"}
                 </button>
               </div>
             </form>
