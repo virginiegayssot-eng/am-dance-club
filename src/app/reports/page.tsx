@@ -335,6 +335,7 @@ export default function ReportsPage() {
               )} className="font-body text-xs text-[#2041d8] hover:underline">Export CSV</button>
             </div>
             <div className="card overflow-hidden mb-8">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
@@ -375,6 +376,7 @@ export default function ReportsPage() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* Revenue by class */}
@@ -386,6 +388,7 @@ export default function ReportsPage() {
               )} className="font-body text-xs text-[#2041d8] hover:underline">Export CSV</button>
             </div>
             <div className="card overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
@@ -408,6 +411,7 @@ export default function ReportsPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -422,6 +426,7 @@ export default function ReportsPage() {
               )} className="btn-secondary py-2 px-4 text-xs">Export CSV</button>
             </div>
             <div className="card overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
@@ -458,6 +463,7 @@ export default function ReportsPage() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -483,6 +489,7 @@ export default function ReportsPage() {
               )} className="btn-secondary py-2 px-4 text-xs">Export CSV</button>
             </div>
             <div className="card overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
@@ -531,6 +538,7 @@ export default function ReportsPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
