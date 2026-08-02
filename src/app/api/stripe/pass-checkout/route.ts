@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { passTypeId, classId, discountCode } = await req.json();
+  const { passTypeId, classId, discountCode, useAltDuration } = await req.json();
   const config = PASS_CONFIGS[passTypeId];
   if (!config) return NextResponse.json({ error: "Invalid pass type" }, { status: 400 });
 
@@ -41,8 +41,27 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Casual bookings charge the specific class's own price (and optional alt-duration price),
+  // not the flat PASS_CONFIGS.casual price
+  let basePrice = config.price;
+  let classDurationMinutes: number | null = null;
+  if (passTypeId === "casual" && classId) {
+    const { data: cls } = await supabase.from("classes").select("price_cents, duration_minutes, alt_price_cents, alt_duration_minutes").eq("id", classId).single();
+    if (!cls) return NextResponse.json({ error: "Class not found" }, { status: 404 });
+    if (useAltDuration) {
+      if (!cls.alt_price_cents || !cls.alt_duration_minutes) {
+        return NextResponse.json({ error: "This class has no alternate duration option" }, { status: 400 });
+      }
+      basePrice = cls.alt_price_cents;
+      classDurationMinutes = cls.alt_duration_minutes;
+    } else {
+      basePrice = cls.price_cents;
+      classDurationMinutes = cls.duration_minutes;
+    }
+  }
+
   // Apply discount code if provided
-  let finalPrice = config.price;
+  let finalPrice = basePrice;
   let discountId: string | null = null;
 
   if (discountCode) {
@@ -60,15 +79,15 @@ export async function POST(req: NextRequest) {
     ) {
       discountId = discount.id;
       if (discount.discount_type === "percentage") {
-        finalPrice = Math.round(config.price * (1 - discount.discount_value / 100));
+        finalPrice = Math.round(basePrice * (1 - discount.discount_value / 100));
       } else {
-        finalPrice = Math.max(0, config.price - discount.discount_value);
+        finalPrice = Math.max(0, basePrice - discount.discount_value);
       }
     }
   }
 
   const descriptions: Record<string, string> = {
-    casual: "Single drop-in class · North Steyne Surf Club",
+    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class · North Steyne Surf Club",
     double: "Two spots in one class (bring a friend!)",
     intro:  "3 classes · Valid 3 months · New students only",
     five:   "5 classes · Valid 6 months",

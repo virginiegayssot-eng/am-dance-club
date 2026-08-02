@@ -26,6 +26,8 @@ export type Class = {
   class_date: string;
   class_time: string;
   duration_minutes: number;
+  alt_duration_minutes: number | null;
+  alt_price_cents: number | null;
   capacity: number;
   price_cents: number;
   stripe_price_id: string | null;

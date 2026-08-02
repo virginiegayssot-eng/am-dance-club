@@ -39,12 +39,12 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", altDurationMinutes: "", altPriceCents: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
 
   // Bulk create Fridays
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [bulkForm, setBulkForm] = useState({ title: "Morning Dance Class", description: "", price_cents: "24", capacity: "20", end_date: "2026-12-31" });
+  const [bulkForm, setBulkForm] = useState({ title: "Morning Dance Class", description: "", price_cents: "24", capacity: "20", end_date: "2026-12-31", altDurationMinutes: "", altPriceCents: "" });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -386,11 +386,13 @@ export default function InstructorPage() {
       price_cents: Math.round(parseFloat(classForm.price_cents) * 100),
       capacity: parseInt(classForm.capacity),
       instructor_id: profile!.id,
+      alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
+      alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
     });
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20" });
+      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", altDurationMinutes: "", altPriceCents: "" });
       loadData();
     }
     setClassFormLoading(false);
@@ -425,6 +427,8 @@ export default function InstructorPage() {
       price_cents: Math.round(parseFloat(bulkForm.price_cents) * 100),
       capacity: parseInt(bulkForm.capacity),
       instructor_id: profile!.id,
+      alt_duration_minutes: bulkForm.altDurationMinutes ? parseInt(bulkForm.altDurationMinutes) : null,
+      alt_price_cents: bulkForm.altPriceCents ? Math.round(parseFloat(bulkForm.altPriceCents) * 100) : null,
     }));
 
     const { error } = await supabase.from("classes").insert(rows);
@@ -1656,6 +1660,29 @@ export default function InstructorPage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="label">Longer session option (optional)</label>
+                <p className="font-body text-xs text-gray-400 mb-2">e.g. offer a 90 min option alongside the default 60 min class</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    placeholder="Alt duration (mins)"
+                    value={classForm.altDurationMinutes}
+                    onChange={e => setClassForm(f => ({ ...f, altDurationMinutes: e.target.value }))}
+                  />
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Alt price (AUD)"
+                    value={classForm.altPriceCents}
+                    onChange={e => setClassForm(f => ({ ...f, altPriceCents: e.target.value }))}
+                  />
+                </div>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowClassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={classFormLoading}>
@@ -1722,6 +1749,29 @@ export default function InstructorPage() {
                     value={bulkForm.capacity}
                     onChange={e => setBulkForm(f => ({ ...f, capacity: e.target.value }))}
                     required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="label">Longer session option (optional)</label>
+                <p className="font-body text-xs text-gray-400 mb-2">e.g. offer a 90 min option alongside the default 60 min class</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    placeholder="Alt duration (mins)"
+                    value={bulkForm.altDurationMinutes}
+                    onChange={e => setBulkForm(f => ({ ...f, altDurationMinutes: e.target.value }))}
+                  />
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Alt price (AUD)"
+                    value={bulkForm.altPriceCents}
+                    onChange={e => setBulkForm(f => ({ ...f, altPriceCents: e.target.value }))}
                   />
                 </div>
               </div>

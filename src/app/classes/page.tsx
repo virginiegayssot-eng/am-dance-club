@@ -99,14 +99,14 @@ export default function ClassesPage() {
     setExpandedId(cls.id === expandedId ? null : cls.id);
   }
 
-  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual" | "double") {
+  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual" | "double", useAltDuration = false) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
-    setActionId(cls.id + passTypeId);
+    setActionId(cls.id + passTypeId + (useAltDuration ? "-alt" : ""));
     const res = await fetch("/api/stripe/pass-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passTypeId, classId: cls.id }),
+      body: JSON.stringify({ passTypeId, classId: cls.id, useAltDuration }),
     });
     const { url, error } = await res.json();
     if (error) { alert(error); setActionId(null); return; }
@@ -175,7 +175,7 @@ export default function ClassesPage() {
 
                   <div className="p-5 flex flex-col flex-1">
                     <div className="space-y-1.5 mb-5">
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />7:00 AM · 45 min</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />7:00 AM · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
                       {isFull && (
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
@@ -193,7 +193,7 @@ export default function ClassesPage() {
                         <div className="space-y-2">
                           {/* Primary book button */}
                           <button
-                            onClick={() => handleBook(cls, isDoublePass ? 1 : 0)}
+                            onClick={() => hasPass ? handleBook(cls, isDoublePass ? 1 : 0) : payAndBook(cls, "casual")}
                             disabled={!!actionId}
                             className="btn-primary w-full justify-center"
                           >
@@ -203,7 +203,7 @@ export default function ClassesPage() {
                               ? isDoublePass
                                 ? `Book for 2 · Use Pass (${bestPass.classes_remaining} left)`
                                 : `Book · Use Pass (${bestPass.classes_remaining} left)`
-                              : "Book · $24 Casual"}
+                              : `Book · ${formatPrice(cls.price_cents)} Casual (${cls.duration_minutes} min)`}
                           </button>
 
                           {/* Book for 2 — only show for non-double passes */}
@@ -230,6 +230,15 @@ export default function ClassesPage() {
                           {/* Expanded payment options */}
                           {isExpanded && !hasPass && (
                             <div className="space-y-2 pt-1">
+                              {cls.alt_duration_minutes && cls.alt_price_cents && (
+                                <button
+                                  onClick={() => payAndBook(cls, "casual", true)}
+                                  disabled={!!actionId}
+                                  className="btn-secondary w-full justify-center text-sm py-2"
+                                >
+                                  {actionId === cls.id + "casual-alt" ? "Loading…" : `${formatPrice(cls.alt_price_cents)} Casual (${cls.alt_duration_minutes} min)`}
+                                </button>
+                              )}
                               <button
                                 onClick={() => payAndBook(cls, "double")}
                                 disabled={!!actionId}
