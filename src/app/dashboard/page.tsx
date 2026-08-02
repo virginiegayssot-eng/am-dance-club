@@ -301,6 +301,7 @@ export default function DashboardPage() {
           <section className="mb-10">
             <h2 className="font-heading text-xl mb-5">Attendance History</h2>
             <div className="card overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
                 <thead className="bg-[#fff8f3] border-b border-gray-100">
                   <tr>
@@ -327,6 +328,7 @@ export default function DashboardPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </section>
         )}

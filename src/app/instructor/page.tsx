@@ -1352,6 +1352,7 @@ export default function InstructorPage() {
               </div>
             ) : (
               <div className="card overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm font-body">
                   <thead className="bg-[#fff8f3] border-b border-gray-100">
                     <tr>
@@ -1412,6 +1413,7 @@ export default function InstructorPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </div>
@@ -1999,7 +2001,7 @@ export default function InstructorPage() {
                   {bulkPreview.length > 0 && (
                     <div>
                       <p className="font-body text-sm text-gray-600 mb-2">{bulkPreview.length} members found — preview:</p>
-                      <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl">
+                      <div className="max-h-48 overflow-y-auto overflow-x-auto border border-gray-100 rounded-xl">
                         <table className="w-full text-xs font-body">
                           <thead className="bg-[#fff8f3] sticky top-0">
                             <tr>
