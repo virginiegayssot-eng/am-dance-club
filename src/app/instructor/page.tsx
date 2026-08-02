@@ -10,6 +10,7 @@ import { formatPrice, getYouTubeId } from "@/lib/stripe";
 import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -23,6 +24,7 @@ export default function InstructorPage() {
   const supabase = createClient();
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string; confirmLabel?: string; action: () => void } | null>(null);
   const [classes, setClasses] = useState<ClassWithCount[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [allPasses, setAllPasses] = useState<PassRow[]>([]);
@@ -264,34 +266,42 @@ export default function InstructorPage() {
     setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
-  async function deleteMember(student: Profile) {
-    if (!confirm(`Remove ${student.full_name ?? student.email} from the app? This permanently deletes their account, bookings, passes, and chat history. This cannot be undone.`)) return;
-    const res = await fetch("/api/instructor/delete-member", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId: student.id }),
+  function deleteMember(student: Profile) {
+    setConfirmDialog({
+      message: `Remove ${student.full_name ?? student.email} from the app? This permanently deletes their account, bookings, passes, and chat history. This cannot be undone.`,
+      action: async () => {
+        const res = await fetch("/api/instructor/delete-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId: student.id }),
+        });
+        if (res.ok) {
+          setAllStudents(prev => prev.filter(s => s.id !== student.id));
+        } else {
+          const data = await res.json();
+          alert(data.error ?? "Something went wrong");
+        }
+      },
     });
-    if (res.ok) {
-      setAllStudents(prev => prev.filter(s => s.id !== student.id));
-    } else {
-      const data = await res.json();
-      alert(data.error ?? "Something went wrong");
-    }
   }
 
-  async function cancelMemberBooking(student: StudentRow) {
-    if (!confirm(`Cancel ${student.full_name ?? student.email}'s booking and refund their pass credit?`)) return;
-    const res = await fetch("/api/instructor/cancel-booking", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ regId: student.reg_id, passId: student.pass_id, guestCount: student.guest_count }),
+  function cancelMemberBooking(student: StudentRow) {
+    setConfirmDialog({
+      message: `Cancel ${student.full_name ?? student.email}'s booking and refund their pass credit?`,
+      action: async () => {
+        const res = await fetch("/api/instructor/cancel-booking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ regId: student.reg_id, passId: student.pass_id, guestCount: student.guest_count }),
+        });
+        if (res.ok) {
+          setStudents(prev => prev.filter(s => s.reg_id !== student.reg_id));
+        } else {
+          const data = await res.json();
+          alert(data.error ?? "Something went wrong");
+        }
+      },
     });
-    if (res.ok) {
-      setStudents(prev => prev.filter(s => s.reg_id !== student.reg_id));
-    } else {
-      const data = await res.json();
-      alert(data.error ?? "Something went wrong");
-    }
   }
 
   async function loadWalkInPasses(studentId: string) {
@@ -427,30 +437,42 @@ export default function InstructorPage() {
     setBulkLoading(false);
   }
 
-  async function cancelClass(cls: ClassWithCount) {
-    if (!confirm(`Cancel "${cls.title}"? This cannot be undone.`)) return;
-    await supabase.from("classes").update({ is_cancelled: true }).eq("id", cls.id);
-    loadData();
+  function cancelClass(cls: ClassWithCount) {
+    setConfirmDialog({
+      message: `Cancel "${cls.title}"? This cannot be undone.`,
+      action: async () => {
+        await supabase.from("classes").update({ is_cancelled: true }).eq("id", cls.id);
+        loadData();
+      },
+    });
   }
 
-  async function deleteClass(cls: ClassWithCount) {
+  function deleteClass(cls: ClassWithCount) {
     const warning = cls.registered_count > 0
       ? `"${cls.title}" has ${cls.registered_count} member${cls.registered_count !== 1 ? "s" : ""} registered. Deleting it will permanently remove those registrations and any attendance records for this class. This cannot be undone. Delete anyway?`
       : `Permanently delete "${cls.title}"? This cannot be undone.`;
-    if (!confirm(warning)) return;
-    await supabase.from("classes").delete().eq("id", cls.id);
-    loadData();
+    setConfirmDialog({
+      message: warning,
+      action: async () => {
+        await supabase.from("classes").delete().eq("id", cls.id);
+        loadData();
+      },
+    });
   }
 
-  async function deleteAllUpcomingClasses() {
+  function deleteAllUpcomingClasses() {
     if (upcomingClasses.length === 0) return;
     const totalRegistrations = upcomingClasses.reduce((sum, c) => sum + c.registered_count, 0);
     const warning = totalRegistrations > 0
       ? `Delete all ${upcomingClasses.length} upcoming classes? This includes ${totalRegistrations} member registration${totalRegistrations !== 1 ? "s" : ""} across them, which will be permanently removed along with any attendance records. This cannot be undone.`
       : `Delete all ${upcomingClasses.length} upcoming classes? This cannot be undone.`;
-    if (!confirm(warning)) return;
-    await supabase.from("classes").delete().in("id", upcomingClasses.map(c => c.id));
-    loadData();
+    setConfirmDialog({
+      message: warning,
+      action: async () => {
+        await supabase.from("classes").delete().in("id", upcomingClasses.map(c => c.id));
+        loadData();
+      },
+    });
   }
 
   async function addVideo(e: React.FormEvent) {
@@ -506,10 +528,14 @@ export default function InstructorPage() {
     loadData();
   }
 
-  async function deleteProduct(id: string) {
-    if (!confirm("Delete this product? This cannot be undone.")) return;
-    await supabase.from("merch_products").delete().eq("id", id);
-    loadData();
+  function deleteProduct(id: string) {
+    setConfirmDialog({
+      message: "Delete this product? This cannot be undone.",
+      action: async () => {
+        await supabase.from("merch_products").delete().eq("id", id);
+        loadData();
+      },
+    });
   }
 
   function parseCSV(text: string) {
@@ -594,10 +620,14 @@ export default function InstructorPage() {
     setDiscountCodes(prev => prev.map(d => d.id === id ? { ...d, active: !active } : d));
   }
 
-  async function deleteDiscountCode(id: string) {
-    if (!confirm("Delete this discount code?")) return;
-    await supabase.from("discount_codes").delete().eq("id", id);
-    setDiscountCodes(prev => prev.filter(d => d.id !== id));
+  function deleteDiscountCode(id: string) {
+    setConfirmDialog({
+      message: "Delete this discount code?",
+      action: async () => {
+        await supabase.from("discount_codes").delete().eq("id", id);
+        setDiscountCodes(prev => prev.filter(d => d.id !== id));
+      },
+    });
   }
 
   async function addPlaylist(e: React.FormEvent) {
@@ -625,16 +655,24 @@ export default function InstructorPage() {
     setPlaylistFormLoading(false);
   }
 
-  async function deletePlaylist(id: string) {
-    if (!confirm("Delete this playlist?")) return;
-    await supabase.from("playlists").delete().eq("id", id);
-    setPlaylists(p => p.filter(pl => pl.id !== id));
+  function deletePlaylist(id: string) {
+    setConfirmDialog({
+      message: "Delete this playlist?",
+      action: async () => {
+        await supabase.from("playlists").delete().eq("id", id);
+        setPlaylists(p => p.filter(pl => pl.id !== id));
+      },
+    });
   }
 
-  async function deleteVideo(id: string) {
-    if (!confirm("Delete this video?")) return;
-    await supabase.from("videos").delete().eq("id", id);
-    setVideos((v) => v.filter((vid) => vid.id !== id));
+  function deleteVideo(id: string) {
+    setConfirmDialog({
+      message: "Delete this video?",
+      action: async () => {
+        await supabase.from("videos").delete().eq("id", id);
+        setVideos((v) => v.filter((vid) => vid.id !== id));
+      },
+    });
   }
 
   async function inviteStudent(e: React.FormEvent) {
@@ -692,25 +730,29 @@ export default function InstructorPage() {
     setAssignPassLoading(false);
   }
 
-  async function debitPass(passId: string) {
-    if (!confirm("Debit 1 class from this pass?")) return;
-    setDebitingPassId(passId);
+  function debitPass(passId: string) {
+    setConfirmDialog({
+      message: "Debit 1 class from this pass?",
+      action: async () => {
+        setDebitingPassId(passId);
 
-    const res = await fetch("/api/instructor/debit-pass", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passId }),
+        const res = await fetch("/api/instructor/debit-pass", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passId }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error ?? "Failed to debit pass");
+        } else {
+          setAllPasses(prev =>
+            prev.map(p => p.id === passId ? { ...p, classes_remaining: p.classes_remaining - 1 } : p)
+          );
+        }
+        setDebitingPassId(null);
+      },
     });
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error ?? "Failed to debit pass");
-    } else {
-      setAllPasses(prev =>
-        prev.map(p => p.id === passId ? { ...p, classes_remaining: p.classes_remaining - 1 } : p)
-      );
-    }
-    setDebitingPassId(null);
   }
 
   function openReviewModal(classId?: string) {
@@ -2503,6 +2545,15 @@ export default function InstructorPage() {
               )}
             </div>
           </Modal>
+        )}
+
+        {confirmDialog && (
+          <ConfirmDialog
+            message={confirmDialog.message}
+            confirmLabel={confirmDialog.confirmLabel}
+            onCancel={() => setConfirmDialog(null)}
+            onConfirm={() => { const action = confirmDialog.action; setConfirmDialog(null); action(); }}
+          />
         )}
       </main>
       <Footer />

@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/stripe";
 import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Megaphone, MapPin, PartyPopper, Music2, X, Ticket, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [newsPosts, setNewsPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [justBooked, setJustBooked] = useState(false);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [justBoughtPass, setJustBoughtPass] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [cancelResult, setCancelResult] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -281,9 +283,7 @@ export default function DashboardPage() {
                       <p className="font-body text-xs text-gray-400">Pass used</p>
                     )}
                     <button
-                      onClick={() => {
-                        if (confirm("Cancel this booking? This cannot be undone.")) cancelBooking(reg.id);
-                      }}
+                      onClick={() => setConfirmCancelId(reg.id)}
                       disabled={cancellingId === reg.id}
                       className="font-body text-xs text-red-400 hover:text-red-600 underline disabled:opacity-50"
                     >
@@ -339,6 +339,14 @@ export default function DashboardPage() {
           <Link href="/videos" className="btn-secondary">Videos</Link>
           <a href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t" target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Group</a>
         </div>
+
+        {confirmCancelId && (
+          <ConfirmDialog
+            message="Cancel this booking? This cannot be undone."
+            onCancel={() => setConfirmCancelId(null)}
+            onConfirm={() => { const id = confirmCancelId; setConfirmCancelId(null); cancelBooking(id); }}
+          />
+        )}
       </main>
       <Footer />
     </div>
