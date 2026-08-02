@@ -1393,69 +1393,50 @@ export default function InstructorPage() {
                 <button onClick={() => setShowDiscountForm(true)} className="btn-primary">Create Code</button>
               </div>
             ) : (
-              <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
-                <table className="w-full text-sm font-body">
-                  <thead className="bg-[#fff8f3] border-b border-gray-100">
-                    <tr>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Code</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Discount</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Uses</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Expires</th>
-                      <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Status</th>
-                      <th className="px-5 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {discountCodes.map(d => (
-                      <tr key={d.id} className="hover:bg-gray-50/50">
-                        <td className="px-5 py-3 font-heading tracking-wider">{d.code}</td>
-                        <td className="px-5 py-3">
-                          {d.discount_type === "percentage"
-                            ? `${d.discount_value}% off`
-                            : `$${(d.discount_value / 100).toFixed(0)} off`}
-                        </td>
-                        <td className="px-5 py-3 text-gray-500">
-                          {d.uses_count}{d.max_uses ? `/${d.max_uses}` : ""}
-                        </td>
-                        <td className="px-5 py-3 text-gray-500">
-                          {editingDiscountId === d.id ? (
-                            <input
-                              type="date"
-                              className="input py-1 px-2 text-xs w-36"
-                              value={editDiscountExpiresAt}
-                              onChange={e => setEditDiscountExpiresAt(e.target.value)}
-                            />
-                          ) : (
-                            d.expires_at ? new Date(d.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "Never"
-                          )}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={d.active ? "badge-confirmed" : "badge bg-gray-100 text-gray-500"}>
-                            {d.active ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-right flex items-center gap-3 justify-end">
-                          {editingDiscountId === d.id ? (
-                            <>
-                              <button onClick={() => saveDiscountExpiry(d.id)} className="font-body text-xs text-green-600 hover:underline">Save</button>
-                              <button onClick={() => setEditingDiscountId(null)} className="font-body text-xs text-gray-400 hover:underline">Cancel</button>
-                            </>
-                          ) : (
-                            <button onClick={() => { setEditingDiscountId(d.id); setEditDiscountExpiresAt(d.expires_at ? d.expires_at.split("T")[0] : ""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
-                          )}
-                          <button onClick={() => toggleDiscountActive(d.id, d.active)} className="font-body text-xs text-[#2041d8] hover:underline">
-                            {d.active ? "Disable" : "Enable"}
-                          </button>
-                          <button onClick={() => deleteDiscountCode(d.id)} className="font-body text-xs text-red-400 hover:text-red-600">
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {discountCodes.map(d => (
+                  <div key={d.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-heading tracking-wider">{d.code}</span>
+                        <span className={d.active ? "badge-confirmed" : "badge bg-gray-100 text-gray-500"}>
+                          {d.active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 font-body mt-1">
+                        {d.discount_type === "percentage" ? `${d.discount_value}% off` : `$${(d.discount_value / 100).toFixed(0)} off`}
+                        {" · "}{d.uses_count} use{d.uses_count !== 1 ? "s" : ""}{d.max_uses ? `/${d.max_uses}` : ""}
+                        {" · "}
+                        {editingDiscountId === d.id ? (
+                          <input
+                            type="date"
+                            className="input py-1 px-2 text-xs w-36 inline-block align-middle"
+                            value={editDiscountExpiresAt}
+                            onChange={e => setEditDiscountExpiresAt(e.target.value)}
+                          />
+                        ) : (
+                          d.expires_at ? `Expires ${new Date(d.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}` : "Never expires"
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {editingDiscountId === d.id ? (
+                        <>
+                          <button onClick={() => saveDiscountExpiry(d.id)} className="font-body text-xs text-green-600 hover:underline">Save</button>
+                          <button onClick={() => setEditingDiscountId(null)} className="font-body text-xs text-gray-400 hover:underline">Cancel</button>
+                        </>
+                      ) : (
+                        <button onClick={() => { setEditingDiscountId(d.id); setEditDiscountExpiresAt(d.expires_at ? d.expires_at.split("T")[0] : ""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
+                      )}
+                      <button onClick={() => toggleDiscountActive(d.id, d.active)} className="font-body text-xs text-[#2041d8] hover:underline">
+                        {d.active ? "Disable" : "Enable"}
+                      </button>
+                      <button onClick={() => deleteDiscountCode(d.id)} className="font-body text-xs text-red-400 hover:text-red-600">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
