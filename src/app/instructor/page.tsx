@@ -39,12 +39,12 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", altDurationMinutes: "", altPriceCents: "" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
 
   // Bulk create Fridays
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [bulkForm, setBulkForm] = useState({ title: "Morning Dance Class", description: "", price_cents: "24", capacity: "20", end_date: "2026-12-31", altDurationMinutes: "", altPriceCents: "" });
+  const [bulkForm, setBulkForm] = useState({ title: "Morning Dance Class", description: "", price_cents: "24", capacity: "20", durationMinutes: "45", end_date: "2026-12-31", altDurationMinutes: "", altPriceCents: "" });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -385,6 +385,7 @@ export default function InstructorPage() {
       class_time: "07:00",
       price_cents: Math.round(parseFloat(classForm.price_cents) * 100),
       capacity: parseInt(classForm.capacity),
+      duration_minutes: parseInt(classForm.durationMinutes),
       instructor_id: profile!.id,
       alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
       alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
@@ -392,7 +393,7 @@ export default function InstructorPage() {
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", altDurationMinutes: "", altPriceCents: "" });
+      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "" });
       loadData();
     }
     setClassFormLoading(false);
@@ -426,6 +427,7 @@ export default function InstructorPage() {
       class_time: "07:00",
       price_cents: Math.round(parseFloat(bulkForm.price_cents) * 100),
       capacity: parseInt(bulkForm.capacity),
+      duration_minutes: parseInt(bulkForm.durationMinutes),
       instructor_id: profile!.id,
       alt_duration_minutes: bulkForm.altDurationMinutes ? parseInt(bulkForm.altDurationMinutes) : null,
       alt_price_cents: bulkForm.altPriceCents ? Math.round(parseFloat(bulkForm.altPriceCents) * 100) : null,
@@ -1633,7 +1635,7 @@ export default function InstructorPage() {
                   onChange={e => setClassForm(f => ({ ...f, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="label">Price (AUD)</label>
                   <input
@@ -1656,6 +1658,18 @@ export default function InstructorPage() {
                     placeholder="20"
                     value={classForm.capacity}
                     onChange={e => setClassForm(f => ({ ...f, capacity: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label">Duration (mins)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    placeholder="45"
+                    value={classForm.durationMinutes}
+                    onChange={e => setClassForm(f => ({ ...f, durationMinutes: e.target.value }))}
                     required
                   />
                 </div>
@@ -1727,7 +1741,7 @@ export default function InstructorPage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="label">Price (AUD)</label>
                   <input
@@ -1748,6 +1762,17 @@ export default function InstructorPage() {
                     min="1"
                     value={bulkForm.capacity}
                     onChange={e => setBulkForm(f => ({ ...f, capacity: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label">Duration (mins)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={bulkForm.durationMinutes}
+                    onChange={e => setBulkForm(f => ({ ...f, durationMinutes: e.target.value }))}
                     required
                   />
                 </div>

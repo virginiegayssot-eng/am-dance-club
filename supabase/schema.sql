@@ -27,7 +27,7 @@ create table public.classes (
   location text not null default 'North Steyne Surf Club',
   class_date date not null,
   class_time time not null default '07:00',
-  duration_minutes int not null default 60,
+  duration_minutes int not null default 45,
   capacity int not null default 20,
   price_cents int not null default 2000,
   stripe_price_id text,
