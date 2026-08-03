@@ -2,13 +2,26 @@
 
 # THE A.M Dance Club — Manual Backup Script
 # Run this occasionally to export your data to CSV files
+#
+# Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to be set —
+# same env vars the app itself uses (see .env.local, or copy them from
+# Supabase dashboard > Settings > API). Never hardcode these values here:
+# this file is committed to git, and a hardcoded key stays in git history
+# even after being removed from a later commit.
+
+if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+  echo "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY."
+  echo "Run this with: source .env.local && ./backup.sh"
+  echo "(or export both env vars yourself before running this script)"
+  exit 1
+fi
+
+SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+SERVICE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
 
 DATE=$(date +%Y-%m-%d)
 DIR="$HOME/Desktop/THE AM BACKUP/AM_Dance_Backups/$DATE"
 mkdir -p "$DIR"
-
-SUPABASE_URL="https://trsseitecjigqlqqscue.supabase.co"
-SERVICE_KEY="sb_secret_f-oLKtttX8GvRkAbBCMZIQ_7_16WHMo"
 
 echo "Backing up data to $DIR..."
 
