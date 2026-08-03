@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage() {
   const supabase = createClient();
@@ -90,11 +91,11 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="label">New password</label>
-                <input type="password" className="input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+                <PasswordInput className="input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
               </div>
               <div>
                 <label className="label">Confirm password</label>
-                <input type="password" className="input" placeholder="••••••••" value={confirm} onChange={e => setConfirm(e.target.value)} required />
+                <PasswordInput className="input" placeholder="••••••••" value={confirm} onChange={e => setConfirm(e.target.value)} required />
               </div>
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{error}</div>

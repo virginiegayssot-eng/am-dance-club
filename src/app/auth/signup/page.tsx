@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { Mail } from "lucide-react";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -93,7 +94,7 @@ export default function SignupPage() {
             </div>
             <div>
               <label className="label">Password *</label>
-              <input type="password" className="input" placeholder="At least 6 characters" minLength={6} value={form.password} onChange={set("password")} required />
+              <PasswordInput className="input" placeholder="At least 6 characters" minLength={6} value={form.password} onChange={set("password")} required />
             </div>
             <div>
               <label className="label">Phone *</label>
