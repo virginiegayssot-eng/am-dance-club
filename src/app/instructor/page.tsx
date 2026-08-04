@@ -39,7 +39,7 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
 
   // Bulk create Fridays
@@ -389,11 +389,14 @@ export default function InstructorPage() {
       instructor_id: profile!.id,
       alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
       alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
+      ...(classForm.location ? { location: classForm.location } : {}),
+      is_special: classForm.isSpecial,
+      special_label: classForm.isSpecial ? (classForm.specialLabel || "Special Class") : null,
     });
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "" });
+      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
     }
     setClassFormLoading(false);
@@ -1697,6 +1700,35 @@ export default function InstructorPage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="label">Location (optional)</label>
+                <input
+                  className="input"
+                  placeholder="Leave blank to use the usual location"
+                  value={classForm.location}
+                  onChange={e => setClassForm(f => ({ ...f, location: e.target.value }))}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="isSpecial"
+                  type="checkbox"
+                  checked={classForm.isSpecial}
+                  onChange={e => setClassForm(f => ({ ...f, isSpecial: e.target.checked }))}
+                />
+                <label htmlFor="isSpecial" className="label mb-0">This is a one-off special class (pop-up, collab, guest class, etc.)</label>
+              </div>
+              {classForm.isSpecial && (
+                <div>
+                  <label className="label">Special label</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Pop-up, Collab, Guest Class"
+                    value={classForm.specialLabel}
+                    onChange={e => setClassForm(f => ({ ...f, specialLabel: e.target.value }))}
+                  />
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowClassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={classFormLoading}>

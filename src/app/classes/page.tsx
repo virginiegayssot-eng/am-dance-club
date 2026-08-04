@@ -166,8 +166,15 @@ export default function ClassesPage() {
 
               return (
                 <div key={cls.id} className="card flex flex-col">
-                  <div className="bg-gradient-to-br from-[#e4c3cc] to-[#a3bdfe] p-6">
-                    <p className="font-body text-xs uppercase tracking-widest text-[#2041d8] mb-1">Friday</p>
+                  <div className="relative bg-gradient-to-br from-[#e4c3cc] to-[#a3bdfe] p-6">
+                    {cls.is_special && (
+                      <span className="absolute top-4 right-4 bg-[#2041d8] text-white text-xs font-body font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                        {cls.special_label || "Special Class"}
+                      </span>
+                    )}
+                    <p className="font-body text-xs uppercase tracking-widest text-[#2041d8] mb-1">
+                      {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long" })}
+                    </p>
                     <p className="font-heading text-2xl text-black">
                       {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
