@@ -6,7 +6,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
-import { MessageCircle, GraduationCap, Pencil, Heart } from "lucide-react";
+import { MessageCircle, GraduationCap, Pencil, Heart, Image as ImageIcon, X } from "lucide-react";
 
 type Message = {
   id: string;
@@ -14,6 +14,7 @@ type Message = {
   recipient_id: string | null;
   channel: "group" | "direct";
   body: string;
+  image_url?: string | null;
   created_at: string;
   profiles?: { full_name: string | null; email: string };
   likeCount?: number;
@@ -31,6 +32,7 @@ export default function ChatPage() {
   const supabase = createClient();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [me, setMe] = useState<Profile | null>(null);
   const [activeChannel, setActiveChannel] = useState<"group" | string>("group");
@@ -40,6 +42,8 @@ export default function ChatPage() {
   const [dmTarget, setDmTarget] = useState<Profile | null>(null);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [imageError, setImageError] = useState("");
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -224,20 +228,55 @@ export default function ChatPage() {
     }
   }
 
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("Image must be under 5MB.");
+      return;
+    }
+    setImageError("");
+
+    const reader = new FileReader();
+    reader.onload = () => setPendingImage(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!body.trim() || !me) return;
+    if ((!body.trim() && !pendingImage) || !me) return;
     setSending(true);
+    setImageError("");
 
-    const payload: Record<string, string> = {
+    let imageUrl: string | null = null;
+    if (pendingImage) {
+      const res = await fetch("/api/chat/upload-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base64: pendingImage }),
+      });
+      const result = await res.json();
+      if (result.error) {
+        setImageError(result.error);
+        setSending(false);
+        return;
+      }
+      imageUrl = result.url;
+    }
+
+    const payload: Record<string, string | null> = {
       sender_id: me.id,
       channel: activeChannel === "group" ? "group" : "direct",
       body: body.trim(),
+      image_url: imageUrl,
     };
     if (activeChannel !== "group") payload.recipient_id = activeChannel;
 
     await supabase.from("messages").insert(payload);
     setBody("");
+    setPendingImage(null);
     setSending(false);
     inputRef.current?.focus();
   }
@@ -480,12 +519,16 @@ export default function ChatPage() {
                               <Pencil className="w-3 h-3" strokeWidth={1.75} />
                             </button>
                           )}
-                          <div className={`px-4 py-2.5 rounded-2xl font-body text-sm leading-relaxed ${
+                          <div className={`rounded-2xl overflow-hidden font-body text-sm leading-relaxed ${
                             isMe
                               ? "bg-[#2041d8] text-white rounded-br-sm"
                               : "bg-[#e4c3cc]/25 text-black rounded-bl-sm"
                           }`}>
-                            {msg.body}
+                            {msg.image_url && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={msg.image_url} alt="" className="max-w-full max-h-80 object-cover" />
+                            )}
+                            {msg.body && <div className="px-4 py-2.5">{msg.body}</div>}
                           </div>
                         </div>
                       )}
@@ -508,23 +551,59 @@ export default function ChatPage() {
           </div>
 
           {/* Input */}
-          <form onSubmit={sendMessage} className="flex items-center gap-3 px-4 py-3 border-t border-gray-100 bg-[#fff8f3]">
-            <input
-              ref={inputRef}
-              className="input flex-1 py-2.5 text-sm"
-              placeholder={`Message ${activeChannel === "group" ? "everyone" : (dmTarget?.full_name?.split(" ")[0] ?? "instructor")}…`}
-              value={body}
-              onChange={e => setBody(e.target.value)}
-              disabled={sending}
-            />
-            <button
-              type="submit"
-              disabled={!body.trim() || sending}
-              className="btn-primary py-2.5 px-4 text-sm shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Send
-            </button>
-          </form>
+          <div className="border-t border-gray-100 bg-[#fff8f3]">
+            {pendingImage && (
+              <div className="px-4 pt-3 flex items-center gap-2">
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={pendingImage} alt="" className="h-16 w-16 object-cover rounded-lg" />
+                  <button
+                    type="button"
+                    onClick={() => setPendingImage(null)}
+                    className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5"
+                  >
+                    <X className="w-3 h-3" strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            )}
+            {imageError && (
+              <p className="px-4 pt-2 font-body text-xs text-red-500">{imageError}</p>
+            )}
+            <form onSubmit={sendMessage} className="flex items-center gap-3 px-4 py-3">
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={sending}
+                className="text-gray-400 hover:text-[#2041d8] shrink-0"
+                title="Attach an image"
+              >
+                <ImageIcon className="w-5 h-5" strokeWidth={1.75} />
+              </button>
+              <input
+                ref={inputRef}
+                className="input flex-1 py-2.5 text-sm"
+                placeholder={`Message ${activeChannel === "group" ? "everyone" : (dmTarget?.full_name?.split(" ")[0] ?? "instructor")}…`}
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                disabled={sending}
+              />
+              <button
+                type="submit"
+                disabled={(!body.trim() && !pendingImage) || sending}
+                className="btn-primary py-2.5 px-4 text-sm shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {sending ? "Sending…" : "Send"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
