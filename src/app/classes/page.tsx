@@ -273,13 +273,15 @@ export default function ClassesPage() {
                                   {actionId === cls.id + "casual-alt" ? "Loading…" : `${formatPrice(cls.alt_price_cents)} Casual (${cls.alt_duration_minutes} min)`}
                                 </button>
                               )}
-                              <button
-                                onClick={() => payAndBook(cls, "double")}
-                                disabled={!!actionId}
-                                className="btn-secondary w-full justify-center text-sm py-2"
-                              >
-                                {actionId === cls.id + "double" ? "Loading…" : "Double Pass $38 (+ 1 guest)"}
-                              </button>
+                              {!cls.is_special && (
+                                <button
+                                  onClick={() => payAndBook(cls, "double")}
+                                  disabled={!!actionId}
+                                  className="btn-secondary w-full justify-center text-sm py-2"
+                                >
+                                  {actionId === cls.id + "double" ? "Loading…" : "Double Pass $38 (+ 1 guest)"}
+                                </button>
+                              )}
                               {!cls.is_special && (
                                 <Link href="/passes" className="btn-pink w-full justify-center text-sm py-2">
                                   Buy a class pass →
