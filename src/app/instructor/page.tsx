@@ -897,18 +897,6 @@ export default function InstructorPage() {
     setShowAssignPassForm(true);
   }
 
-  function getNextFridays(count = 12) {
-    const fridays: string[] = [];
-    const d = new Date();
-    while (fridays.length < count) {
-      d.setDate(d.getDate() + 1);
-      if (d.getDay() === 5) {
-        fridays.push(d.toISOString().split("T")[0]);
-      }
-    }
-    return fridays;
-  }
-
   const tabs = [
     { key: "classes", label: "Classes" },
     { key: "attendance", label: "Attendance" },
@@ -1611,22 +1599,14 @@ export default function InstructorPage() {
                 />
               </div>
               <div>
-                <label className="label">Date (Friday)</label>
-                <select
+                <label className="label">Date</label>
+                <input
+                  type="date"
                   className="input"
                   value={classForm.class_date}
                   onChange={e => setClassForm(f => ({ ...f, class_date: e.target.value }))}
                   required
-                >
-                  <option value="">Select a Friday</option>
-                  {getNextFridays().map(d => (
-                    <option key={d} value={d}>
-                      {new Date(d + "T00:00:00").toLocaleDateString("en-AU", {
-                        weekday: "long", day: "numeric", month: "long", year: "numeric"
-                      })}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
               <div>
                 <label className="label">Description</label>
