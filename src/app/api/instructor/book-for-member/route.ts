@@ -40,13 +40,15 @@ export async function POST(req: NextRequest) {
   if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { classId, studentId, passId, guestCount = 0 } = await req.json();
-  if (!classId || !studentId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  if (!classId || !studentId) return NextResponse.json({ error: `Missing fields (classId: ${classId}, studentId: ${studentId})` }, { status: 400 });
 
   const admin = adminClient();
 
   // Check class exists and isn't full
-  const { data: cls } = await admin.from("classes").select("*").eq("id", classId).single();
-  if (!cls || cls.is_cancelled) return NextResponse.json({ error: "Class not available" }, { status: 400 });
+  const { data: cls, error: clsError } = await admin.from("classes").select("*").eq("id", classId).single();
+  if (clsError) return NextResponse.json({ error: `DEBUG lookup error for classId ${classId}: ${clsError.message}` }, { status: 400 });
+  if (!cls) return NextResponse.json({ error: `DEBUG no class found for classId ${classId}` }, { status: 400 });
+  if (cls.is_cancelled) return NextResponse.json({ error: "DEBUG class is marked cancelled" }, { status: 400 });
 
   const { data: regCount } = await admin.from("class_registration_counts").select("registered_count").eq("class_id", classId).single();
   if ((regCount?.registered_count ?? 0) >= cls.capacity) return NextResponse.json({ error: "Class is full" }, { status: 400 });
