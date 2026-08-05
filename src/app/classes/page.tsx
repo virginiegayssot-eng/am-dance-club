@@ -184,6 +184,7 @@ export default function ClassesPage() {
               const isFull = spotsLeft <= 0;
               const isExpanded = expandedId === cls.id;
               const isLoading = actionId?.startsWith(cls.id);
+              const canUsePass = hasPass && !cls.is_special;
 
               return (
                 <div key={cls.id} className="card flex flex-col">
@@ -219,15 +220,20 @@ export default function ClassesPage() {
                         <p className="font-body text-sm text-gray-400 text-center">Class is full</p>
                       ) : (
                         <div className="space-y-2">
+                          {/* Special classes can't be booked with an existing pass — casual payment only */}
+                          {cls.is_special && (
+                            <p className="font-body text-xs text-gray-400 text-center pb-1">Special classes are booked separately — class passes don't apply here.</p>
+                          )}
+
                           {/* Primary book button */}
                           <button
-                            onClick={() => hasPass ? handleBook(cls, isDoublePass ? 1 : 0) : payAndBook(cls, "casual")}
+                            onClick={() => canUsePass ? handleBook(cls, isDoublePass ? 1 : 0) : payAndBook(cls, "casual")}
                             disabled={!!actionId}
                             className="btn-primary w-full justify-center"
                           >
                             {isLoading
                               ? "Booking…"
-                              : hasPass
+                              : canUsePass
                               ? isDoublePass
                                 ? `Book for 2 · Use Pass (${bestPass.classes_remaining} left)`
                                 : `Book · Use Pass (${bestPass.classes_remaining} left)`
@@ -235,7 +241,7 @@ export default function ClassesPage() {
                           </button>
 
                           {/* Book for 2 — only show for non-double passes */}
-                          {hasPass && !isDoublePass && bestPass.classes_remaining >= 2 && (
+                          {canUsePass && !isDoublePass && bestPass.classes_remaining >= 2 && (
                             <button
                               onClick={() => handleBook(cls, 1)}
                               disabled={!!actionId}
@@ -245,8 +251,8 @@ export default function ClassesPage() {
                             </button>
                           )}
 
-                          {/* Show payment options toggle when no pass */}
-                          {!hasPass && (
+                          {/* Show payment options toggle when no usable pass */}
+                          {!canUsePass && (
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : cls.id)}
                               className="font-body text-xs text-gray-400 hover:text-gray-600 w-full text-center"
@@ -256,7 +262,7 @@ export default function ClassesPage() {
                           )}
 
                           {/* Expanded payment options */}
-                          {isExpanded && !hasPass && (
+                          {isExpanded && !canUsePass && (
                             <div className="space-y-2 pt-1">
                               {cls.alt_duration_minutes && cls.alt_price_cents && (
                                 <button
@@ -274,9 +280,11 @@ export default function ClassesPage() {
                               >
                                 {actionId === cls.id + "double" ? "Loading…" : "Double Pass $38 (+ 1 guest)"}
                               </button>
-                              <Link href="/passes" className="btn-pink w-full justify-center text-sm py-2">
-                                Buy a class pass →
-                              </Link>
+                              {!cls.is_special && (
+                                <Link href="/passes" className="btn-pink w-full justify-center text-sm py-2">
+                                  Buy a class pass →
+                                </Link>
+                              )}
                             </div>
                           )}
                         </div>
