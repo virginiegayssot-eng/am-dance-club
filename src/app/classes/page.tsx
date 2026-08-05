@@ -22,6 +22,7 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showSpecialOnly, setShowSpecialOnly] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -116,6 +117,7 @@ export default function ClassesPage() {
   const hasPass = activePasses.length > 0;
   const bestPass = activePasses[0];
   const isDoublePass = hasPass && (bestPass as any).pass_types?.name?.toLowerCase().includes("double");
+  const visibleClasses = showSpecialOnly ? classes.filter(c => c.is_special) : classes;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -129,6 +131,21 @@ export default function ClassesPage() {
             <p className="font-body text-gray-500">Every Friday at 7:00 AM · North Steyne Surf Club</p>
           </div>
           <Link href="/passes" className="btn-pink self-start sm:self-auto">View Passes & Pricing</Link>
+        </div>
+
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => setShowSpecialOnly(false)}
+            className={!showSpecialOnly ? "btn-primary" : "btn-secondary"}
+          >
+            All Classes
+          </button>
+          <button
+            onClick={() => setShowSpecialOnly(true)}
+            className={showSpecialOnly ? "btn-primary" : "btn-secondary"}
+          >
+            Special Classes
+          </button>
         </div>
 
         {/* Active pass notice */}
@@ -150,15 +167,19 @@ export default function ClassesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2,3].map(i => <div key={i} className="card p-6 animate-pulse h-64 bg-gray-50" />)}
           </div>
-        ) : classes.length === 0 ? (
+        ) : visibleClasses.length === 0 ? (
           <div className="text-center py-20">
             <Clock className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
-            <h3 className="font-heading text-xl mb-2">No upcoming classes</h3>
-            <p className="font-body text-gray-500">Check back soon for new Friday sessions.</p>
+            <h3 className="font-heading text-xl mb-2">
+              {showSpecialOnly ? "No special classes right now" : "No upcoming classes"}
+            </h3>
+            <p className="font-body text-gray-500">
+              {showSpecialOnly ? "Check back soon for pop-ups and guest classes." : "Check back soon for new Friday sessions."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classes.map(cls => {
+            {visibleClasses.map(cls => {
               const spotsLeft = cls.capacity - cls.registered_count;
               const isFull = spotsLeft <= 0;
               const isExpanded = expandedId === cls.id;
