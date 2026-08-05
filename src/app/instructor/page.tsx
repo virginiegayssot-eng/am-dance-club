@@ -39,8 +39,9 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "07:00", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
+  const [classFormError, setClassFormError] = useState("");
 
   // Bulk create Fridays
   const [showBulkForm, setShowBulkForm] = useState(false);
@@ -377,12 +378,13 @@ export default function InstructorPage() {
   async function createClass(e: React.FormEvent) {
     e.preventDefault();
     setClassFormLoading(true);
+    setClassFormError("");
 
     const { error } = await supabase.from("classes").insert({
       title: classForm.title,
       description: classForm.description || null,
       class_date: classForm.class_date,
-      class_time: "07:00",
+      class_time: classForm.class_time,
       price_cents: Math.round(parseFloat(classForm.price_cents) * 100),
       capacity: parseInt(classForm.capacity),
       duration_minutes: parseInt(classForm.durationMinutes),
@@ -396,8 +398,10 @@ export default function InstructorPage() {
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+      setClassForm({ title: "", description: "", class_date: "", class_time: "07:00", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
+    } else {
+      setClassFormError(error.message);
     }
     setClassFormLoading(false);
   }
@@ -1598,15 +1602,27 @@ export default function InstructorPage() {
                   required
                 />
               </div>
-              <div>
-                <label className="label">Date</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={classForm.class_date}
-                  onChange={e => setClassForm(f => ({ ...f, class_date: e.target.value }))}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Date</label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={classForm.class_date}
+                    onChange={e => setClassForm(f => ({ ...f, class_date: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label">Time</label>
+                  <input
+                    type="time"
+                    className="input"
+                    value={classForm.class_time}
+                    onChange={e => setClassForm(f => ({ ...f, class_time: e.target.value }))}
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label className="label">Description</label>
@@ -1708,6 +1724,9 @@ export default function InstructorPage() {
                     onChange={e => setClassForm(f => ({ ...f, specialLabel: e.target.value }))}
                   />
                 </div>
+              )}
+              {classFormError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{classFormError}</div>
               )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowClassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
