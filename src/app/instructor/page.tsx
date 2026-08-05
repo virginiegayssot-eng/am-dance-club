@@ -11,7 +11,7 @@ import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } fr
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -59,9 +59,15 @@ export default function InstructorPage() {
   const [newsPosts, setNewsPosts] = useState<any[]>([]);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [newsForm, setNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
+  const [newsImage, setNewsImage] = useState<string | null>(null);
+  const [newsImageError, setNewsImageError] = useState("");
   const [newsLoading, setNewsLoading] = useState(false);
   const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
-  const [editNewsForm, setEditNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
+  const [editNewsForm, setEditNewsForm] = useState({ title: "", body: "", category: "general", pinned: false, image_url: null as string | null });
+  const [editNewsImage, setEditNewsImage] = useState<string | null>(null);
+  const [editNewsImageError, setEditNewsImageError] = useState("");
+  const newsImageInputRef = useRef<HTMLInputElement>(null);
+  const editNewsImageInputRef = useRef<HTMLInputElement>(null);
 
   // Discount codes
   const [discountCodes, setDiscountCodes] = useState<any[]>([]);
@@ -205,11 +211,44 @@ export default function InstructorPage() {
     setLoading(false);
   }
 
+  function readImageAsBase64(file: File, onError: (msg: string) => void, onLoad: (base64: string) => void) {
+    if (file.size > 5 * 1024 * 1024) { onError("Image must be under 5MB."); return; }
+    onError("");
+    const reader = new FileReader();
+    reader.onload = () => onLoad(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadNewsImage(base64: string): Promise<string | null> {
+    const res = await fetch("/api/instructor/upload-news-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base64 }),
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    return result.url;
+  }
+
   async function submitNewsPost(e: React.FormEvent) {
     e.preventDefault();
     setNewsLoading(true);
-    await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned });
+    setNewsImageError("");
+
+    let imageUrl: string | null = null;
+    if (newsImage) {
+      try {
+        imageUrl = await uploadNewsImage(newsImage);
+      } catch (err: any) {
+        setNewsImageError(err.message ?? "Image upload failed");
+        setNewsLoading(false);
+        return;
+      }
+    }
+
+    await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned, image_url: imageUrl });
     setNewsForm({ title: "", body: "", category: "general", pinned: false });
+    setNewsImage(null);
     setShowNewsForm(false);
     setNewsLoading(false);
     const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
@@ -219,9 +258,22 @@ export default function InstructorPage() {
   async function saveEditNewsPost(e: React.FormEvent) {
     e.preventDefault();
     if (!editingNewsId) return;
-    await supabase.from("news_posts").update({ title: editNewsForm.title, body: editNewsForm.body, category: editNewsForm.category, pinned: editNewsForm.pinned }).eq("id", editingNewsId);
-    setNewsPosts(prev => prev.map(p => p.id === editingNewsId ? { ...p, ...editNewsForm } : p).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)));
+    setEditNewsImageError("");
+
+    let imageUrl = editNewsForm.image_url;
+    if (editNewsImage) {
+      try {
+        imageUrl = await uploadNewsImage(editNewsImage);
+      } catch (err: any) {
+        setEditNewsImageError(err.message ?? "Image upload failed");
+        return;
+      }
+    }
+
+    await supabase.from("news_posts").update({ title: editNewsForm.title, body: editNewsForm.body, category: editNewsForm.category, pinned: editNewsForm.pinned, image_url: imageUrl }).eq("id", editingNewsId);
+    setNewsPosts(prev => prev.map(p => p.id === editingNewsId ? { ...p, ...editNewsForm, image_url: imageUrl } : p).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)));
     setEditingNewsId(null);
+    setEditNewsImage(null);
   }
 
   async function deleteNewsPost(id: string) {
@@ -1463,6 +1515,34 @@ export default function InstructorPage() {
                     <label className="label">Message</label>
                     <textarea className="input min-h-[100px]" placeholder="Write your announcement here…" value={newsForm.body} onChange={e => setNewsForm(f => ({ ...f, body: e.target.value }))} required />
                   </div>
+                  <div>
+                    <label className="label">Image (optional)</label>
+                    <input
+                      ref={newsImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) readImageAsBase64(file, setNewsImageError, setNewsImage);
+                      }}
+                    />
+                    {newsImage ? (
+                      <div className="relative inline-block">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={newsImage} alt="" className="h-24 w-24 object-cover rounded-xl" />
+                        <button type="button" onClick={() => setNewsImage(null)} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5">
+                          <X className="w-3 h-3" strokeWidth={2} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => newsImageInputRef.current?.click()} className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4" strokeWidth={1.75} /> Add image
+                      </button>
+                    )}
+                    {newsImageError && <p className="font-body text-xs text-red-500 mt-1">{newsImageError}</p>}
+                  </div>
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <label className="label">Category</label>
@@ -1502,6 +1582,33 @@ export default function InstructorPage() {
                         <form onSubmit={saveEditNewsPost} className="space-y-3">
                           <input className="input" value={editNewsForm.title} onChange={e => setEditNewsForm(f => ({ ...f, title: e.target.value }))} required />
                           <textarea className="input min-h-[100px]" value={editNewsForm.body} onChange={e => setEditNewsForm(f => ({ ...f, body: e.target.value }))} required />
+                          <div>
+                            <input
+                              ref={editNewsImageInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                e.target.value = "";
+                                if (file) readImageAsBase64(file, setEditNewsImageError, setEditNewsImage);
+                              }}
+                            />
+                            {(editNewsImage ?? editNewsForm.image_url) ? (
+                              <div className="relative inline-block">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={editNewsImage ?? editNewsForm.image_url ?? undefined} alt="" className="h-20 w-20 object-cover rounded-xl" />
+                                <button type="button" onClick={() => { setEditNewsImage(null); setEditNewsForm(f => ({ ...f, image_url: null })); }} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5">
+                                  <X className="w-3 h-3" strokeWidth={2} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button type="button" onClick={() => editNewsImageInputRef.current?.click()} className="btn-secondary text-sm py-1.5 px-3 inline-flex items-center gap-2">
+                                <ImageIcon className="w-4 h-4" strokeWidth={1.75} /> Add image
+                              </button>
+                            )}
+                            {editNewsImageError && <p className="font-body text-xs text-red-500 mt-1">{editNewsImageError}</p>}
+                          </div>
                           <div className="flex gap-4">
                             <select className="input flex-1" value={editNewsForm.category} onChange={e => setEditNewsForm(f => ({ ...f, category: e.target.value }))}>
                               <option value="general">General</option>
@@ -1530,7 +1637,7 @@ export default function InstructorPage() {
                             <p className="font-body text-xs text-gray-400 mt-2">{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</p>
                           </div>
                           <div className="flex gap-2 shrink-0">
-                            <button onClick={() => { setEditingNewsId(post.id); setEditNewsForm({ title: post.title, body: post.body, category: post.category, pinned: post.pinned }); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
+                            <button onClick={() => { setEditingNewsId(post.id); setEditNewsForm({ title: post.title, body: post.body, category: post.category, pinned: post.pinned, image_url: post.image_url ?? null }); setEditNewsImage(null); setEditNewsImageError(""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
                             <button onClick={() => togglePin(post.id, post.pinned)} className="font-body text-xs text-[#2041d8] hover:underline">{post.pinned ? "Unpin" : "Pin"}</button>
                             <button onClick={() => deleteNewsPost(post.id)} className="font-body text-xs text-red-500 hover:underline">Delete</button>
                           </div>

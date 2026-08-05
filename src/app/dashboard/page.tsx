@@ -145,6 +145,10 @@ export default function DashboardPage() {
                     {post.title}
                   </p>
                   <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}><Linkify text={post.body} /></p>
+                  {post.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={post.image_url} alt="" className="mt-3 rounded-xl max-h-72 w-full object-cover" />
+                  )}
                   <p className={`font-body text-xs mt-2 ${post.category === "location" ? "text-white/60" : "text-gray-400"}`}>{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</p>
                 </div>
               );
