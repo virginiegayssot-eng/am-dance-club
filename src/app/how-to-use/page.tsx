@@ -57,7 +57,7 @@ export default function HowToUsePage() {
             <h2 className="font-heading text-lg text-[#2041d8] mb-3">Need help?</h2>
             <p>
               Email us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>{" "}
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a>{" "}
               and we'll sort you out.
             </p>
           </section>

@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
       html: `<p>Hi ${student.full_name?.split(" ")[0] ?? "dancer"},</p>
 <p>1 class has been deducted from your <strong>${passType?.name ?? "pass"}</strong>.</p>
 <p>You have <strong>${newRemaining} class${newRemaining !== 1 ? "es" : ""} remaining</strong>.</p>
-<p>See you next Friday!</p>
-<p>— Ginny & [Studio Name]</p>`,
+<p>See you next class!</p>
+<p>— [Instructor Name]</p>`,
     }).catch(() => {});
   }
 

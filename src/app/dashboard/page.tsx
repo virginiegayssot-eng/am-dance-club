@@ -57,7 +57,7 @@ export default function DashboardPage() {
       setCancelResult({ message: "Booking cancelled and your pass credit has been returned.", type: "success" });
       loadData();
     } else if (data.isRefundable) {
-      setCancelResult({ message: "Booking cancelled. For a refund please contact theamdance@gmail.com.", type: "success" });
+      setCancelResult({ message: "Booking cancelled. For a refund please contact [Studio Email].", type: "success" });
       loadData();
     } else {
       setCancelResult({ message: "Booking cancelled. As it's within 24 hours, no refund applies per our policy.", type: "success" });
@@ -341,7 +341,7 @@ export default function DashboardPage() {
           <Link href="/classes" className="btn-primary">Book Next Class</Link>
           <Link href="/passes" className="btn-secondary">Buy a Pass</Link>
           <Link href="/videos" className="btn-secondary">Videos</Link>
-          <a href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t" target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Group</a>
+          <a href="[WhatsApp group invite URL]" target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Group</a>
         </div>
 
         {confirmCancelId && (

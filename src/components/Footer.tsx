@@ -9,16 +9,16 @@ export default function Footer() {
           <div>
             <Image src="/logo.png" alt="[Studio Name]" width={90} height={60} className="object-contain mb-4" />
             <p className="font-body text-sm text-white/70 leading-relaxed">
-              Morning dance classes for adults & teens (12+).<br />
-              Every Friday at 7:00 AM.
+              [One-line description of the class.]<br />
+              [Schedule]
             </p>
           </div>
           <div>
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e4c3cc]">Location & Hours</h4>
             <p className="font-body text-sm text-white/70 leading-relaxed">
-              North Steyne Surf Life Saving Club<br />
-              Manly NSW 2095<br /><br />
-              Fridays 7:00 AM – 7:45 AM
+              [Studio Address Line 1]<br />
+              [Studio Address Line 2]<br /><br />
+              [Schedule]
             </p>
           </div>
           <div>
@@ -31,21 +31,21 @@ export default function Footer() {
                 { href: "/videos", label: "Videos" },
                 { href: "/playlists", label: "Playlists" },
                 { href: "/auth/login", label: "Log in" },
-                { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },
+                { href: "[Shop merch URL]", label: "Shop Merch" },
               ].map(({ href, label }) => (
                 <Link key={href} href={href} className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
                   {label}
                 </Link>
               ))}
-              <a href="https://theamdance.com" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
+              <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
                 Website
               </a>
               <a
-                href="https://www.instagram.com/theamdance"
+                href="[Instagram URL]"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Instagram @theamdance"
-                title="Instagram @theamdance"
+                aria-label="Instagram"
+                title="Instagram"
                 className="text-white/70 hover:text-[#e4c3cc] transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

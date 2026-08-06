@@ -1,7 +1,7 @@
 {
   "name": "[Studio Name]",
-  "short_name": "A.M Dance",
-  "description": "Morning dance classes at [Studio Location]",
+  "short_name": "[Studio Name]",
+  "description": "Dance classes at [Studio Location]",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#e4c3cc",

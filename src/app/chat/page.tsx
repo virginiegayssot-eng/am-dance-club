@@ -325,10 +325,10 @@ export default function ChatPage() {
               }}
               className={`flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors ${activeChannel !== "group" ? "bg-[#2041d8] text-white" : "bg-white border border-gray-200 text-black"}`}
             >
-              Message Ginny
+              Message Instructor
             </button>
             <a
-              href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t"
+              href="[WhatsApp group invite URL]"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 py-2.5 rounded-xl font-body text-sm text-center transition-colors bg-white border border-gray-200 text-black"
@@ -437,7 +437,7 @@ export default function ChatPage() {
 
           {/* WhatsApp link */}
           <a
-            href="https://chat.whatsapp.com/JNXSwB4Y1aO6ardffyyJXD?mode=gi_t"
+            href="[WhatsApp group invite URL]"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors"

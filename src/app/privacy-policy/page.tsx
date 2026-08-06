@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="mt-3">
               To exercise any of these rights, please contact us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>.
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a>.
             </p>
           </section>
 
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="font-heading text-lg text-[#2041d8] mb-3">Contact</h2>
             <p>
               If you have any questions about this policy or how we handle your data, please contact us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>.
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a>.
             </p>
           </section>
 

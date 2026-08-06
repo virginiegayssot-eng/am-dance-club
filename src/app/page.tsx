@@ -12,21 +12,20 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl">
             <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-4">
-              Every Friday · 7:00 AM
+              [Schedule]
             </p>
             <h1 className="font-heading text-5xl md:text-7xl leading-none mb-6">
-              <span className="text-[#2041d8]">THE A.M</span><br />
-              <span className="text-[#2041d8]">Dance Club</span>
+              <span className="text-[#2041d8]">[Studio Name]</span>
             </h1>
             <p className="font-body text-lg text-black/70 mb-4 leading-relaxed">
-              A 45 minute morning dance class in Manly for adults and teens (12+ years old), designed to boost your energy and confidence.
+              [One or two sentences describing the class: duration, location, who it's for, and what it does for them.]
             </p>
             <p className="font-body text-base text-black/60 mb-8 leading-relaxed">
-              Set to Afro, Latin, R&B and pop beats — easy to follow, broken down before the music starts.
+              [Optional second line — music style, teaching approach, vibe, etc.]
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/classes" className="btn-secondary">View Classes</Link>
-              <Link href="/auth/signup" className="btn-primary">Join the Club</Link>
+              <Link href="/auth/signup" className="btn-primary">Join Now</Link>
               <Link href="/auth/login" className="font-body text-sm text-black/60 hover:text-[#2041d8] transition-colors self-center underline underline-offset-2">Already a member? Log in</Link>
             </div>
           </div>
@@ -39,8 +38,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y-0 md:divide-x md:divide-white/20">
             {[
               { label: "Location", value: "[Studio Location]" },
-              { label: "Schedule", value: "Every Friday · 7:00 – 7:45 AM" },
-              { label: "Who", value: "Adults & Teens (12+)" },
+              { label: "Schedule", value: "[Schedule]" },
+              { label: "Who", value: "[Who it's for]" },
               { label: "Booking", value: "Book & pay online" },
             ].map(item => (
               <div key={item.label} className="flex flex-col items-center text-center gap-1.5 px-4">
@@ -55,7 +54,7 @@ export default function HomePage() {
       {/* Why You'll Love THE AM */}
       <section className="bg-[#e5c3cb] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#2041d8]">Why You'll Love THE A.M</h2>
+          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#2041d8]">Why You'll Love [Studio Name]</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { title: "Stronger Body", desc: "Wake up your body with movement that builds stamina, tones muscles, and gets your heart pumping." },
@@ -79,18 +78,18 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Location & Hours</h2>
-              <p className="font-body text-lg leading-relaxed mb-1">North Steyne Surf Life Saving Club</p>
-              <p className="font-body text-lg mb-4">Manly NSW 2095</p>
-              <p className="font-body text-lg">Fridays 7:00 am to 7:45 am</p>
+              <p className="font-body text-lg leading-relaxed mb-1">[Studio Address Line 1]</p>
+              <p className="font-body text-lg mb-4">[Studio Address Line 2]</p>
+              <p className="font-body text-lg">[Schedule]</p>
             </div>
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Class Prices</h2>
               <div className="space-y-3 font-body">
-                <p><strong>Casual Drop-In:</strong> $24 per class</p>
-                <p><strong>Double Pass:</strong> $38 — Two spots in the same class</p>
-                <p><strong>Intro Offer:</strong> $39 for 3 classes — First-timers only</p>
-                <p><strong>5-Class Pass:</strong> $100 — Valid 6 months</p>
-                <p><strong>10-Class Pass:</strong> $200 — Valid 1 year</p>
+                <p><strong>Casual Drop-In:</strong> [Price] per class</p>
+                <p><strong>Double Pass:</strong> [Price] — Two spots in the same class</p>
+                <p><strong>Intro Offer:</strong> [Price] for [N] classes — First-timers only</p>
+                <p><strong>5-Class Pass:</strong> [Price] — Valid [N months/years]</p>
+                <p><strong>10-Class Pass:</strong> [Price] — Valid [N months/years]</p>
               </div>
               <Link href="/passes" className="mt-6 inline-block bg-white text-[#2041d8] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#e4c3cc] transition-colors">
                 Buy a Pass
@@ -105,7 +104,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl mb-4 text-black">Ready to dance?</h2>
           <p className="font-body text-black/60 mb-8 max-w-md mx-auto">
-            Join [Studio Name] and book your first Friday session today.
+            Join [Studio Name] and book your first session today.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/auth/signup" className="btn-primary">Create Account</Link>

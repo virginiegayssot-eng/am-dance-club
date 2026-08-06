@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "[Studio Name]",
-  description: "Morning dance classes at [Studio Location] – Adults & Teens",
+  description: "Dance classes at [Studio Location]",
   icons: {
     apple: "/apple-touch-icon.png",
     icon: [

@@ -104,7 +104,7 @@ export default function Navbar() {
               <Link href="/classes" className={`font-body text-sm transition-colors ${isActive("/classes")}`}>Classes</Link>
               <Link href="/passes" className={`font-body text-sm transition-colors ${isActive("/passes")}`}>Passes</Link>
               <Link href="/videos" className={`font-body text-sm transition-colors ${isActive("/videos")}`}>Videos</Link>
-              <a href="https://www.theamdance.com/s/shop" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-black hover:text-[#2041d8] transition-colors">Shop Merch</a>
+              <a href="[Shop merch URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-black hover:text-[#2041d8] transition-colors">Shop Merch</a>
               {profile && (
                 <Link href="/playlists" className={`font-body text-sm transition-colors ${isActive("/playlists")}`}>Playlists</Link>
               )}
@@ -160,7 +160,7 @@ export default function Navbar() {
               { href: "/classes", label: "Classes" },
               { href: "/passes", label: "Passes & Pricing" },
               { href: "/videos", label: "Videos" },
-              { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },
+              { href: "[Shop merch URL]", label: "Shop Merch" },
               ...(profile ? [{ href: "/playlists", label: "Playlists" }] : []),
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#2041d8]" onClick={() => setMenuOpen(false)}>

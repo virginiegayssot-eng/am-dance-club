@@ -20,7 +20,7 @@ export default function CancellationPolicyPage() {
               You may cancel your booking up to 24 hours before your class without any penalty.
               If your booking was made using a class pass, one credit will automatically be returned to your pass so you can book another session.
               If you paid by card, Apple Pay, or Google Pay, please contact us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a> to arrange a refund.
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a> to arrange a refund.
             </p>
           </section>
 
@@ -43,7 +43,7 @@ export default function CancellationPolicyPage() {
             <h2 className="font-heading text-lg text-[#2041d8] mb-3">Emergency or illness</h2>
             <p>
               If you are unable to attend due to illness or emergency, please reach out to us as soon as possible at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>.
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a>.
               We will do our best to accommodate you.
             </p>
           </section>
@@ -54,7 +54,7 @@ export default function CancellationPolicyPage() {
               Log in to your account and visit your{" "}
               <Link href="/dashboard" className="text-[#2041d8] underline">Dashboard</Link> to cancel an upcoming booking directly.
               You can also contact us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>.
+              <a href="mailto:[Studio Email]" className="text-[#2041d8] underline">[Studio Email]</a>.
             </p>
           </section>
 
