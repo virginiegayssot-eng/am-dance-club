@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
-import { formatPrice } from "@/lib/stripe";
+import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Class, Pass, Profile } from "@/lib/supabase";
 import { Clock, MapPin, Users, Check } from "lucide-react";
 
@@ -204,7 +204,7 @@ export default function ClassesPage() {
 
                   <div className="p-5 flex flex-col flex-1">
                     <div className="space-y-1.5 mb-5">
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />7:00 AM · {cls.duration_minutes} min</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
                       {isFull && (
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
