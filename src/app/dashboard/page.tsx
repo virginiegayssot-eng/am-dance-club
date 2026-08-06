@@ -341,6 +341,7 @@ export default function DashboardPage() {
           <Link href="/classes" className="btn-primary">Book Next Class</Link>
           <Link href="/passes" className="btn-secondary">Buy a Pass</Link>
           <Link href="/videos" className="btn-secondary">Videos</Link>
+          <Link href="/merch" className="btn-secondary">Merch</Link>
           <a href="[WhatsApp group invite URL]" target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Group</a>
         </div>
 

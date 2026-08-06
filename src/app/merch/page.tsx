@@ -17,6 +17,7 @@ export default function MerchPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [buying, setBuying] = useState<string | null>(null);
+  const [buyError, setBuyError] = useState("");
 
   useEffect(() => { loadData(); }, []);
 
@@ -37,9 +38,10 @@ export default function MerchPage() {
   async function buyProduct(product: MerchProduct) {
     if (!isLoggedIn) { router.push("/auth/login"); return; }
 
+    setBuyError("");
     const size = selectedSizes[product.id];
     if (product.sizes && product.sizes.length > 0 && !size) {
-      alert("Please select a size first.");
+      setBuyError("Please select a size first.");
       return;
     }
 
@@ -50,7 +52,7 @@ export default function MerchPage() {
       body: JSON.stringify({ productId: product.id, size: size || undefined }),
     });
     const { url, error } = await res.json();
-    if (error) { alert(error); setBuying(null); return; }
+    if (error) { setBuyError(error); setBuying(null); return; }
     window.location.href = url;
   }
 
@@ -65,6 +67,12 @@ export default function MerchPage() {
             Rep the club. Every purchase goes straight to supporting the studio.
           </p>
         </div>
+
+        {buyError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 font-body text-sm text-red-700">
+            {buyError}
+          </div>
+        )}
 
         {loading ? (
           <p className="font-body text-gray-400">Loading…</p>

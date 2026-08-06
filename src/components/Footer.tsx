@@ -29,6 +29,7 @@ export default function Footer() {
                 { href: "/classes", label: "Classes" },
                 { href: "/passes", label: "Passes & Pricing" },
                 { href: "/videos", label: "Videos" },
+                { href: "/merch", label: "Merch" },
                 { href: "/playlists", label: "Playlists" },
                 { href: "/auth/login", label: "Log in" },
               ].map(({ href, label }) => (
@@ -36,9 +37,6 @@ export default function Footer() {
                   {label}
                 </Link>
               ))}
-              <a href="[Shop merch URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
-                Shop Merch
-              </a>
               <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                 Website
               </a>
