@@ -31,9 +31,9 @@ export async function POST(req: NextRequest) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error: emailError } = await resend.emails.send({
-    from: `THE A.M Dance Club <${process.env.RESEND_FROM}>`,
+    from: `[Studio Name] <${process.env.RESEND_FROM}>`,
     to: email,
-    subject: "Reset your password — THE A.M Dance Club",
+    subject: "Reset your password — [Studio Name]",
     html: `
       <!DOCTYPE html>
       <html>
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
             </p>
           </div>
           <div style="background:#e4c3cc;padding:20px;text-align:center;">
-            <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
+            <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · [Studio Location]</p>
           </div>
         </div>
       </body>

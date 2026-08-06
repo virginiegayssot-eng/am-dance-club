@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const emailResult = await resend.emails.send({
-    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
     subject: `New booking – ${profile?.full_name ?? "A student"}`,
     html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass${guestCount > 0 ? ` <strong>(+${guestCount} guest)</strong>` : ""}.</p>`,
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   if (profile?.email) {
     const firstName = (profile.full_name ?? "dancer").split(" ")[0];
     await resend.emails.send({
-      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,
       subject: `You're booked – ${cls.title}`,
       html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),

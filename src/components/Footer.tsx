@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <Image src="/logo.png" alt="THE A.M Dance Club" width={90} height={60} className="object-contain mb-4" />
+            <Image src="/logo.png" alt="[Studio Name]" width={90} height={60} className="object-contain mb-4" />
             <p className="font-body text-sm text-white/70 leading-relaxed">
               Morning dance classes for adults & teens (12+).<br />
               Every Friday at 7:00 AM.
@@ -59,7 +59,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-white/10 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="font-body text-xs text-white/40">
-            © {new Date().getFullYear()} THE A.M Dance Club. All rights reserved.
+            © {new Date().getFullYear()} [Studio Name]. All rights reserved.
           </p>
           <div className="flex gap-4">
             <Link href="/cancellation-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">

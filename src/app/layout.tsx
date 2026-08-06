@@ -20,8 +20,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "THE A.M Dance Club",
-  description: "Morning dance classes at North Steyne Surf Club – Adults & Teens",
+  title: "[Studio Name]",
+  description: "Morning dance classes at [Studio Location] – Adults & Teens",
   icons: {
     apple: "/apple-touch-icon.png",
     icon: [

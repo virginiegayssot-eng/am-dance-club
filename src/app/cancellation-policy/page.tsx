@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 
-export const metadata = { title: "Cancellation Policy · THE A.M Dance Club" };
+export const metadata = { title: "Cancellation Policy · [Studio Name]" };
 
 export default function CancellationPolicyPage() {
   return (

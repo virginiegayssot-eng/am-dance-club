@@ -38,7 +38,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y-0 md:divide-x md:divide-white/20">
             {[
-              { label: "Location", value: "North Steyne Surf Club, Manly NSW" },
+              { label: "Location", value: "[Studio Location]" },
               { label: "Schedule", value: "Every Friday · 7:00 – 7:45 AM" },
               { label: "Who", value: "Adults & Teens (12+)" },
               { label: "Booking", value: "Book & pay online" },
@@ -105,7 +105,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl mb-4 text-black">Ready to dance?</h2>
           <p className="font-body text-black/60 mb-8 max-w-md mx-auto">
-            Join THE A.M Dance Club and book your first Friday session today.
+            Join [Studio Name] and book your first Friday session today.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/auth/signup" className="btn-primary">Create Account</Link>

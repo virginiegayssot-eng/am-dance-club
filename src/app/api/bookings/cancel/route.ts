@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   if (profile?.email) {
     const firstName = (profile.full_name ?? "dancer").split(" ")[0];
     const { error } = await resend.emails.send({
-      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,
       subject: `Booking cancelled – ${reg.classes.title}`,
       html: buildBookingCancellationEmailHtml({ firstName, classTitle: reg.classes.title, classDate, passRefunded }),
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { error: instructorEmailError } = await resend.emails.send({
-    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
     subject: `Cancellation – ${profile?.full_name ?? "A student"}`,
     html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) cancelled their booking for <strong>${reg.classes.title}</strong> on ${classDate}.${passRefunded ? " Their class credit was refunded." : ""}</p>`,

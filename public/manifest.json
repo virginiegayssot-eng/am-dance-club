@@ -1,7 +1,7 @@
 {
-  "name": "THE A.M Dance Club",
+  "name": "[Studio Name]",
   "short_name": "A.M Dance",
-  "description": "Morning dance classes at North Steyne Surf Club",
+  "description": "Morning dance classes at [Studio Location]",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#e4c3cc",

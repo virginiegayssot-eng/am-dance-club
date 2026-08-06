@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export const metadata = { title: "Privacy Policy · THE A.M Dance Club" };
+export const metadata = { title: "Privacy Policy · [Studio Name]" };
 
 export default function PrivacyPolicyPage() {
   return (
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <p>
-              THE A.M Dance Club ("we", "us", "our") is committed to protecting your personal information in accordance with the
+              [Studio Name] ("we", "us", "our") is committed to protecting your personal information in accordance with the
               Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs).
               This policy explains what information we collect, how we use it, and how we protect it.
             </p>

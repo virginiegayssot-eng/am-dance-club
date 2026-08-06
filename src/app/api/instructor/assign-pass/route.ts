@@ -22,10 +22,10 @@ function buildBirthdayPassEmailHtml(firstName: string) {
             It's valid for the next 30 days, so grab a spot whenever suits you.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
-          <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
+          <p style="color:#444;font-size:16px;margin:0;">[Instructor Name]</p>
         </div>
         <div style="background:#e4c3cc;padding:20px;text-align:center;">
-          <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
+          <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · [Studio Location]</p>
         </div>
       </div>
     </body>
@@ -81,9 +81,9 @@ export async function POST(req: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const firstName = (student.full_name ?? "dancer").split(" ")[0];
       await resend.emails.send({
-        from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: student.email,
-        subject: "Happy Birthday from THE A.M Dance Club! 🎂",
+        subject: "Happy Birthday from [Studio Name]! 🎂",
         html: buildBirthdayPassEmailHtml(firstName),
       }).catch((e) => console.error("Birthday pass email error:", e));
     }

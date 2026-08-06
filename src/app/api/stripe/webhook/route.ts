@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       if (profile?.email && product) {
         const firstName = (profile.full_name ?? "dancer").split(" ")[0];
         await resend.emails.send({
-          from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+          from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
           to: profile.email,
           subject: `Order confirmed – ${product.title}`,
           html: buildMerchOrderEmailHtml({ firstName, productTitle: product.title, size: size || null, amountPaidCents: session.amount_total }),
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       }
 
       const { error: merchInstructorEmailError } = await resend.emails.send({
-        from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
         subject: `New merch order – ${profile?.full_name ?? "A student"}`,
         html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just bought <strong>${product?.title ?? "a product"}</strong>${size ? ` (Size ${size})` : ""}.</p>`,
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
           const firstName = (profile.full_name ?? "dancer").split(" ")[0];
           const guestCount = isDoublePass === "true" ? 1 : 0;
           await resend.emails.send({
-            from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+            from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
             to: profile.email,
             subject: `You're booked – ${cls.title}`,
             html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     }
     emailBody += `</p>`;
     const { error: instructorEmailError } = await resend.emails.send({
-      from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
       subject: `New booking – ${profile?.full_name ?? "A student"}`,
       html: emailBody,

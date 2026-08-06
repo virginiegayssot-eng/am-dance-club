@@ -24,7 +24,7 @@ create table public.classes (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
   description text,
-  location text not null default 'North Steyne Surf Club',
+  location text not null default '[Studio Location]',
   class_date date not null,
   class_time time not null default '07:00',
   duration_minutes int not null default 45,

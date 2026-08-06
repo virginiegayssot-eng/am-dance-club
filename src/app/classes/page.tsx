@@ -128,7 +128,7 @@ export default function ClassesPage() {
           <div>
             <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Book a class</p>
             <h1 className="section-title mb-1">Upcoming Classes</h1>
-            <p className="font-body text-gray-500">Every Friday at 7:00 AM · North Steyne Surf Club</p>
+            <p className="font-body text-gray-500">Every Friday at 7:00 AM · [Studio Location]</p>
           </div>
           <Link href="/passes" className="btn-pink self-start sm:self-auto">View Passes & Pricing</Link>
         </div>

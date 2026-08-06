@@ -24,7 +24,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
-    from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+    from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: profile.email,
     subject: `You're booked – ${cls.title}`,
     html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),

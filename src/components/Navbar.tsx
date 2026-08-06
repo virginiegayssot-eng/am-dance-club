@@ -94,7 +94,7 @@ export default function Navbar() {
         <div className="flex items-end">
           {/* Logo */}
           <Link href={profile ? (isInstructor ? "/instructor" : "/dashboard") : "/"} className="flex-shrink-0 flex items-end pb-0 mr-8">
-            <Image src="/logo.png" alt="THE A.M Dance Club" width={100} height={70} className="object-contain" />
+            <Image src="/logo.png" alt="[Studio Name]" width={100} height={70} className="object-contain" />
           </Link>
 
           <div className="flex-1 flex items-center justify-between border-b border-[#2041d8]/20 pb-3 pt-4">
