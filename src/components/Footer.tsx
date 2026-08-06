@@ -31,12 +31,14 @@ export default function Footer() {
                 { href: "/videos", label: "Videos" },
                 { href: "/playlists", label: "Playlists" },
                 { href: "/auth/login", label: "Log in" },
-                { href: "[Shop merch URL]", label: "Shop Merch" },
               ].map(({ href, label }) => (
                 <Link key={href} href={href} className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                   {label}
                 </Link>
               ))}
+              <a href="[Shop merch URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
+                Shop Merch
+              </a>
               <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                 Website
               </a>

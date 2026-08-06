@@ -160,13 +160,15 @@ export default function Navbar() {
               { href: "/classes", label: "Classes" },
               { href: "/passes", label: "Passes & Pricing" },
               { href: "/videos", label: "Videos" },
-              { href: "[Shop merch URL]", label: "Shop Merch" },
               ...(profile ? [{ href: "/playlists", label: "Playlists" }] : []),
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#334155]" onClick={() => setMenuOpen(false)}>
                 {label}
               </Link>
             ))}
+            <a href="[Shop merch URL]" target="_blank" rel="noopener noreferrer" className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#334155]">
+              Shop Merch
+            </a>
 
             {profile && (
               <Link href="/chat" className="flex items-center gap-2 font-body text-sm text-black py-2.5 px-1 hover:text-[#334155]" onClick={() => setMenuOpen(false)}>
