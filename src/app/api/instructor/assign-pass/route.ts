@@ -16,13 +16,13 @@ function buildBirthdayPassEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            As a little gift from us, we've added a <strong>complimentary class</strong> to your account — on us!
+            To celebrate your birthday, I've added a <strong>free class</strong> to your account.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             It's valid for the next 30 days, so grab a spot whenever suits you.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
-          <p style="color:#444;font-size:16px;margin:0;">Ginny &amp; THE A.M Dance Club team</p>
+          <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
         </div>
         <div style="background:#e4c3cc;padding:20px;text-align:center;">
           <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
