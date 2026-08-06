@@ -8,14 +8,14 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-[#e4c3cc] py-24 md:py-36">
+      <section className="bg-[#e2e8f0] py-24 md:py-36">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl">
-            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-4">
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-4">
               [Schedule]
             </p>
             <h1 className="font-heading text-5xl md:text-7xl leading-none mb-6">
-              <span className="text-[#2041d8]">[Studio Name]</span>
+              <span className="text-[#334155]">[Studio Name]</span>
             </h1>
             <p className="font-body text-lg text-black/70 mb-4 leading-relaxed">
               [One or two sentences describing the class: duration, location, who it's for, and what it does for them.]
@@ -26,14 +26,14 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link href="/classes" className="btn-secondary">View Classes</Link>
               <Link href="/auth/signup" className="btn-primary">Join Now</Link>
-              <Link href="/auth/login" className="font-body text-sm text-black/60 hover:text-[#2041d8] transition-colors self-center underline underline-offset-2">Already a member? Log in</Link>
+              <Link href="/auth/login" className="font-body text-sm text-black/60 hover:text-[#334155] transition-colors self-center underline underline-offset-2">Already a member? Log in</Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Blue info strip */}
-      <section className="bg-[#2041d8] text-white py-10">
+      <section className="bg-[#334155] text-white py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y-0 md:divide-x md:divide-white/20">
             {[
@@ -43,7 +43,7 @@ export default function HomePage() {
               { label: "Booking", value: "Book & pay online" },
             ].map(item => (
               <div key={item.label} className="flex flex-col items-center text-center gap-1.5 px-4">
-                <p className="font-heading text-xs uppercase tracking-widest text-[#e4c3cc]">{item.label}</p>
+                <p className="font-heading text-xs uppercase tracking-widest text-[#e2e8f0]">{item.label}</p>
                 <p className="font-body text-sm text-white/90 leading-snug">{item.value}</p>
               </div>
             ))}
@@ -52,9 +52,9 @@ export default function HomePage() {
       </section>
 
       {/* Why You'll Love THE AM */}
-      <section className="bg-[#e5c3cb] py-20">
+      <section className="bg-[#cbd5e1] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#2041d8]">Why You'll Love [Studio Name]</h2>
+          <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#334155]">Why You'll Love [Studio Name]</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { title: "Stronger Body", desc: "Wake up your body with movement that builds stamina, tones muscles, and gets your heart pumping." },
@@ -64,7 +64,7 @@ export default function HomePage() {
               { title: "Feel-Good Community", desc: "Be part of a fun, inclusive, and empowering community." },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl p-6">
-                <h3 className="font-heading text-lg text-[#2041d8] mb-2">{f.title}</h3>
+                <h3 className="font-heading text-lg text-[#334155] mb-2">{f.title}</h3>
                 <p className="font-body text-sm text-black/70 leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -73,17 +73,17 @@ export default function HomePage() {
       </section>
 
       {/* Blue location section */}
-      <section className="bg-[#2041d8] text-white py-16">
+      <section className="bg-[#334155] text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
-              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Location & Hours</h2>
+              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2e8f0]">Location & Hours</h2>
               <p className="font-body text-lg leading-relaxed mb-1">[Studio Address Line 1]</p>
               <p className="font-body text-lg mb-4">[Studio Address Line 2]</p>
               <p className="font-body text-lg">[Schedule]</p>
             </div>
             <div>
-              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e4c3cc]">Class Prices</h2>
+              <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2e8f0]">Class Prices</h2>
               <div className="space-y-3 font-body">
                 <p><strong>Casual Drop-In:</strong> [Price] per class</p>
                 <p><strong>Double Pass:</strong> [Price] — Two spots in the same class</p>
@@ -91,7 +91,7 @@ export default function HomePage() {
                 <p><strong>5-Class Pass:</strong> [Price] — Valid [N months/years]</p>
                 <p><strong>10-Class Pass:</strong> [Price] — Valid [N months/years]</p>
               </div>
-              <Link href="/passes" className="mt-6 inline-block bg-white text-[#2041d8] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#e4c3cc] transition-colors">
+              <Link href="/passes" className="mt-6 inline-block bg-white text-[#334155] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#e2e8f0] transition-colors">
                 Buy a Pass
               </Link>
             </div>
@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-[#e4c3cc] py-20">
+      <section className="bg-[#e2e8f0] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl mb-4 text-black">Ready to dance?</h2>
           <p className="font-body text-black/60 mb-8 max-w-md mx-auto">

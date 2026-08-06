@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff8f3] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-10">
@@ -67,7 +67,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="label mb-0">Password</label>
-                <Link href="/auth/forgot-password" className="font-body text-xs text-[#2041d8] hover:underline">
+                <Link href="/auth/forgot-password" className="font-body text-xs text-[#334155] hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="font-body text-sm text-gray-500">
               Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-[#2041d8] hover:underline">
+              <Link href="/auth/signup" className="text-[#334155] hover:underline">
                 Sign up
               </Link>
             </p>

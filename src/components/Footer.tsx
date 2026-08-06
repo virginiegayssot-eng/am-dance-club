@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#2041d8] text-white mt-auto">
+    <footer className="bg-[#334155] text-white mt-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -14,7 +14,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e4c3cc]">Location & Hours</h4>
+            <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2e8f0]">Location & Hours</h4>
             <p className="font-body text-sm text-white/70 leading-relaxed">
               [Studio Address Line 1]<br />
               [Studio Address Line 2]<br /><br />
@@ -22,7 +22,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e4c3cc]">Quick Links</h4>
+            <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2e8f0]">Quick Links</h4>
             <div className="flex flex-col gap-2">
               {[
                 { href: "/how-to-use", label: "How to Use" },
@@ -33,11 +33,11 @@ export default function Footer() {
                 { href: "/auth/login", label: "Log in" },
                 { href: "[Shop merch URL]", label: "Shop Merch" },
               ].map(({ href, label }) => (
-                <Link key={href} href={href} className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
+                <Link key={href} href={href} className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                   {label}
                 </Link>
               ))}
-              <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e4c3cc] transition-colors">
+              <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                 Website
               </a>
               <a
@@ -46,7 +46,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Instagram"
                 title="Instagram"
-                className="text-white/70 hover:text-[#e4c3cc] transition-colors"
+                className="text-white/70 hover:text-[#e2e8f0] transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />

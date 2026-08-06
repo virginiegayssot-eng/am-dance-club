@@ -113,7 +113,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fff8f3]">
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
         <div className="font-body text-gray-400">Loading…</div>
       </div>
     );
@@ -125,7 +125,7 @@ export default function DashboardPage() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
 
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Your account</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Your account</p>
           <h1 className="section-title">
             Hey, {profile?.full_name?.split(" ")[0] ?? "dancer"}
           </h1>
@@ -135,13 +135,13 @@ export default function DashboardPage() {
         {newsPosts.length > 0 && (
           <div className="mb-8 space-y-3">
             {newsPosts.map(post => {
-              const catColor: Record<string, string> = { location: "bg-[#2041d8] text-white", event: "bg-[#e4c3cc] text-black border border-[#d4a8b4]", routine: "bg-[#fff8f3] text-black border border-[#e8d5c4]", general: "bg-[#fff8f3] text-black border border-[#e8d5c4]" };
+              const catColor: Record<string, string> = { location: "bg-[#334155] text-white", event: "bg-[#e2e8f0] text-black border border-[#cbd5e1]", routine: "bg-[#f8fafc] text-black border border-[#e2e8f0]", general: "bg-[#f8fafc] text-black border border-[#e2e8f0]" };
               const colorClass = catColor[post.category] ?? catColor.general;
               const Icon = CATEGORY_ICONS[post.category] ?? Megaphone;
               return (
                 <div key={post.id} className={`rounded-2xl p-5 ${colorClass}`}>
                   <p className="font-heading text-base mb-1 flex items-center gap-2">
-                    <Icon className={`w-4 h-4 shrink-0 ${post.category === "location" ? "text-white" : "text-[#2041d8]"}`} strokeWidth={1.75} />
+                    <Icon className={`w-4 h-4 shrink-0 ${post.category === "location" ? "text-white" : "text-[#334155]"}`} strokeWidth={1.75} />
                     {post.title}
                   </p>
                   <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}><Linkify text={post.body} /></p>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
         {/* Success banners */}
         {justBooked && (
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 font-body text-sm text-green-700 flex items-center gap-3">
-            <PartyPopper className="w-5 h-5 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
+            <PartyPopper className="w-5 h-5 shrink-0 text-[#334155]" strokeWidth={1.75} />
             You're booked! See you on the dancefloor.
           </div>
         )}
@@ -172,19 +172,19 @@ export default function DashboardPage() {
           </div>
         )}
         {justBoughtPass && (
-          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
-            <Ticket className="w-5 h-5 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
-            Pass purchased! Head to <Link href="/classes" className="text-[#2041d8] underline font-medium">Classes</Link> to book your first session.
+          <div className="bg-[#94a3b8]/20 border border-[#94a3b8] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
+            <Ticket className="w-5 h-5 shrink-0 text-[#334155]" strokeWidth={1.75} />
+            Pass purchased! Head to <Link href="/classes" className="text-[#334155] underline font-medium">Classes</Link> to book your first session.
           </div>
         )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Upcoming", value: upcoming.length, color: "bg-[#fff8f3]" },
-            { label: "Classes attended", value: attendedCount, color: "bg-[#fff8f3]" },
-            { label: "Active passes", value: activePasses.length, color: "bg-[#fff8f3]" },
-            { label: "Past classes", value: past.length, color: "bg-[#fff8f3]" },
+            { label: "Upcoming", value: upcoming.length, color: "bg-[#f8fafc]" },
+            { label: "Classes attended", value: attendedCount, color: "bg-[#f8fafc]" },
+            { label: "Active passes", value: activePasses.length, color: "bg-[#f8fafc]" },
+            { label: "Past classes", value: past.length, color: "bg-[#f8fafc]" },
           ].map(stat => (
             <div key={stat.label} className={`card p-5 ${stat.color}`}>
               <p className="font-heading text-2xl">{stat.value}</p>
@@ -198,13 +198,13 @@ export default function DashboardPage() {
           <section className="mb-10">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-heading text-xl">Your Passes</h2>
-              <Link href="/passes" className="font-body text-sm text-[#2041d8] hover:underline">
+              <Link href="/passes" className="font-body text-sm text-[#334155] hover:underline">
                 Buy more →
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {activePasses.map(p => (
-                <div key={p.id} className="card p-5 bg-gradient-to-br from-[#a3bdfe]/10 to-[#e4c3cc]/10">
+                <div key={p.id} className="card p-5 bg-gradient-to-br from-[#94a3b8]/10 to-[#e2e8f0]/10">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <p className="font-heading text-sm">{p.pass_types?.name}</p>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-1.5">
                     <div
-                      className="bg-[#2041d8] h-1.5 rounded-full transition-all"
+                      className="bg-[#334155] h-1.5 rounded-full transition-all"
                       style={{ width: `${(p.classes_remaining / p.classes_total) * 100}%` }}
                     />
                   </div>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
 
         {/* No pass prompt */}
         {activePasses.length === 0 && (
-          <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#e4c3cc]/10">
+          <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#e2e8f0]/10">
             <div>
               <p className="font-heading text-sm">Save with a class pass</p>
               <p className="font-body text-xs text-gray-500 mt-0.5">5-class pass from $100 · 10-class pass from $200</p>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading text-xl">Upcoming Classes</h2>
-            <Link href="/classes" className="font-body text-sm text-[#2041d8] hover:underline">
+            <Link href="/classes" className="font-body text-sm text-[#334155] hover:underline">
               Browse all →
             </Link>
           </div>
@@ -264,10 +264,10 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="badge-confirmed">Confirmed</span>
                       {reg.payment_type === "pass" && (
-                        <span className="badge bg-[#a3bdfe]/30 text-[#2041d8]">Pass</span>
+                        <span className="badge bg-[#94a3b8]/30 text-[#334155]">Pass</span>
                       )}
                       {reg.payment_type === "double" && (
-                        <span className="badge bg-[#e4c3cc]/50 text-black">Double (+1 guest)</span>
+                        <span className="badge bg-[#e2e8f0]/50 text-black">Double (+1 guest)</span>
                       )}
                     </div>
                     <h3 className="font-heading text-base">{reg.classes?.title}</h3>
@@ -307,7 +307,7 @@ export default function DashboardPage() {
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
-                <thead className="bg-[#fff8f3] border-b border-gray-100">
+                <thead className="bg-[#f8fafc] border-b border-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Class</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>

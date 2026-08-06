@@ -4,8 +4,8 @@
   "description": "Dance classes at [Studio Location]",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e4c3cc",
-  "theme_color": "#2041d8",
+  "background_color": "#e2e8f0",
+  "theme_color": "#334155",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

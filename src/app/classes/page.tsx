@@ -126,7 +126,7 @@ export default function ClassesPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Book a class</p>
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Book a class</p>
             <h1 className="section-title mb-1">Upcoming Classes</h1>
             <p className="font-body text-gray-500">[Schedule] · [Studio Location]</p>
           </div>
@@ -150,7 +150,7 @@ export default function ClassesPage() {
 
         {/* Active pass notice */}
         {hasPass && (
-          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-8">
+          <div className="bg-[#94a3b8]/20 border border-[#94a3b8] rounded-2xl p-4 mb-8">
             <div>
               <p className="font-heading text-sm">
                 {(bestPass as any).pass_types?.name ?? "Your pass"} — {bestPass.classes_remaining} class{bestPass.classes_remaining !== 1 ? "es" : ""} remaining
@@ -169,7 +169,7 @@ export default function ClassesPage() {
           </div>
         ) : visibleClasses.length === 0 ? (
           <div className="text-center py-20">
-            <Clock className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
+            <Clock className="w-12 h-12 mx-auto mb-4 text-[#334155]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">
               {showSpecialOnly ? "No special classes right now" : "No upcoming classes"}
             </h3>
@@ -188,13 +188,13 @@ export default function ClassesPage() {
 
               return (
                 <div key={cls.id} className="card flex flex-col">
-                  <div className="relative bg-gradient-to-br from-[#e4c3cc] to-[#a3bdfe] p-6">
+                  <div className="relative bg-gradient-to-br from-[#e2e8f0] to-[#94a3b8] p-6">
                     {cls.is_special && (
-                      <span className="absolute top-4 right-4 bg-[#2041d8] text-white text-xs font-body font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                      <span className="absolute top-4 right-4 bg-[#334155] text-white text-xs font-body font-bold uppercase tracking-wide px-3 py-1 rounded-full">
                         {cls.special_label || "Special Class"}
                       </span>
                     )}
-                    <p className="font-body text-xs uppercase tracking-widest text-[#2041d8] mb-1">
+                    <p className="font-body text-xs uppercase tracking-widest text-[#334155] mb-1">
                       {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long" })}
                     </p>
                     <p className="font-heading text-2xl text-black">
@@ -204,8 +204,8 @@ export default function ClassesPage() {
 
                   <div className="p-5 flex flex-col flex-1">
                     <div className="space-y-1.5 mb-5">
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
-                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#334155]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
+                      <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#334155]" strokeWidth={1.5} />{cls.location}</div>
                       {isFull && (
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
                       )}
