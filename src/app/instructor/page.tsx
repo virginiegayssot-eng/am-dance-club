@@ -106,6 +106,7 @@ export default function InstructorPage() {
   const [assignPassSource, setAssignPassSource] = useState("cash");
   const [assignPassAmount, setAssignPassAmount] = useState("");
   const [assignPassLoading, setAssignPassLoading] = useState(false);
+  const [assignPassError, setAssignPassError] = useState("");
 
   // Debit pass
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
@@ -768,6 +769,7 @@ export default function InstructorPage() {
     e.preventDefault();
     if (!assignPassTarget || !assignPassTypeId) return;
     setAssignPassLoading(true);
+    setAssignPassError("");
 
     const res = await fetch("/api/instructor/assign-pass", {
       method: "POST",
@@ -782,7 +784,7 @@ export default function InstructorPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error ?? "Failed to assign pass");
+      setAssignPassError(data.error ?? "Failed to assign pass");
       setAssignPassLoading(false);
       return;
     }
@@ -950,6 +952,7 @@ export default function InstructorPage() {
     setAssignPassTypeId(passTypes[0]?.id ?? "");
     setAssignPassSource("cash");
     setAssignPassAmount("");
+    setAssignPassError("");
     setShowAssignPassForm(true);
   }
 
@@ -2586,6 +2589,9 @@ export default function InstructorPage() {
                   />
                   <p className="font-body text-xs text-gray-400 mt-1">Leave blank to use full price. Enter discounted amount if applicable.</p>
                 </div>
+              )}
+              {assignPassError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{assignPassError}</div>
               )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowAssignPassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>

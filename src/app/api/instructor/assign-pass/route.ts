@@ -54,8 +54,9 @@ export async function POST(req: NextRequest) {
 
   const admin = adminClient();
 
-  const { data: passType } = await admin.from("pass_types").select("*").eq("id", passTypeId).single();
-  if (!passType) return NextResponse.json({ error: "Pass type not found" }, { status: 404 });
+  const { data: passType, error: passTypeError } = await admin.from("pass_types").select("*").eq("id", passTypeId).single();
+  if (passTypeError) return NextResponse.json({ error: `DEBUG pass_types lookup error for id "${passTypeId}": ${passTypeError.message} (code: ${passTypeError.code})` }, { status: 400 });
+  if (!passType) return NextResponse.json({ error: `DEBUG no pass_type row for id "${passTypeId}"` }, { status: 404 });
 
   const expiresAt = passType.validity_days
     ? new Date(Date.now() + passType.validity_days * 86400000).toISOString()
