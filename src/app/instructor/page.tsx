@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
-import { formatPrice, getYouTubeId } from "@/lib/stripe";
+import { formatPrice, formatTime, getYouTubeId } from "@/lib/stripe";
 import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
@@ -1021,7 +1021,7 @@ export default function InstructorPage() {
               <p className="font-body text-xs uppercase tracking-widest text-[#e4c3cc] mb-1">Today's Class</p>
               <h2 className="font-heading text-lg">{todaysClass.title}</h2>
               <p className="font-body text-sm text-white/70 mt-0.5">
-                7:00 AM · {todaysClass.registered_count}/{todaysClass.capacity} booked
+                {formatTime(todaysClass.class_time)} · {todaysClass.registered_count}/{todaysClass.capacity} booked
               </p>
             </div>
             <button
@@ -2788,7 +2788,7 @@ function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past
         <p className="font-body text-sm text-gray-500 mt-1">
           {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", {
             weekday: "long", day: "numeric", month: "long", year: "numeric"
-          })} · 7:00 AM
+          })} · {formatTime(cls.class_time)}
         </p>
       </div>
       <div className="flex items-center gap-4 flex-wrap shrink-0">

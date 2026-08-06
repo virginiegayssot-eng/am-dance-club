@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
-import { formatPrice } from "@/lib/stripe";
+import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                     <p className="font-body text-sm text-gray-500 mt-1">
                       {new Date(reg.classes?.class_date + "T00:00:00").toLocaleDateString("en-AU", {
                         weekday: "long", day: "numeric", month: "long", year: "numeric"
-                      })} · 7:00 AM · {reg.classes?.location}
+                      })} · {reg.classes?.class_time ? formatTime(reg.classes.class_time) : ""} · {reg.classes?.location}
                     </p>
                   </div>
                   <div className="text-right shrink-0 flex flex-col items-end gap-2">
