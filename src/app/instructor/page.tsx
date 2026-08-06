@@ -39,13 +39,14 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "07:00", price_cents: "24", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "09:00", price_cents: "", capacity: "20", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
   const [classFormError, setClassFormError] = useState("");
+  const [actionError, setActionError] = useState("");
 
   // Bulk create Fridays
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [bulkForm, setBulkForm] = useState({ title: "Morning Dance Class", description: "", price_cents: "24", capacity: "20", durationMinutes: "45", end_date: "2026-12-31", altDurationMinutes: "", altPriceCents: "" });
+  const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "", capacity: "20", durationMinutes: "60", classTime: "09:00", dayOfWeek: "5", end_date: "", altDurationMinutes: "", altPriceCents: "" });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -333,7 +334,7 @@ export default function InstructorPage() {
           setAllStudents(prev => prev.filter(s => s.id !== student.id));
         } else {
           const data = await res.json();
-          alert(data.error ?? "Something went wrong");
+          setActionError(data.error ?? "Something went wrong");
         }
       },
     });
@@ -352,7 +353,7 @@ export default function InstructorPage() {
           setStudents(prev => prev.filter(s => s.reg_id !== student.reg_id));
         } else {
           const data = await res.json();
-          alert(data.error ?? "Something went wrong");
+          setActionError(data.error ?? "Something went wrong");
         }
       },
     });
@@ -451,7 +452,7 @@ export default function InstructorPage() {
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", class_time: "07:00", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+      setClassForm({ title: "", description: "", class_date: "", class_time: "09:00", price_cents: "", capacity: "20", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
     } else {
       setClassFormError(error.message);
@@ -464,27 +465,28 @@ export default function InstructorPage() {
     setBulkLoading(true);
 
     const endDate = new Date(bulkForm.end_date + "T23:59:59");
-    const fridays: string[] = [];
+    const targetDay = parseInt(bulkForm.dayOfWeek);
+    const matchingDates: string[] = [];
     const d = new Date();
     while (d <= endDate) {
       d.setDate(d.getDate() + 1);
-      if (d.getDay() === 5) fridays.push(d.toISOString().split("T")[0]);
+      if (d.getDay() === targetDay) matchingDates.push(d.toISOString().split("T")[0]);
     }
 
     const existingDates = new Set(classes.map(c => c.class_date));
-    const newFridays = fridays.filter(f => !existingDates.has(f));
+    const newDates = matchingDates.filter(f => !existingDates.has(f));
 
-    if (newFridays.length === 0) {
-      alert("All those Fridays already have classes!");
+    if (newDates.length === 0) {
+      setActionError("All those dates already have classes!");
       setBulkLoading(false);
       return;
     }
 
-    const rows = newFridays.map(date => ({
+    const rows = newDates.map(date => ({
       title: bulkForm.title,
       description: bulkForm.description || null,
       class_date: date,
-      class_time: "07:00",
+      class_time: bulkForm.classTime,
       price_cents: Math.round(parseFloat(bulkForm.price_cents) * 100),
       capacity: parseInt(bulkForm.capacity),
       duration_minutes: parseInt(bulkForm.durationMinutes),
@@ -498,7 +500,7 @@ export default function InstructorPage() {
       setShowBulkForm(false);
       loadData();
     } else {
-      alert("Error creating classes: " + error.message);
+      setActionError("Error creating classes: " + error.message);
     }
     setBulkLoading(false);
   }
@@ -547,7 +549,7 @@ export default function InstructorPage() {
 
     const youtubeId = getYouTubeId(videoForm.youtube_url);
     if (!youtubeId) {
-      alert("Invalid YouTube URL");
+      setActionError("Invalid YouTube URL");
       setVideoFormLoading(false);
       return;
     }
@@ -667,7 +669,7 @@ export default function InstructorPage() {
       expires_at: discountForm.expires_at || null,
       active: true,
     });
-    if (error) { alert(error.message); setDiscountFormLoading(false); return; }
+    if (error) { setActionError(error.message); setDiscountFormLoading(false); return; }
     setShowDiscountForm(false);
     setDiscountForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "" });
     loadData();
@@ -702,7 +704,7 @@ export default function InstructorPage() {
 
     const match = playlistForm.spotify_url.match(/playlist\/([a-zA-Z0-9]+)/);
     if (!match) {
-      alert("Invalid Spotify playlist URL. It should look like: https://open.spotify.com/playlist/...");
+      setActionError("Invalid Spotify playlist URL. It should look like: https://open.spotify.com/playlist/...");
       setPlaylistFormLoading(false);
       return;
     }
@@ -811,7 +813,7 @@ export default function InstructorPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          alert(data.error ?? "Failed to debit pass");
+          setActionError(data.error ?? "Failed to debit pass");
         } else {
           setAllPasses(prev =>
             prev.map(p => p.id === passId ? { ...p, classes_remaining: p.classes_remaining - 1 } : p)
@@ -1003,7 +1005,7 @@ export default function InstructorPage() {
               + Add Recording
             </button>
             <button onClick={() => setShowBulkForm(true)} className="btn-secondary py-2 px-4 text-sm">
-              + Bulk Fridays
+              + Bulk Create
             </button>
             <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
               Send Review Emails
@@ -1013,6 +1015,13 @@ export default function InstructorPage() {
             </button>
           </div>
         </div>
+
+        {actionError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 font-body text-sm text-red-700 flex items-center justify-between gap-3">
+            <span>{actionError}</span>
+            <button onClick={() => setActionError("")} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
+          </div>
+        )}
 
         {/* Today's class banner */}
         {todaysClass && (
@@ -1848,16 +1857,16 @@ export default function InstructorPage() {
           </Modal>
         )}
 
-        {/* BULK CREATE FRIDAYS MODAL */}
+        {/* BULK CREATE RECURRING CLASSES MODAL */}
         {showBulkForm && (
-          <Modal title="Bulk Create Friday Classes" onClose={() => setShowBulkForm(false)}>
+          <Modal title="Bulk Create Recurring Classes" onClose={() => setShowBulkForm(false)}>
             <form onSubmit={bulkCreateFridays} className="space-y-4">
-              <p className="font-body text-sm text-gray-500">Creates a class for every upcoming Friday that doesn't already have one.</p>
+              <p className="font-body text-sm text-gray-500">Creates a class for every upcoming date on the chosen weekday that doesn't already have one.</p>
               <div>
                 <label className="label">Class Title</label>
                 <input
                   className="input"
-                  placeholder="Morning Dance Class"
+                  placeholder="e.g. Morning Dance Class"
                   value={bulkForm.title}
                   onChange={e => setBulkForm(f => ({ ...f, title: e.target.value }))}
                   required
@@ -1871,6 +1880,34 @@ export default function InstructorPage() {
                   value={bulkForm.description}
                   onChange={e => setBulkForm(f => ({ ...f, description: e.target.value }))}
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Day of week</label>
+                  <select
+                    className="input"
+                    value={bulkForm.dayOfWeek}
+                    onChange={e => setBulkForm(f => ({ ...f, dayOfWeek: e.target.value }))}
+                  >
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Time</label>
+                  <input
+                    className="input"
+                    type="time"
+                    value={bulkForm.classTime}
+                    onChange={e => setBulkForm(f => ({ ...f, classTime: e.target.value }))}
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label className="label">Create classes until</label>

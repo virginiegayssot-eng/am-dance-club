@@ -78,6 +78,7 @@ export default function PassesPage() {
   const [discountInput, setDiscountInput] = useState("");
   const [discountInfo, setDiscountInfo] = useState<{ type: string; value: number } | null>(null);
   const [discountError, setDiscountError] = useState("");
+  const [buyError, setBuyError] = useState("");
   const [validatingCode, setValidatingCode] = useState(false);
 
   useEffect(() => { loadData(); }, []);
@@ -132,6 +133,7 @@ export default function PassesPage() {
   async function buyPass(passId: string) {
     if (!isLoggedIn) { router.push("/auth/login"); return; }
 
+    setBuyError("");
     setBuying(passId);
     const res = await fetch("/api/stripe/pass-checkout", {
       method: "POST",
@@ -139,7 +141,7 @@ export default function PassesPage() {
       body: JSON.stringify({ passTypeId: passId, discountCode: discountCode || undefined }),
     });
     const { url, error } = await res.json();
-    if (error) { alert(error); setBuying(null); return; }
+    if (error) { setBuyError(error); setBuying(null); return; }
     window.location.href = url;
   }
 
@@ -156,9 +158,16 @@ export default function PassesPage() {
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Pricing</p>
           <h1 className="section-title mb-3">Class Passes</h1>
           <p className="font-body text-gray-500">
-            Buy a pass and use it to book any upcoming Friday class.
+            Buy a pass and use it to book any upcoming class.
           </p>
         </div>
+
+        {buyError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 font-body text-sm text-red-700 flex items-center justify-between gap-3">
+            <span>{buyError}</span>
+            <button onClick={() => setBuyError("")} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
+          </div>
+        )}
 
         {/* Active passes banner */}
         {validPasses.length > 0 && (

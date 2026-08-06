@@ -23,6 +23,7 @@ export default function ClassesPage() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showSpecialOnly, setShowSpecialOnly] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     loadData();
@@ -90,7 +91,7 @@ export default function ClassesPage() {
         body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount }),
       });
       const { error } = await res.json();
-      if (error) { alert(error); setActionId(null); return; }
+      if (error) { setActionError(error); setActionId(null); return; }
       await loadData();
       setActionId(null);
       return;
@@ -110,7 +111,7 @@ export default function ClassesPage() {
       body: JSON.stringify({ passTypeId, classId: cls.id, useAltDuration }),
     });
     const { url, error } = await res.json();
-    if (error) { alert(error); setActionId(null); return; }
+    if (error) { setActionError(error); setActionId(null); return; }
     window.location.href = url;
   }
 
@@ -147,6 +148,13 @@ export default function ClassesPage() {
             Special Classes
           </button>
         </div>
+
+        {actionError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 font-body text-sm text-red-700 flex items-center justify-between gap-3">
+            <span>{actionError}</span>
+            <button onClick={() => setActionError("")} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
+          </div>
+        )}
 
         {/* Active pass notice */}
         {hasPass && (
