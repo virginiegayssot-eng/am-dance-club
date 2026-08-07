@@ -3,17 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@supabase/supabase-js";
 import { Mail } from "lucide-react";
-
-// Implicit flow client — Supabase sends OTP-style link (no PKCE verifier needed)
-function resetClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { flowType: "implicit" } }
-  );
-}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -26,13 +16,15 @@ export default function ForgotPasswordPage() {
     setError("");
     setLoading(true);
 
-    const supabase = resetClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
+    const res = await fetch("/api/auth/send-reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     });
 
-    if (error) {
-      setError(error.message);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Something went wrong. Please try again.");
       setLoading(false);
       return;
     }
