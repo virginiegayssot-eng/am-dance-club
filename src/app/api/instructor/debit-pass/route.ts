@@ -47,14 +47,14 @@ export async function POST(req: NextRequest) {
     const student = (pass as any).profiles;
     const passType = (pass as any).pass_types;
     await resend.emails.send({
-      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: student.email,
       subject: "Class recorded — see you on the dancefloor!",
       html: `<p>Hi ${student.full_name?.split(" ")[0] ?? "dancer"},</p>
 <p>1 class has been deducted from your <strong>${passType?.name ?? "pass"}</strong>.</p>
 <p>You have <strong>${newRemaining} class${newRemaining !== 1 ? "es" : ""} remaining</strong>.</p>
 <p>See you next class!</p>
-<p>— [Instructor Name]</p>`,
+<p>— Majo</p>`,
     }).catch(() => {});
   }
 

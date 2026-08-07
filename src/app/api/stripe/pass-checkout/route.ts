@@ -11,12 +11,14 @@ function adminClient() {
   );
 }
 
+// Pricing: casual/five/ten are real BYLA prices from the brief. double/intro
+// were not specified — estimated, confirm with Majo before going live.
 const PASS_CONFIGS: Record<string, { name: string; price: number; classes: number; validityDays: number | null; newOnly: boolean }> = {
-  casual:  { name: "Casual Class",   price: 2400,  classes: 1,  validityDays: null, newOnly: false },
-  double:  { name: "Double Pass",    price: 3800,  classes: 2,  validityDays: null, newOnly: false },
-  intro:   { name: "Intro Pass",     price: 3900,  classes: 3,  validityDays: 90,   newOnly: true  },
-  five:    { name: "5-Class Pass",   price: 10000, classes: 5,  validityDays: 180,  newOnly: false },
-  ten:     { name: "10-Class Pass",  price: 20000, classes: 10, validityDays: 365,  newOnly: false },
+  casual:  { name: "Casual Class",   price: 2600,  classes: 1,  validityDays: null, newOnly: false },
+  double:  { name: "Double Pass",    price: 4800,  classes: 2,  validityDays: null, newOnly: false },
+  intro:   { name: "Intro Pass",     price: 6500,  classes: 3,  validityDays: 90,   newOnly: true  },
+  five:    { name: "5-Class Pack",   price: 12000, classes: 5,  validityDays: 60,   newOnly: false },
+  ten:     { name: "10-Class Pack",  price: 22000, classes: 10, validityDays: 365,  newOnly: false },
 };
 
 export async function POST(req: NextRequest) {
@@ -87,10 +89,10 @@ export async function POST(req: NextRequest) {
   }
 
   const descriptions: Record<string, string> = {
-    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class · [Studio Location]",
+    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class",
     double: "Two spots in one class (bring a friend!)",
     intro:  "3 classes · Valid 3 months · New students only",
-    five:   "5 classes · Valid 6 months",
+    five:   "5 classes · Valid 2 months",
     ten:    "10 classes · Valid 1 year",
   };
 

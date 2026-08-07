@@ -3,17 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --accent: #e2e8f0;
-  --accent-light: #cbd5e1;
-  --primary: #334155;
-  --primary-light: #94a3b8;
+  --accent: #e2d0fb;
+  --accent-light: #d1b3f5;
+  --primary: #000000;
+  --primary-light: #9b7fc7;
   --black: #000000;
-  --surface: #f8fafc;
+  --surface: #ffffff;
 }
 
 @layer base {
   body {
-    @apply bg-[#e2e8f0] text-black font-body;
+    @apply bg-[#e2d0fb] text-black font-body;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -23,23 +23,23 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-[#334155] text-white font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-blue-800 transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+    @apply bg-[#000000] text-white font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-gray-800 transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
   }
 
   .btn-secondary {
-    @apply border-2 border-[#334155] text-[#334155] font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#334155] hover:text-white transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+    @apply border-2 border-[#000000] text-[#000000] font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#000000] hover:text-white transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
   }
 
   .btn-pink {
-    @apply bg-[#e2e8f0] text-black font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#cbd5e1] transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
+    @apply bg-[#e2d0fb] text-black font-heading text-sm tracking-wide px-6 py-3 rounded-full hover:bg-[#d1b3f5] transition-all duration-200 active:scale-95 inline-flex items-center gap-2;
   }
 
   .card {
-    @apply bg-[#f8fafc] rounded-2xl shadow-sm border border-[#e2e8f0]/30 overflow-hidden;
+    @apply bg-[#ffffff] rounded-2xl shadow-sm border border-[#e2d0fb]/30 overflow-hidden;
   }
 
   .input {
-    @apply w-full border border-[#334155]/20 rounded-xl px-4 py-3 text-sm font-body focus:outline-none focus:border-[#334155] focus:ring-1 focus:ring-[#334155] transition-colors bg-white;
+    @apply w-full border border-[#000000]/20 rounded-xl px-4 py-3 text-sm font-body focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] transition-colors bg-white;
   }
 
   .label {

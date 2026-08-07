@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           currency: "aud",
           product_data: {
             name: cls.title,
-            description: `${classDate} · [Studio Location]`,
+            description: `${classDate}`,
           },
           unit_amount: cls.price_cents,
         },

@@ -57,9 +57,9 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#ffffff] flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
-          <Mail className="w-14 h-14 mx-auto mb-6 text-[#334155]" strokeWidth={1.5} />
+          <Mail className="w-14 h-14 mx-auto mb-6 text-[#000000]" strokeWidth={1.5} />
           <h2 className="font-heading text-2xl mb-3">Check your email!</h2>
           <p className="font-body text-gray-500 mb-6">
             We've sent a confirmation link to <strong>{form.email}</strong>.<br />
@@ -72,11 +72,11 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-6">
-            <Image src="/logo-transparent.png" alt="[Studio Name]" width={140} height={100} className="object-contain mx-auto" />
+            <Image src="/logo-transparent.png" alt="BYLA" width={140} height={100} className="object-contain mx-auto" />
           </Link>
           <h1 className="font-heading text-3xl mb-2">Join the club</h1>
           <p className="font-body text-sm text-gray-500">Create your account to book classes</p>
@@ -130,7 +130,7 @@ export default function SignupPage() {
           <div className="mt-6 text-center">
             <p className="font-body text-sm text-gray-500">
               Already have an account?{" "}
-              <Link href="/auth/login" className="text-[#334155] hover:underline">Sign in</Link>
+              <Link href="/auth/login" className="text-[#000000] hover:underline">Sign in</Link>
             </p>
           </div>
         </div>

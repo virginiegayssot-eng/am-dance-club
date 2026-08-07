@@ -61,7 +61,7 @@ export default function MerchPage() {
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Shop</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Shop</p>
           <h1 className="section-title mb-3">Merch</h1>
           <p className="font-body text-gray-500">
             Rep the club. Every purchase goes straight to supporting the studio.
@@ -85,13 +85,13 @@ export default function MerchPage() {
             {products.map((product) => (
               <div key={product.id} className="card overflow-hidden flex flex-col">
                 {product.image_url && (
-                  <div className="aspect-square bg-[#f8fafc]">
+                  <div className="aspect-square bg-[#ffffff]">
                     <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="p-6 flex flex-col flex-1">
                   <h3 className="font-heading text-lg mb-1">{product.title}</h3>
-                  <p className="font-heading text-2xl text-[#334155] mb-2">{formatPrice(product.price_cents)}</p>
+                  <p className="font-heading text-2xl text-[#000000] mb-2">{formatPrice(product.price_cents)}</p>
                   {product.description && (
                     <p className="font-body text-sm text-gray-500 mb-4 leading-relaxed">{product.description}</p>
                   )}

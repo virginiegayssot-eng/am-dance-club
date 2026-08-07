@@ -1,28 +1,28 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export const metadata = { title: "Privacy Policy · [Studio Name]" };
+export const metadata = { title: "Privacy Policy · BYLA" };
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-14 w-full">
-        <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Legal</p>
+        <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Legal</p>
         <h1 className="section-title mb-10">Privacy Policy</h1>
 
         <div className="space-y-8 font-body text-gray-700 leading-relaxed">
 
           <section>
             <p>
-              [Studio Name] ("we", "us", "our") is committed to protecting your personal information in accordance with the
+              BYLA ("we", "us", "our") is committed to protecting your personal information in accordance with the
               Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs).
               This policy explains what information we collect, how we use it, and how we protect it.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">What information we collect</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">What information we collect</h2>
             <p>When you create an account or purchase a class, we may collect:</p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
               <li>Your name and email address</li>
@@ -33,7 +33,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">How we use your information</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">How we use your information</h2>
             <p>We use your information to:</p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
               <li>Manage your bookings and passes</li>
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">Data storage & security</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">Data storage & security</h2>
             <p>
               Your data is stored securely using Supabase, hosted on servers in Australia and the United States.
               Payments are processed by Stripe, which is PCI-DSS compliant.
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">Your rights</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">Your rights</h2>
             <p>You have the right to:</p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
               <li>Access the personal information we hold about you</li>
@@ -63,22 +63,22 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="mt-3">
               To exercise any of these rights, please contact us at{" "}
-              <a href="mailto:[Studio Email]" className="text-[#334155] underline">[Studio Email]</a>.
+              <a href="mailto:hello@byla.fit" className="text-[#000000] underline">hello@byla.fit</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">Cookies</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">Cookies</h2>
             <p>
               This app uses essential cookies to keep you logged in. We do not use tracking or advertising cookies.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-lg text-[#334155] mb-3">Contact</h2>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">Contact</h2>
             <p>
               If you have any questions about this policy or how we handle your data, please contact us at{" "}
-              <a href="mailto:[Studio Email]" className="text-[#334155] underline">[Studio Email]</a>.
+              <a href="mailto:hello@byla.fit" className="text-[#000000] underline">hello@byla.fit</a>.
             </p>
           </section>
 

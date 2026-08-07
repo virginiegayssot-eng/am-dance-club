@@ -47,7 +47,7 @@ export default function PlaylistsPage() {
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Members only</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Members only</p>
           <h1 className="section-title mb-3">Class Playlists</h1>
           <p className="font-body text-gray-500">
             The music we dance to. Your Friday soundtrack starts here.
@@ -56,7 +56,7 @@ export default function PlaylistsPage() {
 
         {playlists.length === 0 ? (
           <div className="text-center py-20">
-            <Music className="w-12 h-12 mx-auto mb-4 text-[#334155]" strokeWidth={1.5} />
+            <Music className="w-12 h-12 mx-auto mb-4 text-[#000000]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">No playlists yet</h3>
             <p className="font-body text-gray-500">Check back soon!</p>
           </div>

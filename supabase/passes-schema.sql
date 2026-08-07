@@ -12,12 +12,14 @@ create table public.pass_types (
   new_students_only boolean default false
 );
 
+-- Pricing: casual/five/ten are real BYLA prices from the brief. double/intro
+-- were not specified — estimated, confirm with Majo before going live.
 insert into public.pass_types values
-  ('casual',    'Casual Class',   'Drop-in, one class',                         1,   2400, null, 0, false),
-  ('double',    'Double Pass',    'Two spots in the same class',                 1,   3800, null, 1, false),
-  ('intro',     'Intro Pass',     '3 classes for new students — valid 3 months', 3,   3900, 90,  0, true),
-  ('five',      '5-Class Pass',   'Valid for 6 months',                          5,  10000, 180, 0, false),
-  ('ten',       '10-Class Pass',  'Valid for 1 year',                            10, 20000, 365, 0, false);
+  ('casual',    'Casual Class',  'Drop-in, one class',                          1,   2600, null, 0, false),
+  ('double',    'Double Pass',   'Two spots in the same class',                 1,   4800, null, 1, false),
+  ('intro',     'Intro Pass',    '3 classes for new students — valid 3 months', 3,   6500, 90,  0, true),
+  ('five',      '5-Class Pack',  'Valid for 2 months',                          5,  12000, 60,  0, false),
+  ('ten',       '10-Class Pack', 'Valid for 1 year',                            10, 22000, 365, 0, false);
 
 -- Student passes (purchased)
 create table public.passes (

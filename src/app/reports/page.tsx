@@ -226,7 +226,7 @@ export default function ReportsPage() {
   ] as const;
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+    <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
       <div className="font-body text-gray-400">Loading reports…</div>
     </div>
   );
@@ -238,7 +238,7 @@ export default function ReportsPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Instructor</p>
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Instructor</p>
             <h1 className="section-title">Reports</h1>
           </div>
         </div>
@@ -246,10 +246,10 @@ export default function ReportsPage() {
         {/* Summary stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Total revenue", value: formatPrice(totalRevenue), color: "bg-[#f8fafc]" },
-            { label: "Total members", value: totalStudents, color: "bg-[#f8fafc]" },
-            { label: "Active (90 days)", value: activeStudents, color: "bg-[#f8fafc]" },
-            { label: "Avg attendance", value: `${avgAttendance}%`, color: "bg-[#f8fafc]" },
+            { label: "Total revenue", value: formatPrice(totalRevenue), color: "bg-[#ffffff]" },
+            { label: "Total members", value: totalStudents, color: "bg-[#ffffff]" },
+            { label: "Active (90 days)", value: activeStudents, color: "bg-[#ffffff]" },
+            { label: "Avg attendance", value: `${avgAttendance}%`, color: "bg-[#ffffff]" },
           ].map(stat => (
             <div key={stat.label} className={`card p-5 ${stat.color}`}>
               <p className="font-heading text-2xl">{stat.value}</p>
@@ -266,7 +266,7 @@ export default function ReportsPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors ${
                 activeTab === tab.key
-                  ? "border-[#334155] text-[#334155]"
+                  ? "border-[#000000] text-[#000000]"
                   : "border-transparent text-gray-500 hover:text-black"
               }`}
             >
@@ -285,7 +285,7 @@ export default function ReportsPage() {
                     key={p}
                     onClick={() => setPeriod(p)}
                     className={`font-body text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                      period === p ? "bg-[#334155] text-white border-[#334155]" : "border-gray-200 text-gray-500 hover:border-[#334155]"
+                      period === p ? "bg-[#000000] text-white border-[#000000]" : "border-gray-200 text-gray-500 hover:border-[#000000]"
                     }`}
                   >
                     {p === "3m" ? "3 months" : p === "6m" ? "6 months" : "12 months"}
@@ -310,7 +310,7 @@ export default function ReportsPage() {
                     <div key={row.month} className="flex-1 flex flex-col items-center gap-1">
                       <span className="font-body text-xs text-gray-500">{formatPrice(row.total)}</span>
                       <div
-                        className="w-full bg-gradient-to-t from-[#334155] to-[#94a3b8] rounded-t-lg transition-all"
+                        className="w-full bg-gradient-to-t from-[#000000] to-[#9b7fc7] rounded-t-lg transition-all"
                         style={{ height: `${h}%` }}
                       />
                       <span className="font-body text-xs text-gray-400">{row.month}</span>
@@ -332,12 +332,12 @@ export default function ReportsPage() {
                   amount_aud: ((p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0) / 100).toFixed(2),
                 })),
                 "pass-sales.csv"
-              )} className="font-body text-xs text-[#334155] hover:underline">Export CSV</button>
+              )} className="font-body text-xs text-[#000000] hover:underline">Export CSV</button>
             </div>
             <div className="card overflow-hidden mb-8">
               <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
-                <thead className="bg-[#f8fafc] border-b border-gray-100">
+                <thead className="bg-[#ffffff] border-b border-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
@@ -366,7 +366,7 @@ export default function ReportsPage() {
                         <td className="px-5 py-3">{p.pass_types?.name ?? p.pass_type_id}</td>
                         <td className="px-5 py-3 text-xs">
                           <span className="inline-flex items-center gap-1">
-                            {SourceIcon && <SourceIcon className="w-3.5 h-3.5 text-[#334155]" strokeWidth={1.75} />}
+                            {SourceIcon && <SourceIcon className="w-3.5 h-3.5 text-[#000000]" strokeWidth={1.75} />}
                             {sourceLabel}
                           </span>
                         </td>
@@ -385,12 +385,12 @@ export default function ReportsPage() {
               <button onClick={() => downloadCSV(
                 classes.map(c => ({ date: c.class_date, title: c.title, registered: c.registered, attended: c.attended, revenue_aud: (c.revenue / 100).toFixed(2) })),
                 "class-revenue.csv"
-              )} className="font-body text-xs text-[#334155] hover:underline">Export CSV</button>
+              )} className="font-body text-xs text-[#000000] hover:underline">Export CSV</button>
             </div>
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
-                <thead className="bg-[#f8fafc] border-b border-gray-100">
+                <thead className="bg-[#ffffff] border-b border-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Class</th>
@@ -428,7 +428,7 @@ export default function ReportsPage() {
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
-                <thead className="bg-[#f8fafc] border-b border-gray-100">
+                <thead className="bg-[#ffffff] border-b border-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Class</th>
@@ -451,7 +451,7 @@ export default function ReportsPage() {
                         <td className="px-5 py-3 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <div className="w-16 bg-gray-100 rounded-full h-1.5">
-                              <div className="bg-[#334155] h-1.5 rounded-full" style={{ width: `${rate}%` }} />
+                              <div className="bg-[#000000] h-1.5 rounded-full" style={{ width: `${rate}%` }} />
                             </div>
                             <span className={`text-xs font-heading ${rate >= 80 ? "text-green-600" : rate >= 50 ? "text-yellow-600" : "text-red-500"}`}>
                               {rate}%
@@ -491,7 +491,7 @@ export default function ReportsPage() {
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full text-sm font-body">
-                <thead className="bg-[#f8fafc] border-b border-gray-100">
+                <thead className="bg-[#ffffff] border-b border-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
                     <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Contact</th>
@@ -511,7 +511,7 @@ export default function ReportsPage() {
                       <td className="px-5 py-3 text-gray-500 text-xs">
                         {s.phone && <p>{s.phone}</p>}
                         {s.birth_date && (
-                          <p className="inline-flex items-center gap-1"><Cake className="w-3.5 h-3.5 text-[#334155]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</p>
+                          <p className="inline-flex items-center gap-1"><Cake className="w-3.5 h-3.5 text-[#000000]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</p>
                         )}
                       </td>
                       <td className="px-5 py-3 text-center">
@@ -530,7 +530,7 @@ export default function ReportsPage() {
                       </td>
                       <td className="px-5 py-3 text-right font-heading">{formatPrice(s.total_spent)}</td>
                       <td className="px-5 py-3 text-center">
-                        <Link href={`/chat?dm=${s.id}`} className="font-body text-xs text-[#334155] hover:underline">
+                        <Link href={`/chat?dm=${s.id}`} className="font-body text-xs text-[#000000] hover:underline">
                           Message
                         </Link>
                       </td>
@@ -564,7 +564,7 @@ export default function ReportsPage() {
 
             {upcomingBirthdays.length === 0 ? (
               <div className="card p-10 text-center">
-                <Cake className="w-10 h-10 mx-auto mb-3 text-[#334155]" strokeWidth={1.5} />
+                <Cake className="w-10 h-10 mx-auto mb-3 text-[#000000]" strokeWidth={1.5} />
                 <p className="font-body text-gray-400">No birthdays on record yet. Encourage members to add their birth date in their profile.</p>
               </div>
             ) : (
@@ -573,23 +573,23 @@ export default function ReportsPage() {
                   const isThisWeek = s.daysUntil <= 7;
                   const isToday = s.daysUntil === 0;
                   return (
-                    <div key={s.id} className={`card p-5 ${isToday ? "ring-2 ring-[#334155] bg-[#94a3b8]/10" : isThisWeek ? "bg-[#e2e8f0]/10" : ""}`}>
+                    <div key={s.id} className={`card p-5 ${isToday ? "ring-2 ring-[#000000] bg-[#9b7fc7]/10" : isThisWeek ? "bg-[#e2d0fb]/10" : ""}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="font-heading text-sm">{s.full_name ?? s.email}</p>
                           {s.phone && <p className="font-body text-xs text-gray-400 mt-0.5">{s.phone}</p>}
                         </div>
-                        {isToday ? <PartyPopper className="w-6 h-6 text-[#334155]" strokeWidth={1.5} /> : isThisWeek ? <Cake className="w-6 h-6 text-[#334155]" strokeWidth={1.5} /> : <Calendar className="w-6 h-6 text-gray-300" strokeWidth={1.5} />}
+                        {isToday ? <PartyPopper className="w-6 h-6 text-[#000000]" strokeWidth={1.5} /> : isThisWeek ? <Cake className="w-6 h-6 text-[#000000]" strokeWidth={1.5} /> : <Calendar className="w-6 h-6 text-gray-300" strokeWidth={1.5} />}
                       </div>
                       <p className="font-body text-xs text-gray-500">
                         {new Date(s.birth_date!).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}
                       </p>
-                      <p className={`font-heading text-sm mt-1 ${isToday ? "text-[#334155]" : isThisWeek ? "text-[#e2e8f0]" : "text-gray-400"}`}>
+                      <p className={`font-heading text-sm mt-1 ${isToday ? "text-[#000000]" : isThisWeek ? "text-[#e2d0fb]" : "text-gray-400"}`}>
                         {isToday ? "Today!" : `In ${s.daysUntil} day${s.daysUntil !== 1 ? "s" : ""}`}
                       </p>
                       <Link
                         href={`/chat?dm=${s.id}`}
-                        className="mt-3 font-body text-xs text-[#334155] hover:underline block"
+                        className="mt-3 font-body text-xs text-[#000000] hover:underline block"
                       >
                         Send birthday message →
                       </Link>

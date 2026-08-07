@@ -42,11 +42,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-6">
-            <Image src="/logo-transparent.png" alt="[Studio Name]" width={140} height={100} className="object-contain mx-auto" />
+            <Image src="/logo-transparent.png" alt="BYLA" width={140} height={100} className="object-contain mx-auto" />
           </Link>
           <h1 className="font-heading text-3xl mb-2">Reset password</h1>
           <p className="font-body text-sm text-gray-500">We'll send you a link to reset it</p>
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
         <div className="card p-8">
           {sent ? (
             <div className="text-center space-y-4">
-              <Mail className="w-12 h-12 mx-auto text-[#334155]" strokeWidth={1.5} />
+              <Mail className="w-12 h-12 mx-auto text-[#000000]" strokeWidth={1.5} />
               <p className="font-heading text-lg">Check your email</p>
               <p className="font-body text-sm text-gray-500">
                 We sent a reset link to <strong>{email}</strong>. Click it to set a new password.

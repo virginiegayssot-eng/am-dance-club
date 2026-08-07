@@ -1,11 +1,11 @@
 {
-  "name": "[Studio Name]",
-  "short_name": "[Studio Name]",
-  "description": "Dance classes at [Studio Location]",
+  "name": "BYLA",
+  "short_name": "BYLA",
+  "description": "Reggaeton dance classes in Alexandria & Manly, Sydney",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e2e8f0",
-  "theme_color": "#334155",
+  "background_color": "#e2d0fb",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

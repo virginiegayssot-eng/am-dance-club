@@ -972,7 +972,7 @@ export default function InstructorPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+      <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
         <div className="font-body text-gray-400">Loading…</div>
       </div>
     );
@@ -991,7 +991,7 @@ export default function InstructorPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Instructor</p>
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Instructor</p>
             <h1 className="section-title">Dashboard</h1>
           </div>
           <div className="flex gap-3 flex-wrap">
@@ -1025,9 +1025,9 @@ export default function InstructorPage() {
 
         {/* Today's class banner */}
         {todaysClass && (
-          <div className="bg-[#334155] text-white rounded-2xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-[#000000] text-white rounded-2xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="font-body text-xs uppercase tracking-widest text-[#e2e8f0] mb-1">Today's Class</p>
+              <p className="font-body text-xs uppercase tracking-widest text-[#e2d0fb] mb-1">Today's Class</p>
               <h2 className="font-heading text-lg">{todaysClass.title}</h2>
               <p className="font-body text-sm text-white/70 mt-0.5">
                 {formatTime(todaysClass.class_time)} · {todaysClass.registered_count}/{todaysClass.capacity} booked
@@ -1035,7 +1035,7 @@ export default function InstructorPage() {
             </div>
             <button
               onClick={() => loadStudents(todaysClass)}
-              className="bg-white text-[#334155] font-heading text-sm px-5 py-2.5 rounded-full hover:bg-[#e2e8f0] transition-colors shrink-0"
+              className="bg-white text-[#000000] font-heading text-sm px-5 py-2.5 rounded-full hover:bg-[#e2d0fb] transition-colors shrink-0"
             >
               Take Roll →
             </button>
@@ -1057,9 +1057,9 @@ export default function InstructorPage() {
           });
           if (upcoming.length === 0) return null;
           return (
-            <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl px-5 py-4 mb-6">
+            <div className="bg-[#ffffff] border border-[#e2d0fb] rounded-2xl px-5 py-4 mb-6">
               <p className="font-heading text-sm mb-2 flex items-center gap-1.5">
-                <Cake className="w-4 h-4 text-[#334155]" strokeWidth={1.75} /> Upcoming Birthdays
+                <Cake className="w-4 h-4 text-[#000000]" strokeWidth={1.75} /> Upcoming Birthdays
               </p>
               <div className="space-y-1">
                 {upcoming.map(s => {
@@ -1069,7 +1069,7 @@ export default function InstructorPage() {
                   const label = diff === 0 ? "Today!" : diff === 1 ? "Tomorrow" : `in ${diff} days`;
                   return (
                     <p key={s.id} className="font-body text-sm">
-                      <strong>{s.full_name ?? s.email}</strong> — {bd.toLocaleDateString("en-AU", { day: "numeric", month: "long" })} <span className="text-[#334155]">({label})</span>
+                      <strong>{s.full_name ?? s.email}</strong> — {bd.toLocaleDateString("en-AU", { day: "numeric", month: "long" })} <span className="text-[#000000]">({label})</span>
                     </p>
                   );
                 })}
@@ -1081,10 +1081,10 @@ export default function InstructorPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Upcoming classes", value: upcomingClasses.length, color: "bg-[#f8fafc]" },
-            { label: "Total members", value: allStudents.length, color: "bg-[#f8fafc]" },
-            { label: "Videos", value: videos.length, color: "bg-[#f8fafc]" },
-            { label: "Active passes", value: allPasses.filter(p => p.classes_remaining > 0 && (!p.expires_at || new Date(p.expires_at) > new Date())).length, color: "bg-[#f8fafc]" },
+            { label: "Upcoming classes", value: upcomingClasses.length, color: "bg-[#ffffff]" },
+            { label: "Total members", value: allStudents.length, color: "bg-[#ffffff]" },
+            { label: "Videos", value: videos.length, color: "bg-[#ffffff]" },
+            { label: "Active passes", value: allPasses.filter(p => p.classes_remaining > 0 && (!p.expires_at || new Date(p.expires_at) > new Date())).length, color: "bg-[#ffffff]" },
           ].map((stat) => (
             <div key={stat.label} className={`card p-5 ${stat.color}`}>
               <p className="font-heading text-2xl">{stat.value}</p>
@@ -1101,7 +1101,7 @@ export default function InstructorPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
-                  ? "border-[#334155] text-[#334155]"
+                  ? "border-[#000000] text-[#000000]"
                   : "border-transparent text-gray-500 hover:text-black"
               }`}
             >
@@ -1121,7 +1121,7 @@ export default function InstructorPage() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-heading text-sm uppercase tracking-widest text-[#334155]">Upcoming</h3>
+                  <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000]">Upcoming</h3>
                   <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
                     Remove All Upcoming
                   </button>
@@ -1210,7 +1210,7 @@ export default function InstructorPage() {
                             <p className="font-medium text-sm font-body">
                               {s.full_name ?? "—"}
                               {s.guest_count > 0 && (
-                                <span className="ml-2 badge bg-[#e2e8f0]/50 text-black">+{s.guest_count} guest</span>
+                                <span className="ml-2 badge bg-[#e2d0fb]/50 text-black">+{s.guest_count} guest</span>
                               )}
                             </p>
                             <p className="text-xs text-gray-500 font-body">{s.email}</p>
@@ -1227,8 +1227,8 @@ export default function InstructorPage() {
                               onClick={() => toggleAttendance(s.id, s.attended)}
                               className={`w-8 h-8 rounded-full border-2 transition-all ${
                                 s.attended
-                                  ? "bg-[#334155] border-[#334155] text-white"
-                                  : "border-gray-300 hover:border-[#334155]"
+                                  ? "bg-[#000000] border-[#000000] text-white"
+                                  : "border-gray-300 hover:border-[#000000]"
                               }`}
                             >
                               {s.attended ? <Check className="w-4 h-4 mx-auto" strokeWidth={2.5} /> : ""}
@@ -1237,16 +1237,16 @@ export default function InstructorPage() {
                         </div>
                       ))}
                       {walkIns.map((w) => (
-                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#f8fafc]">
+                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#ffffff]">
                           <div>
                             <p className="font-medium text-sm font-body">
                               {w.name}
-                              <span className="ml-2 badge bg-[#e2e8f0]/50 text-black text-xs">Walk-in</span>
+                              <span className="ml-2 badge bg-[#e2d0fb]/50 text-black text-xs">Walk-in</span>
                               {w.payment_type === "pass" && <span className="ml-1 badge bg-blue-100 text-blue-700 text-xs">Pass deducted</span>}
                             </p>
                             <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-[#334155] border-2 border-[#334155] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
+                          <div className="w-8 h-8 rounded-full bg-[#000000] border-2 border-[#000000] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
                         </div>
                       ))}
                     </div>
@@ -1292,7 +1292,7 @@ export default function InstructorPage() {
                 {products.map((p) => (
                   <div key={p.id} className={`card overflow-hidden flex flex-col ${!p.active ? "opacity-50" : ""}`}>
                     {p.image_url && (
-                      <div className="aspect-square bg-[#f8fafc]">
+                      <div className="aspect-square bg-[#ffffff]">
                         <img src={p.image_url} alt={p.title} className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -1303,12 +1303,12 @@ export default function InstructorPage() {
                         </span>
                       </div>
                       <h3 className="font-heading text-base">{p.title}</h3>
-                      <p className="font-heading text-lg text-[#334155] mt-1">{formatPrice(p.price_cents)}</p>
+                      <p className="font-heading text-lg text-[#000000] mt-1">{formatPrice(p.price_cents)}</p>
                       {p.sizes && p.sizes.length > 0 && (
                         <p className="font-body text-xs text-gray-400 mt-1">Sizes: {p.sizes.join(", ")}</p>
                       )}
                       <div className="flex gap-3 mt-auto pt-4">
-                        <button onClick={() => toggleProductActive(p)} className="font-body text-xs text-[#334155] hover:underline">
+                        <button onClick={() => toggleProductActive(p)} className="font-body text-xs text-[#000000] hover:underline">
                           {p.active ? "Hide" : "Unhide"}
                         </button>
                         <button onClick={() => deleteProduct(p.id)} className="font-body text-xs text-red-400 hover:text-red-600 underline">
@@ -1355,7 +1355,7 @@ export default function InstructorPage() {
                         <button
                           onClick={() => debitPass(p.id)}
                           disabled={debitingPassId === p.id}
-                          className="font-body text-xs text-[#334155] hover:underline disabled:opacity-50 shrink-0"
+                          className="font-body text-xs text-[#000000] hover:underline disabled:opacity-50 shrink-0"
                         >
                           {debitingPassId === p.id ? "…" : "Debit 1"}
                         </button>
@@ -1418,14 +1418,14 @@ export default function InstructorPage() {
                       <p className="text-xs text-gray-400 font-body inline-flex items-center gap-1">
                         {s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                         {s.birth_date && (
-                          <> · <Cake className="w-3 h-3 text-[#334155]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
+                          <> · <Cake className="w-3 h-3 text-[#000000]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
                         )}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <button
                         onClick={() => openAssignPass(s)}
-                        className="font-body text-xs text-[#334155] hover:underline"
+                        className="font-body text-xs text-[#000000] hover:underline"
                       >
                         Assign pass
                       </button>
@@ -1493,7 +1493,7 @@ export default function InstructorPage() {
                       ) : (
                         <button onClick={() => { setEditingDiscountId(d.id); setEditDiscountExpiresAt(d.expires_at ? d.expires_at.split("T")[0] : ""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
                       )}
-                      <button onClick={() => toggleDiscountActive(d.id, d.active)} className="font-body text-xs text-[#334155] hover:underline">
+                      <button onClick={() => toggleDiscountActive(d.id, d.active)} className="font-body text-xs text-[#000000] hover:underline">
                         {d.active ? "Disable" : "Enable"}
                       </button>
                       <button onClick={() => deleteDiscountCode(d.id)} className="font-body text-xs text-red-400 hover:text-red-600">
@@ -1589,7 +1589,7 @@ export default function InstructorPage() {
                   const CatIcon = CATEGORY_ICONS[post.category as string] ?? Megaphone;
                   const isEditing = editingNewsId === post.id;
                   return (
-                    <div key={post.id} className={`card p-5 ${post.pinned ? "border-2 border-[#334155]" : ""}`}>
+                    <div key={post.id} className={`card p-5 ${post.pinned ? "border-2 border-[#000000]" : ""}`}>
                       {isEditing ? (
                         <form onSubmit={saveEditNewsPost} className="space-y-3">
                           <input className="input" value={editNewsForm.title} onChange={e => setEditNewsForm(f => ({ ...f, title: e.target.value }))} required />
@@ -1642,15 +1642,15 @@ export default function InstructorPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="font-heading text-base flex items-center gap-1.5">
-                              <CatIcon className="w-4 h-4 shrink-0 text-[#334155]" strokeWidth={1.75} />
-                              {post.title} {post.pinned && <span className="ml-1 badge bg-[#334155] text-white text-xs">Pinned</span>}
+                              <CatIcon className="w-4 h-4 shrink-0 text-[#000000]" strokeWidth={1.75} />
+                              {post.title} {post.pinned && <span className="ml-1 badge bg-[#000000] text-white text-xs">Pinned</span>}
                             </p>
                             <p className="font-body text-sm text-gray-600 mt-1 whitespace-pre-wrap"><Linkify text={post.body} /></p>
                             <p className="font-body text-xs text-gray-400 mt-2">{new Date(post.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</p>
                           </div>
                           <div className="flex gap-2 shrink-0">
                             <button onClick={() => { setEditingNewsId(post.id); setEditNewsForm({ title: post.title, body: post.body, category: post.category, pinned: post.pinned, image_url: post.image_url ?? null }); setEditNewsImage(null); setEditNewsImageError(""); }} className="font-body text-xs text-gray-500 hover:underline">Edit</button>
-                            <button onClick={() => togglePin(post.id, post.pinned)} className="font-body text-xs text-[#334155] hover:underline">{post.pinned ? "Unpin" : "Pin"}</button>
+                            <button onClick={() => togglePin(post.id, post.pinned)} className="font-body text-xs text-[#000000] hover:underline">{post.pinned ? "Unpin" : "Pin"}</button>
                             <button onClick={() => deleteNewsPost(post.id)} className="font-body text-xs text-red-500 hover:underline">Delete</button>
                           </div>
                         </div>
@@ -1816,10 +1816,10 @@ export default function InstructorPage() {
                 </div>
               </div>
               <div>
-                <label className="label">Location (optional)</label>
+                <label className="label">Location</label>
                 <input
                   className="input"
-                  placeholder="Leave blank to use the usual location"
+                  placeholder="e.g. BYLA City — Alexandria, or BYLA Manly"
                   value={classForm.location}
                   onChange={e => setClassForm(f => ({ ...f, location: e.target.value }))}
                 />
@@ -1831,14 +1831,14 @@ export default function InstructorPage() {
                   checked={classForm.isSpecial}
                   onChange={e => setClassForm(f => ({ ...f, isSpecial: e.target.checked }))}
                 />
-                <label htmlFor="isSpecial" className="label mb-0">This is a one-off special class (pop-up, collab, guest class, etc.)</label>
+                <label htmlFor="isSpecial" className="label mb-0">This is a one-off special class (pop-up, collab, video shooting, etc.)</label>
               </div>
               {classForm.isSpecial && (
                 <div>
                   <label className="label">Special label</label>
                   <input
                     className="input"
-                    placeholder="e.g. Pop-up, Collab, Guest Class"
+                    placeholder="e.g. Pop-up, Collab, Video Shooting"
                     value={classForm.specialLabel}
                     onChange={e => setClassForm(f => ({ ...f, specialLabel: e.target.value }))}
                   />
@@ -2041,7 +2041,7 @@ export default function InstructorPage() {
                   id="is_public"
                   checked={videoForm.is_public}
                   onChange={e => setVideoForm(f => ({ ...f, is_public: e.target.checked }))}
-                  className="w-4 h-4 accent-[#334155]"
+                  className="w-4 h-4 accent-[#000000]"
                 />
                 <label htmlFor="is_public" className="font-body text-sm text-gray-700">
                   Visible to all members (not just paid registrants)
@@ -2246,7 +2246,7 @@ export default function InstructorPage() {
             <div className="space-y-4">
               {!bulkResults ? (
                 <>
-                  <div className="bg-[#94a3b8]/10 border border-[#94a3b8]/40 rounded-xl p-4 font-body text-xs text-gray-600 leading-relaxed">
+                  <div className="bg-[#9b7fc7]/10 border border-[#9b7fc7]/40 rounded-xl p-4 font-body text-xs text-gray-600 leading-relaxed">
                     <p className="font-heading text-sm mb-2">CSV format required:</p>
                     <code className="block bg-white rounded p-2 text-xs">
                       Full Name,Email,Phone<br/>
@@ -2261,7 +2261,7 @@ export default function InstructorPage() {
                     <input
                       type="file"
                       accept=".csv,.txt"
-                      className="block w-full font-body text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-heading file:bg-[#334155] file:text-white hover:file:bg-[#334155]/80 cursor-pointer"
+                      className="block w-full font-body text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-heading file:bg-[#000000] file:text-white hover:file:bg-[#000000]/80 cursor-pointer"
                       onChange={e => {
                         const file = e.target.files?.[0];
                         if (!file) return;
@@ -2279,7 +2279,7 @@ export default function InstructorPage() {
                       <p className="font-body text-sm text-gray-600 mb-2">{bulkPreview.length} members found — preview:</p>
                       <div className="max-h-48 overflow-y-auto overflow-x-auto border border-gray-100 rounded-xl">
                         <table className="w-full text-xs font-body">
-                          <thead className="bg-[#f8fafc] sticky top-0">
+                          <thead className="bg-[#ffffff] sticky top-0">
                             <tr>
                               <th className="text-left px-3 py-2 text-gray-500">Name</th>
                               <th className="text-left px-3 py-2 text-gray-500">Email</th>
@@ -2467,10 +2467,10 @@ export default function InstructorPage() {
           <Modal title={`Add to Roll — ${new Date(selectedClass.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long" })}`} onClose={() => setShowAddToRoll(false)}>
             {/* Mode toggle */}
             <div className="flex rounded-xl overflow-hidden border border-gray-200 mb-4">
-              <button type="button" onClick={() => setAddToRollMode("member")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "member" ? "bg-[#334155] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
+              <button type="button" onClick={() => setAddToRollMode("member")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "member" ? "bg-[#000000] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
                 Existing Member
               </button>
-              <button type="button" onClick={() => setAddToRollMode("walkin")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "walkin" ? "bg-[#334155] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
+              <button type="button" onClick={() => setAddToRollMode("walkin")} className={`flex-1 py-2 font-body text-sm transition-colors ${addToRollMode === "walkin" ? "bg-[#000000] text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>
                 Walk-in (no account)
               </button>
             </div>
@@ -2647,14 +2647,14 @@ export default function InstructorPage() {
                 <button
                   type="button"
                   onClick={() => switchReviewMode("class")}
-                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "class" ? "bg-[#334155] text-white" : "text-gray-500"}`}
+                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "class" ? "bg-[#000000] text-white" : "text-gray-500"}`}
                 >
                   First-timers by class
                 </button>
                 <button
                   type="button"
                   onClick={() => switchReviewMode("any")}
-                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "any" ? "bg-[#334155] text-white" : "text-gray-500"}`}
+                  className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-colors ${reviewMode === "any" ? "bg-[#000000] text-white" : "text-gray-500"}`}
                 >
                   Any members
                 </button>
@@ -2808,13 +2808,13 @@ function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past
   isToday?: boolean;
 }) {
   return (
-    <div className={`card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${cls.is_cancelled ? "opacity-60" : ""} ${isToday ? "ring-2 ring-[#334155]" : ""}`}>
+    <div className={`card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${cls.is_cancelled ? "opacity-60" : ""} ${isToday ? "ring-2 ring-[#000000]" : ""}`}>
       <div>
         <div className="flex items-center gap-2 mb-1">
           {cls.is_cancelled ? (
             <span className="badge badge-cancelled">Cancelled</span>
           ) : isToday ? (
-            <span className="badge bg-[#334155] text-white">Today</span>
+            <span className="badge bg-[#000000] text-white">Today</span>
           ) : past ? (
             <span className="badge badge bg-gray-100 text-gray-600">Past</span>
           ) : (
@@ -2876,7 +2876,7 @@ function VideoCard({ video, onDelete }: { video: Video; onDelete: () => void }) 
           className="absolute inset-0 flex items-center justify-center"
         >
           <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[14px] border-l-[#334155] ml-1" />
+            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[14px] border-l-[#000000] ml-1" />
           </div>
         </a>
       </div>

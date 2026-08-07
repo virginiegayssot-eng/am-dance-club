@@ -20,8 +20,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "[Studio Name]",
-  description: "Dance classes at [Studio Location]",
+  title: "BYLA",
+  description: "Reggaeton dance classes in Alexandria & Manly, Sydney",
   icons: {
     apple: "/apple-touch-icon.png",
     icon: [
