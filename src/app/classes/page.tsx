@@ -79,17 +79,17 @@ export default function ClassesPage() {
   }
 
   // Smart book: auto-use best pass, else show options
-  async function handleBook(cls: ClassWithMeta, guestCount = 0) {
+  async function handleBook(cls: ClassWithMeta) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
 
     // Auto-use first valid pass (sorted by soonest expiry)
     if (activePasses.length > 0) {
-      setActionId(cls.id + (guestCount > 0 ? "-double" : ""));
+      setActionId(cls.id);
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount }),
+        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount: 0 }),
       });
       const { error } = await res.json();
       if (error) { setActionError(error); setActionId(null); return; }
@@ -102,7 +102,7 @@ export default function ClassesPage() {
     setExpandedId(cls.id === expandedId ? null : cls.id);
   }
 
-  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual" | "double", useAltDuration = false) {
+  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual", useAltDuration = false) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
     setActionId(cls.id + passTypeId + (useAltDuration ? "-alt" : ""));
@@ -118,7 +118,6 @@ export default function ClassesPage() {
 
   const hasPass = activePasses.length > 0;
   const bestPass = activePasses[0];
-  const isDoublePass = hasPass && (bestPass as any).pass_types?.name?.toLowerCase().includes("double");
   const visibleClasses = showSpecialOnly ? classes.filter(c => c.is_special) : classes;
 
   return (
@@ -242,29 +241,16 @@ export default function ClassesPage() {
 
                           {/* Primary book button */}
                           <button
-                            onClick={() => canUsePass ? handleBook(cls, isDoublePass ? 1 : 0) : payAndBook(cls, "casual")}
+                            onClick={() => canUsePass ? handleBook(cls) : payAndBook(cls, "casual")}
                             disabled={!!actionId}
                             className="btn-primary w-full justify-center"
                           >
                             {isLoading
                               ? "Booking…"
                               : canUsePass
-                              ? isDoublePass
-                                ? `Book for 2 · Use Pass (${bestPass.classes_remaining} left)`
-                                : `Book · Use Pass (${bestPass.classes_remaining} left)`
+                              ? `Book · Use Pass (${bestPass.classes_remaining} left)`
                               : `Book · ${formatPrice(cls.price_cents)} Casual (${cls.duration_minutes} min)`}
                           </button>
-
-                          {/* Book for 2 — only show for non-double passes */}
-                          {canUsePass && !isDoublePass && bestPass.classes_remaining >= 2 && (
-                            <button
-                              onClick={() => handleBook(cls, 1)}
-                              disabled={!!actionId}
-                              className="btn-secondary w-full justify-center text-sm py-2"
-                            >
-                              {actionId === cls.id + "-double" ? "Booking…" : "Book for 2 · Uses 2 credits"}
-                            </button>
-                          )}
 
                           {/* Show payment options toggle when no usable pass */}
                           {!canUsePass && (
@@ -286,15 +272,6 @@ export default function ClassesPage() {
                                   className="btn-secondary w-full justify-center text-sm py-2"
                                 >
                                   {actionId === cls.id + "casual-alt" ? "Loading…" : `${formatPrice(cls.alt_price_cents)} Casual (${cls.alt_duration_minutes} min)`}
-                                </button>
-                              )}
-                              {!cls.is_special && (
-                                <button
-                                  onClick={() => payAndBook(cls, "double")}
-                                  disabled={!!actionId}
-                                  className="btn-secondary w-full justify-center text-sm py-2"
-                                >
-                                  {actionId === cls.id + "double" ? "Loading…" : "Double Pass $48 (+ 1 guest)"}
                                 </button>
                               )}
                               {!cls.is_special && (

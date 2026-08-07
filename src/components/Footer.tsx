@@ -19,6 +19,10 @@ export default function Footer() {
               BYLA City — Alexandria, Tuesdays 7:30pm<br />
               BYLA Manly — Manly, Thursdays 7:00pm
             </p>
+            <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
+              <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a><br />
+              <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
+            </p>
           </div>
           <div>
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2d0fb]">Quick Links</h4>

@@ -93,7 +93,10 @@ export default function HomePage() {
               <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong> — Alexandria</p>
               <p className="font-body text-lg mb-4">Tuesdays 7:30pm</p>
               <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong> — Manly</p>
-              <p className="font-body text-lg">Thursdays 7:00pm</p>
+              <p className="font-body text-lg mb-4">Thursdays 7:00pm</p>
+              <p className="font-body text-base text-white/70">
+                <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a> · <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
+              </p>
             </div>
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Class Prices</h2>

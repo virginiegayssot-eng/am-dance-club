@@ -21,9 +21,7 @@ type PassOption = {
   newOnly?: boolean;
 };
 
-// NOTE: casual/five/ten prices are real (from the BYLA brief). double/intro
-// prices were not specified in the brief — estimated here, confirm with
-// Majo before this goes live.
+// BYLA only offers these three tiers — no double/intro pass.
 const PASS_OPTIONS: PassOption[] = [
   {
     id: "casual",
@@ -32,23 +30,6 @@ const PASS_OPTIONS: PassOption[] = [
     classes: "1 class",
     validity: "One-time",
     description: "Drop in whenever you like. Pay per class.",
-  },
-  {
-    id: "double",
-    name: "Double Pass",
-    price: "$48",
-    classes: "2 spots",
-    validity: "One class",
-    description: "Bring a friend to the same class. Two spots for the price of one deal.",
-  },
-  {
-    id: "intro",
-    name: "Intro Pass",
-    price: "$65",
-    classes: "3 classes",
-    validity: "3 months",
-    description: "Perfect for new dancers. Try 3 classes at a special rate.",
-    newOnly: true,
   },
   {
     id: "five",
