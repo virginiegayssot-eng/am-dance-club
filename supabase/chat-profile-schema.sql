@@ -52,3 +52,6 @@ create or replace view public.unread_dm_counts as
   from public.messages
   where channel = 'direct' and read_at is null
   group by recipient_id;
+
+-- Unused by the app today, but lock it down rather than leave it bypassing RLS
+alter view public.unread_dm_counts set (security_invoker = true);
