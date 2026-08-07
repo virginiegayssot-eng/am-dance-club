@@ -19,6 +19,14 @@ insert into public.pass_types values
   ('five',      '5-Class Pass',   'Valid for 6 months',                          5,  10000, 180, 0, false),
   ('ten',       '10-Class Pass',  'Valid for 1 year',                            10, 20000, 365, 0, false);
 
+alter table public.pass_types enable row level security;
+create policy "Pass types viewable by authenticated users" on public.pass_types
+  for select using (auth.role() = 'authenticated');
+create policy "Instructors can manage pass types" on public.pass_types
+  for all using (
+    auth.uid() in (select id from public.profiles where role = 'instructor')
+  );
+
 -- Student passes (purchased)
 create table public.passes (
   id uuid primary key default uuid_generate_v4(),
