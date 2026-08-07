@@ -45,10 +45,10 @@ create policy "Instructors view all passes" on public.passes
   for select using (
     auth.uid() in (select id from public.profiles where role = 'instructor')
   );
-create policy "System can insert passes" on public.passes
-  for insert with check (true);
-create policy "System can update passes" on public.passes
-  for update using (true);
+-- No client-writable insert/update policy: every pass write in the app goes
+-- through the service-role admin client (webhook, instructor tools), which
+-- bypasses RLS regardless. A "using (true)" policy here would just be an
+-- unused door open to any signed-in user.
 
 -- Update registrations table to track pass usage and guests
 alter table public.registrations
