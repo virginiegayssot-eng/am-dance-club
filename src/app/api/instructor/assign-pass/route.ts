@@ -33,6 +33,37 @@ function buildBirthdayPassEmailHtml(firstName: string) {
   `;
 }
 
+function buildPassAssignedEmailHtml(firstName: string, passName: string, classesIncluded: number | null, expiresAt: string | null) {
+  const expiryLine = expiresAt
+    ? `Valid until ${new Date(expiresAt).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}.`
+    : "No expiry.";
+  return `
+    <!DOCTYPE html>
+    <html>
+    <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
+      <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
+        <div style="background:#2041d8;padding:32px;text-align:center;">
+          <h1 style="color:#e4c3cc;font-size:28px;margin:0;letter-spacing:2px;">THE A.M</h1>
+          <p style="color:#ffffff;margin:4px 0 0;font-size:14px;letter-spacing:1px;">DANCE CLUB</p>
+        </div>
+        <div style="padding:36px 32px;">
+          <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">You're all set, ${firstName}!</h2>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
+            Your <strong>${passName}</strong>${classesIncluded ? ` (${classesIncluded} class${classesIncluded !== 1 ? "es" : ""})` : ""} has been added to your account and is ready to use.
+          </p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">${expiryLine}</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Head to the Classes page any time to book a spot.</p>
+          <p style="color:#444;font-size:16px;margin:0;">See you on the dancefloor!</p>
+        </div>
+        <div style="background:#e4c3cc;padding:20px;text-align:center;">
+          <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 function adminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -75,17 +106,25 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  if (passTypeId === "birthday") {
-    const { data: student } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
-    if (student?.email && process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const firstName = (student.full_name ?? "dancer").split(" ")[0];
+  const { data: student } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
+  if (student?.email && process.env.RESEND_API_KEY) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const firstName = (student.full_name ?? "dancer").split(" ")[0];
+
+    if (passTypeId === "birthday") {
       await resend.emails.send({
         from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: student.email,
         subject: "Happy Birthday from THE A.M Dance Club! 🎂",
         html: buildBirthdayPassEmailHtml(firstName),
       }).catch((e) => console.error("Birthday pass email error:", e));
+    } else {
+      await resend.emails.send({
+        from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        to: student.email,
+        subject: `Your ${passType.name} is ready — THE A.M Dance Club`,
+        html: buildPassAssignedEmailHtml(firstName, passType.name, passType.classes_included, expiresAt),
+      }).catch((e) => console.error("Pass assigned email error:", e));
     }
   }
 
