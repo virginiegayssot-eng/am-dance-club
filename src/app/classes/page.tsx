@@ -22,7 +22,7 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [showSpecialOnly, setShowSpecialOnly] = useState(false);
+  const [filter, setFilter] = useState<"all" | "special" | "city" | "manly" | "videoshoot">("all");
   const [actionError, setActionError] = useState("");
 
   useEffect(() => {
@@ -118,7 +118,20 @@ export default function ClassesPage() {
 
   const hasPass = activePasses.length > 0;
   const bestPass = activePasses[0];
-  const visibleClasses = showSpecialOnly ? classes.filter(c => c.is_special) : classes;
+  const visibleClasses = classes.filter(c => {
+    if (filter === "special") return c.is_special;
+    if (filter === "city") return c.location.toLowerCase().includes("city");
+    if (filter === "manly") return c.location.toLowerCase().includes("manly");
+    if (filter === "videoshoot") return c.is_special && (c.special_label ?? "").toLowerCase().includes("video");
+    return true;
+  });
+  const emptyStateLabel: Record<typeof filter, string> = {
+    all: "No upcoming classes",
+    special: "No special classes right now",
+    city: "No upcoming classes at City",
+    manly: "No upcoming classes at Manly",
+    videoshoot: "No video shoots scheduled right now",
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -134,18 +147,21 @@ export default function ClassesPage() {
           <Link href="/passes" className="btn-pink self-start sm:self-auto">View Passes & Pricing</Link>
         </div>
 
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={() => setShowSpecialOnly(false)}
-            className={!showSpecialOnly ? "btn-primary" : "btn-secondary"}
-          >
+        <div className="flex gap-3 mb-8 flex-wrap">
+          <button onClick={() => setFilter("all")} className={filter === "all" ? "btn-primary" : "btn-secondary"}>
             All Classes
           </button>
-          <button
-            onClick={() => setShowSpecialOnly(true)}
-            className={showSpecialOnly ? "btn-primary" : "btn-secondary"}
-          >
+          <button onClick={() => setFilter("special")} className={filter === "special" ? "btn-primary" : "btn-secondary"}>
             Special Classes
+          </button>
+          <button onClick={() => setFilter("city")} className={filter === "city" ? "btn-primary" : "btn-secondary"}>
+            City
+          </button>
+          <button onClick={() => setFilter("manly")} className={filter === "manly" ? "btn-primary" : "btn-secondary"}>
+            Manly
+          </button>
+          <button onClick={() => setFilter("videoshoot")} className={filter === "videoshoot" ? "btn-primary" : "btn-secondary"}>
+            Videoshoot
           </button>
         </div>
 
@@ -178,11 +194,9 @@ export default function ClassesPage() {
         ) : visibleClasses.length === 0 ? (
           <div className="text-center py-20">
             <Clock className="w-12 h-12 mx-auto mb-4 text-[#000000]" strokeWidth={1.5} />
-            <h3 className="font-heading text-xl mb-2">
-              {showSpecialOnly ? "No special classes right now" : "No upcoming classes"}
-            </h3>
+            <h3 className="font-heading text-xl mb-2">{emptyStateLabel[filter]}</h3>
             <p className="font-body text-gray-500">
-              {showSpecialOnly ? "Check back soon for pop-ups and video shoots." : "Check back soon for new classes."}
+              {filter === "all" ? "Check back soon for new classes." : "Check back soon, or view All Classes."}
             </p>
           </div>
         ) : (
