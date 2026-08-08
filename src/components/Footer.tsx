@@ -16,8 +16,12 @@ export default function Footer() {
           <div>
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2d0fb]">Location & Hours</h4>
             <p className="font-body text-sm text-white/70 leading-relaxed">
-              BYLA City — Alexandria, Tuesdays 7:30pm<br />
-              BYLA Manly — Manly, Thursdays 7:00pm
+              <strong>BYLA City</strong> — Tuesdays 7:30pm<br />
+              70 O'Riordan St, Alexandria NSW 2015
+            </p>
+            <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
+              <strong>BYLA Manly</strong> — Thursdays 7:00pm<br />
+              St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095
             </p>
             <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
               <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a><br />
@@ -30,6 +34,7 @@ export default function Footer() {
               {[
                 { href: "/how-to-use", label: "How to Use" },
                 { href: "/classes", label: "Classes" },
+                { href: "/instructors", label: "Instructors" },
                 { href: "/passes", label: "Passes & Pricing" },
                 { href: "/videos", label: "Videos" },
                 { href: "/merch", label: "Merch" },

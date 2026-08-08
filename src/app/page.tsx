@@ -90,10 +90,18 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Location & Hours</h2>
-              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong> — Alexandria</p>
-              <p className="font-body text-lg mb-4">Tuesdays 7:30pm</p>
-              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong> — Manly</p>
-              <p className="font-body text-lg mb-4">Thursdays 7:00pm</p>
+              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong> — Tuesdays 7:30pm</p>
+              <p className="font-body text-base text-white/70 mb-4">
+                <a href="https://maps.google.com/?q=70+O%27Riordan+St,+Alexandria+NSW+2015,+Australia" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
+                  70 O'Riordan St, Alexandria NSW 2015
+                </a>
+              </p>
+              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong> — Thursdays 7:00pm</p>
+              <p className="font-body text-base text-white/70 mb-4">
+                <a href="https://maps.google.com/?q=St+Matthews+Church+Hall,+1+Darley+Road,+Manly,+NSW+2095" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
+                  St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095
+                </a>
+              </p>
               <p className="font-body text-base text-white/70">
                 <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a> · <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
               </p>

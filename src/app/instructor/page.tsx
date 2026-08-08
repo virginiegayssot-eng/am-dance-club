@@ -56,7 +56,7 @@ export default function InstructorPage() {
   const [bulkResults, setBulkResults] = useState<{ email: string; name: string; status: string; reason?: string }[] | null>(null);
   const [bulkParseError, setBulkParseError] = useState("");
 
-  // Club News
+  // BYLA News
   const [newsPosts, setNewsPosts] = useState<any[]>([]);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [newsForm, setNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
@@ -966,7 +966,7 @@ export default function InstructorPage() {
     { key: "students", label: "Members" },
     { key: "playlists", label: "Playlists" },
     { key: "discounts", label: "Discounts" },
-    { key: "news", label: "Club News" },
+    { key: "news", label: "BYLA News" },
     { key: "merch", label: "Merch" },
   ] as const;
 
