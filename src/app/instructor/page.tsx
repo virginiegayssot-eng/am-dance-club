@@ -107,6 +107,7 @@ export default function InstructorPage() {
   const [addStudentForm, setAddStudentForm] = useState({ full_name: "", email: "", phone: "" });
   const [addStudentLoading, setAddStudentLoading] = useState(false);
   const [addStudentError, setAddStudentError] = useState("");
+  const [addStudentWarning, setAddStudentWarning] = useState<{ message: string; url: string } | null>(null);
 
   // Assign pass form
   const [showAssignPassForm, setShowAssignPassForm] = useState(false);
@@ -772,6 +773,7 @@ export default function InstructorPage() {
     e.preventDefault();
     setAddStudentLoading(true);
     setAddStudentError("");
+    setAddStudentWarning(null);
 
     const res = await fetch("/api/instructor/create-student", {
       method: "POST",
@@ -786,10 +788,18 @@ export default function InstructorPage() {
       return;
     }
 
-    setShowAddStudentForm(false);
     setAddStudentForm({ full_name: "", email: "", phone: "" });
     loadData();
     setAddStudentLoading(false);
+
+    if (data.warning) {
+      // Account was created but the email failed to send — keep the modal
+      // open so the instructor can copy the link and share it manually,
+      // instead of silently losing it behind a closed modal.
+      setAddStudentWarning({ message: data.warning, url: data.inviteUrl });
+    } else {
+      setShowAddStudentForm(false);
+    }
   }
 
   async function assignPass(e: React.FormEvent) {
@@ -2385,7 +2395,31 @@ export default function InstructorPage() {
 
         {/* ADD STUDENT MODAL */}
         {showAddStudentForm && (
-          <Modal title="Invite Member" onClose={() => { setShowAddStudentForm(false); setAddStudentError(""); }}>
+          <Modal title="Invite Member" onClose={() => { setShowAddStudentForm(false); setAddStudentError(""); setAddStudentWarning(null); }}>
+            {addStudentWarning ? (
+              <div className="space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 font-body text-sm text-amber-800">
+                  {addStudentWarning.message}
+                </div>
+                <div>
+                  <label className="label">Invite link</label>
+                  <input
+                    className="input font-mono text-xs"
+                    readOnly
+                    value={addStudentWarning.url}
+                    onClick={e => (e.target as HTMLInputElement).select()}
+                  />
+                  <p className="font-body text-xs text-gray-400 mt-1">Click to select, then copy and share it with them directly (e.g. by text).</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowAddStudentForm(false); setAddStudentWarning(null); }}
+                  className="btn-primary w-full justify-center"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
             <form onSubmit={inviteStudent} className="space-y-4">
               <p className="font-body text-sm text-gray-500">
                 The student will receive an email invitation to set up their password and join the club.
@@ -2431,6 +2465,7 @@ export default function InstructorPage() {
                 </button>
               </div>
             </form>
+            )}
           </Modal>
         )}
 
