@@ -59,7 +59,7 @@ export default function HomePage() {
             {[
               { title: "Stronger Body", desc: "Move to Reggaeton beats that build stamina, tone muscles, and get your heart pumping." },
               { title: "End-of-Day Energy", desc: "Swap the couch for music and movement that lift your mood after a long day." },
-              { title: "Confidence Boost", desc: "No mirrors, no judgment. Every step, every beat — confidence grows with practice!" },
+              { title: "Confidence Boost", desc: "No mirrors, no judgment. Every step, every beat, confidence grows with practice!" },
               { title: "Improved Coordination", desc: "Master choreography designed to challenge and grow your rhythm skills." },
               { title: "Feel-Good Community", desc: "Be part of a fun, inclusive, and empowering community." },
             ].map(f => (
@@ -90,13 +90,13 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Location & Hours</h2>
-              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong> — Tuesdays 7:30pm</p>
+              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong>: Tuesdays 7:30pm</p>
               <p className="font-body text-base text-white/70 mb-4">
                 <a href="https://maps.google.com/?q=70+O%27Riordan+St,+Alexandria+NSW+2015,+Australia" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
                   70 O'Riordan St, Alexandria NSW 2015
                 </a>
               </p>
-              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong> — Thursdays 7:00pm</p>
+              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong>: Thursdays 7:00pm</p>
               <p className="font-body text-base text-white/70 mb-4">
                 <a href="https://maps.google.com/?q=St+Matthews+Church+Hall,+1+Darley+Road,+Manly,+NSW+2095" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
                   St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095
@@ -110,7 +110,7 @@ export default function HomePage() {
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Class Prices</h2>
               <div className="space-y-3 font-body">
                 <p><strong>Casual Drop-In:</strong> $26 per class</p>
-                <p><strong>5-Class Pack:</strong> $120 — Valid 2 months</p>
+                <p><strong>5-Class Pack:</strong> $120 (Valid 2 months)</p>
                 <p><strong>10-Class Pack:</strong> $220</p>
               </div>
               <Link href="/passes" className="mt-6 inline-block bg-white text-[#000000] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#e2d0fb] transition-colors">
