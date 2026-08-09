@@ -15,6 +15,13 @@ import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageI
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
+// Quick-fill addresses for the Location field — instructors can still type over
+// these freely if a location ever changes, this is just a shortcut.
+const LOCATION_CITY = "BYLA City — 70 O'Riordan St, Alexandria NSW 2015";
+const LOCATION_MANLY = "BYLA Manly — St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095";
+
+const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
+
 type ClassWithCount = Class & { registered_count: number };
 type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
 type PassRow = Pass & { profiles: { full_name: string | null; email: string } };
@@ -44,9 +51,9 @@ export default function InstructorPage() {
   const [classFormError, setClassFormError] = useState("");
   const [actionError, setActionError] = useState("");
 
-  // Bulk create Fridays
+  // Bulk create recurring classes
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "", capacity: "20", durationMinutes: "60", classTime: "09:00", dayOfWeek: "5", end_date: "", altDurationMinutes: "", altPriceCents: "" });
+  const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "", capacity: "20", durationMinutes: "60", classTime: "09:00", dayOfWeek: "5", end_date: "", altDurationMinutes: "", altPriceCents: "", location: "" });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -460,7 +467,7 @@ export default function InstructorPage() {
     setClassFormLoading(false);
   }
 
-  async function bulkCreateFridays(e: React.FormEvent) {
+  async function bulkCreateClasses(e: React.FormEvent) {
     e.preventDefault();
     setBulkLoading(true);
 
@@ -493,6 +500,7 @@ export default function InstructorPage() {
       instructor_id: profile!.id,
       alt_duration_minutes: bulkForm.altDurationMinutes ? parseInt(bulkForm.altDurationMinutes) : null,
       alt_price_cents: bulkForm.altPriceCents ? Math.round(parseFloat(bulkForm.altPriceCents) * 100) : null,
+      ...(bulkForm.location ? { location: bulkForm.location } : {}),
     }));
 
     const { error } = await supabase.from("classes").insert(rows);
@@ -1817,6 +1825,10 @@ export default function InstructorPage() {
               </div>
               <div>
                 <label className="label">Location</label>
+                <div className="flex gap-2 mb-2">
+                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_CITY }))} className="btn-secondary py-1.5 px-3 text-xs">City</button>
+                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
+                </div>
                 <input
                   className="input"
                   placeholder="e.g. BYLA City — Alexandria, or BYLA Manly"
@@ -1860,7 +1872,7 @@ export default function InstructorPage() {
         {/* BULK CREATE RECURRING CLASSES MODAL */}
         {showBulkForm && (
           <Modal title="Bulk Create Recurring Classes" onClose={() => setShowBulkForm(false)}>
-            <form onSubmit={bulkCreateFridays} className="space-y-4">
+            <form onSubmit={bulkCreateClasses} className="space-y-4">
               <p className="font-body text-sm text-gray-500">Creates a class for every upcoming date on the chosen weekday that doesn't already have one.</p>
               <div>
                 <label className="label">Class Title</label>
@@ -1917,6 +1929,19 @@ export default function InstructorPage() {
                   value={bulkForm.end_date}
                   onChange={e => setBulkForm(f => ({ ...f, end_date: e.target.value }))}
                   required
+                />
+              </div>
+              <div>
+                <label className="label">Location</label>
+                <div className="flex gap-2 mb-2">
+                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_CITY }))} className="btn-secondary py-1.5 px-3 text-xs">City</button>
+                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
+                </div>
+                <input
+                  className="input"
+                  placeholder="e.g. BYLA City — Alexandria, or BYLA Manly"
+                  value={bulkForm.location}
+                  onChange={e => setBulkForm(f => ({ ...f, location: e.target.value }))}
                 />
               </div>
               <div className="grid grid-cols-3 gap-3">
@@ -1981,7 +2006,7 @@ export default function InstructorPage() {
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowBulkForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={bulkLoading}>
-                  {bulkLoading ? "Creating…" : "Create all Fridays"}
+                  {bulkLoading ? "Creating…" : `Create all ${DAY_NAMES_PLURAL[parseInt(bulkForm.dayOfWeek)]}`}
                 </button>
               </div>
             </form>

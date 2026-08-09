@@ -78,7 +78,7 @@ export default function SignupPage() {
           <Link href="/" className="inline-block mb-6">
             <Image src="/logo-transparent.png" alt="BYLA" width={140} height={100} className="object-contain mx-auto" />
           </Link>
-          <h1 className="font-heading text-3xl mb-2">Join the club</h1>
+          <h1 className="font-heading text-3xl mb-2">Join BYLA</h1>
           <p className="font-body text-sm text-gray-500">Create your account to book classes</p>
         </div>
 
