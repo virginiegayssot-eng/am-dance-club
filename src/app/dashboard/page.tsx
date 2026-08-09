@@ -236,7 +236,7 @@ export default function DashboardPage() {
           <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#e2d0fb]/10">
             <div>
               <p className="font-heading text-sm">Save with a class pass</p>
-              <p className="font-body text-xs text-gray-500 mt-0.5">5-class pass from $100 · 10-class pass from $200</p>
+              <p className="font-body text-xs text-gray-500 mt-0.5">5-class pass from $120 · 10-class pass from $220</p>
             </div>
             <Link href="/passes" className="btn-primary py-2 px-4 text-sm shrink-0">View Passes</Link>
           </div>
