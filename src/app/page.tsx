@@ -14,6 +14,8 @@ export default function HomePage() {
           src="/byla-banner-hires.png"
           alt="Majo and the BYLA instructors dancing"
           fill
+          sizes="100vw"
+          quality={90}
           className="object-cover"
           priority
         />
