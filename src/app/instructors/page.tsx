@@ -82,13 +82,6 @@ export default function InstructorsPage() {
             ))}
           </div>
         )}
-
-        <div className="card p-6 mt-10 bg-[#e2d0fb] border-none">
-          <h2 className="font-heading text-lg mb-2 text-[#000000]">Visiting & Guest Instructors</h2>
-          <p className="font-body text-sm text-black/70 leading-relaxed">
-            BYLA regularly brings in specialist instructors for workshops and special classes — including Video Shooting sessions. Check the schedule for upcoming guests.
-          </p>
-        </div>
       </main>
       <Footer />
     </div>
