@@ -52,7 +52,7 @@ export default function HomePage() {
       </section>
 
       {/* Why You'll Love BYLA */}
-      <section className="bg-[#d1b3f5] py-20">
+      <section className="bg-[#e2d0fb] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#000000]">Why You'll Love BYLA</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
