@@ -17,7 +17,7 @@ export default function Footer() {
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2d0fb]">Location & Hours</h4>
             <p className="font-body text-sm text-white/70 leading-relaxed">
               <strong>BYLA City</strong> — Tuesdays 7:30pm<br />
-              70 O'Riordan St, Alexandria NSW 2015
+              70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)
             </p>
             <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
               <strong>BYLA Manly</strong> — Thursdays 7:00pm<br />

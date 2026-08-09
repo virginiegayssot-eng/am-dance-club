@@ -17,7 +17,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, locatio
 
 // Quick-fill addresses for the Location field — instructors can still type over
 // these freely if a location ever changes, this is just a shortcut.
-const LOCATION_CITY = "BYLA City — 70 O'Riordan St, Alexandria NSW 2015";
+const LOCATION_CITY = "BYLA City — 70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)";
 const LOCATION_MANLY = "BYLA Manly — St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095";
 
 const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];

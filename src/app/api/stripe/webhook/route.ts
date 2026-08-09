@@ -19,7 +19,7 @@ const PASS_CONFIGS: Record<string, { classes: number; validityDays: number | nul
   double: { classes: 1,  validityDays: null },
   intro:  { classes: 3,  validityDays: 90   },
   five:   { classes: 5,  validityDays: 180  },
-  ten:    { classes: 10, validityDays: 365  },
+  ten:    { classes: 10, validityDays: 485  },
 };
 
 export async function POST(req: NextRequest) {

@@ -105,7 +105,7 @@ export default function HomePage() {
               <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong>: Tuesdays 7:30pm</p>
               <p className="font-body text-base text-white/70 mb-4">
                 <a href="https://maps.google.com/?q=70+O%27Riordan+St,+Alexandria+NSW+2015,+Australia" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
-                  70 O'Riordan St, Alexandria NSW 2015
+                  70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)
                 </a>
               </p>
               <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Manly</strong>: Thursdays 7:00pm</p>
