@@ -15,6 +15,8 @@ import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageI
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
+const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
+
 type ClassWithCount = Class & { registered_count: number };
 type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
 type PassRow = Pass & { profiles: { full_name: string | null; email: string } };
@@ -47,6 +49,7 @@ export default function InstructorPage() {
   // Bulk create Fridays
   const [showBulkForm, setShowBulkForm] = useState(false);
   const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "", capacity: "20", durationMinutes: "60", classTime: "09:00", dayOfWeek: "5", end_date: "", altDurationMinutes: "", altPriceCents: "" });
+  const [bulkFormError, setBulkFormError] = useState("");
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -99,6 +102,7 @@ export default function InstructorPage() {
   const [addStudentForm, setAddStudentForm] = useState({ full_name: "", email: "", phone: "" });
   const [addStudentLoading, setAddStudentLoading] = useState(false);
   const [addStudentError, setAddStudentError] = useState("");
+  const [addStudentWarning, setAddStudentWarning] = useState<{ message: string; url: string } | null>(null);
 
   // Assign pass form
   const [showAssignPassForm, setShowAssignPassForm] = useState(false);
@@ -460,8 +464,23 @@ export default function InstructorPage() {
     setClassFormLoading(false);
   }
 
-  async function bulkCreateFridays(e: React.FormEvent) {
+  async function bulkCreateClasses(e: React.FormEvent) {
     e.preventDefault();
+    setBulkFormError("");
+
+    if (!bulkForm.title.trim()) {
+      setBulkFormError("Class Title is required.");
+      return;
+    }
+    if (!bulkForm.end_date) {
+      setBulkFormError('"Create classes until" needs a date.');
+      return;
+    }
+    if (!bulkForm.price_cents || !bulkForm.capacity) {
+      setBulkFormError("Price and Capacity are required.");
+      return;
+    }
+
     setBulkLoading(true);
 
     const endDate = new Date(bulkForm.end_date + "T23:59:59");
@@ -477,7 +496,7 @@ export default function InstructorPage() {
     const newDates = matchingDates.filter(f => !existingDates.has(f));
 
     if (newDates.length === 0) {
-      setActionError("All those dates already have classes!");
+      setBulkFormError("All those dates already have classes!");
       setBulkLoading(false);
       return;
     }
@@ -498,9 +517,10 @@ export default function InstructorPage() {
     const { error } = await supabase.from("classes").insert(rows);
     if (!error) {
       setShowBulkForm(false);
+      setBulkFormError("");
       loadData();
     } else {
-      setActionError("Error creating classes: " + error.message);
+      setBulkFormError("Error creating classes: " + error.message);
     }
     setBulkLoading(false);
   }
@@ -747,6 +767,7 @@ export default function InstructorPage() {
     e.preventDefault();
     setAddStudentLoading(true);
     setAddStudentError("");
+    setAddStudentWarning(null);
 
     const res = await fetch("/api/instructor/create-student", {
       method: "POST",
@@ -761,10 +782,18 @@ export default function InstructorPage() {
       return;
     }
 
-    setShowAddStudentForm(false);
     setAddStudentForm({ full_name: "", email: "", phone: "" });
     loadData();
     setAddStudentLoading(false);
+
+    if (data.warning) {
+      // Account was created but the email failed to send — keep the modal
+      // open so the instructor can copy the link and share it manually,
+      // instead of silently losing it behind a closed modal.
+      setAddStudentWarning({ message: data.warning, url: data.inviteUrl });
+    } else {
+      setShowAddStudentForm(false);
+    }
   }
 
   async function assignPass(e: React.FormEvent) {
@@ -1004,7 +1033,7 @@ export default function InstructorPage() {
             <button onClick={() => setShowVideoForm(true)} className="btn-secondary py-2 px-4 text-sm">
               + Add Recording
             </button>
-            <button onClick={() => setShowBulkForm(true)} className="btn-secondary py-2 px-4 text-sm">
+            <button onClick={() => { setBulkFormError(""); setShowBulkForm(true); }} className="btn-secondary py-2 px-4 text-sm">
               + Bulk Create
             </button>
             <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
@@ -1859,9 +1888,12 @@ export default function InstructorPage() {
 
         {/* BULK CREATE RECURRING CLASSES MODAL */}
         {showBulkForm && (
-          <Modal title="Bulk Create Recurring Classes" onClose={() => setShowBulkForm(false)}>
-            <form onSubmit={bulkCreateFridays} className="space-y-4">
+          <Modal title="Bulk Create Recurring Classes" onClose={() => { setShowBulkForm(false); setBulkFormError(""); }}>
+            <form onSubmit={bulkCreateClasses} className="space-y-4">
               <p className="font-body text-sm text-gray-500">Creates a class for every upcoming date on the chosen weekday that doesn't already have one.</p>
+              {bulkFormError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 font-body text-sm text-red-700">{bulkFormError}</div>
+              )}
               <div>
                 <label className="label">Class Title</label>
                 <input
@@ -1981,7 +2013,7 @@ export default function InstructorPage() {
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowBulkForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={bulkLoading}>
-                  {bulkLoading ? "Creating…" : "Create all Fridays"}
+                  {bulkLoading ? "Creating…" : `Create all ${DAY_NAMES_PLURAL[parseInt(bulkForm.dayOfWeek)]}`}
                 </button>
               </div>
             </form>
@@ -2340,7 +2372,31 @@ export default function InstructorPage() {
 
         {/* ADD STUDENT MODAL */}
         {showAddStudentForm && (
-          <Modal title="Invite Member" onClose={() => { setShowAddStudentForm(false); setAddStudentError(""); }}>
+          <Modal title="Invite Member" onClose={() => { setShowAddStudentForm(false); setAddStudentError(""); setAddStudentWarning(null); }}>
+            {addStudentWarning ? (
+              <div className="space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 font-body text-sm text-amber-800">
+                  {addStudentWarning.message}
+                </div>
+                <div>
+                  <label className="label">Invite link</label>
+                  <input
+                    className="input font-mono text-xs"
+                    readOnly
+                    value={addStudentWarning.url}
+                    onClick={e => (e.target as HTMLInputElement).select()}
+                  />
+                  <p className="font-body text-xs text-gray-400 mt-1">Click to select, then copy and share it with them directly (e.g. by text).</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowAddStudentForm(false); setAddStudentWarning(null); }}
+                  className="btn-primary w-full justify-center"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
             <form onSubmit={inviteStudent} className="space-y-4">
               <p className="font-body text-sm text-gray-500">
                 The student will receive an email invitation to set up their password and join the club.
@@ -2386,6 +2442,7 @@ export default function InstructorPage() {
                 </button>
               </div>
             </form>
+            )}
           </Modal>
         )}
 

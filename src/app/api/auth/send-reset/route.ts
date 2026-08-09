@@ -27,11 +27,10 @@ export async function POST(req: NextRequest) {
 
   const { hashed_token } = data.properties;
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token_hash=${hashed_token}&type=recovery`;
-  const firstName = email.split("@")[0];
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error: emailError } = await resend.emails.send({
-    from: `[Studio Name] <${process.env.RESEND_FROM}>`,
+    from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: email,
     subject: "Reset your password — [Studio Name]",
     html: `
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
           <div style="padding:36px 32px;">
             <h2 style="color:#334155;font-size:22px;margin:0 0 16px;">Reset your password</h2>
             <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-              Hi ${firstName},<br/><br/>
+              Hi,<br/><br/>
               Click the button below to set a new password for your account. This link expires in 1 hour.
             </p>
             <div style="text-align:center;margin:32px 0;">
