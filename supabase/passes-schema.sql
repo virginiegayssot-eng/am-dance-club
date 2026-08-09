@@ -16,7 +16,7 @@ create table public.pass_types (
 insert into public.pass_types values
   ('casual',    'Casual Class',  'Drop-in, one class', 1,   2600, null, 0, false),
   ('five',      '5-Class Pack',  'Valid for 2 months',  5,  12000, 60,  0, false),
-  ('ten',       '10-Class Pack', 'Valid for 1 year 4 months', 10, 22000, 485, 0, false);
+  ('ten',       '10-Class Pack', 'Valid for 4 months', 10, 22000, 120, 0, false);
 
 alter table public.pass_types enable row level security;
 create policy "Pass types viewable by authenticated users" on public.pass_types

@@ -44,7 +44,7 @@ const PASS_OPTIONS: PassOption[] = [
     name: "10-Class Pack",
     price: "$220",
     classes: "10 classes",
-    validity: "1 year 4 months",
+    validity: "4 months",
     description: "$22 per class. Best value.",
     highlight: true,
   },
