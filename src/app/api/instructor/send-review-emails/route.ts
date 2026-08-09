@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const firstName = (profile?.full_name ?? "dancer").split(" ")[0];
 
     const { error } = await resend.emails.send({
-      from: `BYLA <${process.env.RESEND_FROM}>`,
+      from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: email,
       subject: generic ? "Loving BYLA?" : "How was your first class?",
       html: generic ? buildGenericReviewEmailHtml(firstName) : buildReviewEmailHtml(firstName),

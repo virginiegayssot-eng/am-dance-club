@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error: emailError } = await resend.emails.send({
-    from: `BYLA <${process.env.RESEND_FROM}>`,
+    from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: email,
     subject: "Reset your password — BYLA",
     html: `
