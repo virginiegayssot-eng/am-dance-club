@@ -362,6 +362,16 @@ export default function ChatPage() {
           </div>
         )}
 
+        {/* Mobile WhatsApp links — placeholders until Majo shares the real group links */}
+        <div className="md:hidden flex flex-row gap-2 px-3 pt-2 pb-1 shrink-0">
+          <button className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
+            <MessageCircle className="w-4 h-4 text-[#25D366]" strokeWidth={1.75} /> WhatsApp City
+          </button>
+          <button className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
+            <MessageCircle className="w-4 h-4 text-[#25D366]" strokeWidth={1.75} /> WhatsApp Manly
+          </button>
+        </div>
+
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 shrink-0 bg-white rounded-2xl border border-[#e2d0fb]/30 overflow-hidden">
           {/* Group chat */}
