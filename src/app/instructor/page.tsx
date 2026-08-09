@@ -54,6 +54,7 @@ export default function InstructorPage() {
   // Bulk create recurring classes
   const [showBulkForm, setShowBulkForm] = useState(false);
   const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "26", capacity: "30", durationMinutes: "60", classTime: "19:30", dayOfWeek: "2", end_date: "", altDurationMinutes: "", altPriceCents: "", location: "" });
+  const [bulkFormError, setBulkFormError] = useState("");
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -469,6 +470,21 @@ export default function InstructorPage() {
 
   async function bulkCreateClasses(e: React.FormEvent) {
     e.preventDefault();
+    setBulkFormError("");
+
+    if (!bulkForm.title.trim()) {
+      setBulkFormError("Class Title is required.");
+      return;
+    }
+    if (!bulkForm.end_date) {
+      setBulkFormError('"Create classes until" needs a date.');
+      return;
+    }
+    if (!bulkForm.price_cents || !bulkForm.capacity) {
+      setBulkFormError("Price and Capacity are required.");
+      return;
+    }
+
     setBulkLoading(true);
 
     const endDate = new Date(bulkForm.end_date + "T23:59:59");
@@ -484,7 +500,7 @@ export default function InstructorPage() {
     const newDates = matchingDates.filter(f => !existingDates.has(f));
 
     if (newDates.length === 0) {
-      setActionError("All those dates already have classes!");
+      setBulkFormError("All those dates already have classes!");
       setBulkLoading(false);
       return;
     }
@@ -506,9 +522,10 @@ export default function InstructorPage() {
     const { error } = await supabase.from("classes").insert(rows);
     if (!error) {
       setShowBulkForm(false);
+      setBulkFormError("");
       loadData();
     } else {
-      setActionError("Error creating classes: " + error.message);
+      setBulkFormError("Error creating classes: " + error.message);
     }
     setBulkLoading(false);
   }
@@ -1012,7 +1029,7 @@ export default function InstructorPage() {
             <button onClick={() => setShowVideoForm(true)} className="btn-secondary py-2 px-4 text-sm">
               + Add Recording
             </button>
-            <button onClick={() => setShowBulkForm(true)} className="btn-secondary py-2 px-4 text-sm">
+            <button onClick={() => { setBulkFormError(""); setShowBulkForm(true); }} className="btn-secondary py-2 px-4 text-sm">
               + Bulk Create
             </button>
             <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
@@ -1871,9 +1888,12 @@ export default function InstructorPage() {
 
         {/* BULK CREATE RECURRING CLASSES MODAL */}
         {showBulkForm && (
-          <Modal title="Bulk Create Recurring Classes" onClose={() => setShowBulkForm(false)}>
+          <Modal title="Bulk Create Recurring Classes" onClose={() => { setShowBulkForm(false); setBulkFormError(""); }}>
             <form onSubmit={bulkCreateClasses} className="space-y-4">
               <p className="font-body text-sm text-gray-500">Creates a class for every upcoming date on the chosen weekday that doesn't already have one.</p>
+              {bulkFormError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 font-body text-sm text-red-700">{bulkFormError}</div>
+              )}
               <div>
                 <label className="label">Class Title</label>
                 <input
