@@ -93,7 +93,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-end">
           {/* Logo */}
-          <Link href={profile ? (isInstructor ? "/instructor" : "/dashboard") : "/"} className="flex-shrink-0 flex items-end pb-0 mr-8">
+          <Link href="/" className="flex-shrink-0 flex items-end pb-0 mr-8">
             <Image src="/logo.png" alt="BYLA" width={100} height={70} className="object-contain" />
           </Link>
 
