@@ -46,14 +46,14 @@ export default function InstructorPage() {
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
-  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "09:00", price_cents: "", capacity: "20", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+  const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "19:30", price_cents: "26", capacity: "30", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
   const [classFormError, setClassFormError] = useState("");
   const [actionError, setActionError] = useState("");
 
   // Bulk create recurring classes
   const [showBulkForm, setShowBulkForm] = useState(false);
-  const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "", capacity: "20", durationMinutes: "60", classTime: "09:00", dayOfWeek: "5", end_date: "", altDurationMinutes: "", altPriceCents: "", location: "" });
+  const [bulkForm, setBulkForm] = useState({ title: "", description: "", price_cents: "26", capacity: "30", durationMinutes: "60", classTime: "19:30", dayOfWeek: "2", end_date: "", altDurationMinutes: "", altPriceCents: "", location: "" });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Bulk import
@@ -459,7 +459,7 @@ export default function InstructorPage() {
 
     if (!error) {
       setShowClassForm(false);
-      setClassForm({ title: "", description: "", class_date: "", class_time: "09:00", price_cents: "", capacity: "20", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+      setClassForm({ title: "", description: "", class_date: "", class_time: "19:30", price_cents: "26", capacity: "30", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
     } else {
       setClassFormError(error.message);
@@ -1723,7 +1723,7 @@ export default function InstructorPage() {
                 <label className="label">Class Title</label>
                 <input
                   className="input"
-                  placeholder="e.g. Morning Dance – Beginners"
+                  placeholder="e.g. Reggaeton Basics"
                   value={classForm.title}
                   onChange={e => setClassForm(f => ({ ...f, title: e.target.value }))}
                   required
@@ -1878,7 +1878,7 @@ export default function InstructorPage() {
                 <label className="label">Class Title</label>
                 <input
                   className="input"
-                  placeholder="e.g. Morning Dance Class"
+                  placeholder="e.g. Reggaeton Class"
                   value={bulkForm.title}
                   onChange={e => setBulkForm(f => ({ ...f, title: e.target.value }))}
                   required
@@ -2021,7 +2021,7 @@ export default function InstructorPage() {
                 <label className="label">Title</label>
                 <input
                   className="input"
-                  placeholder="e.g. Friday 16 May – Salsa Basics"
+                  placeholder="e.g. Reggaeton Basics, 16 May"
                   value={videoForm.title}
                   onChange={e => setVideoForm(f => ({ ...f, title: e.target.value }))}
                   required
@@ -2226,7 +2226,7 @@ export default function InstructorPage() {
                 <label className="label">Title</label>
                 <input
                   className="input"
-                  placeholder="e.g. Friday Vibes – Afro & Latin"
+                  placeholder="e.g. Reggaeton Vibes, Afro & Latin"
                   value={playlistForm.title}
                   onChange={e => setPlaylistForm(f => ({ ...f, title: e.target.value }))}
                   required
