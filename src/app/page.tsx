@@ -8,19 +8,6 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      {/* Banner photo — Majo + instructors */}
-      <div className="relative w-full aspect-[2500/844]">
-        <Image
-          src="/byla-banner-hires.png"
-          alt="Majo and the BYLA instructors dancing"
-          fill
-          sizes="100vw"
-          quality={90}
-          className="object-cover"
-          priority
-        />
-      </div>
-
       {/* Hero */}
       <section className="bg-[#e2d0fb] py-24 md:py-36">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -84,18 +71,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Meet Majo */}
-      <section className="bg-white py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-4">Meet the founder</p>
-          <h2 className="font-heading text-3xl md:text-4xl mb-8 text-[#000000]">About Majo</h2>
-          <p className="font-body text-lg text-black/70 leading-relaxed">
-            Hola! I'm Majo, an energetic latina from Peru who LOVES connecting people through dance. I started BYLA because I missed home. What started as a dance class has become one of the happiest latin-inspired dance communities in Sydney. BYLA ("baila" means "to dance" in Spanish) and it also stands for "By Latina". Thanks for being here.
-          </p>
-          <p className="font-heading text-lg text-[#000000] mt-6">With love, Majo x</p>
-        </div>
-      </section>
-
       {/* Location section */}
       <section className="bg-[#000000] text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -133,6 +108,18 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Meet Majo */}
+      <section className="bg-white py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-4">Meet the founder</p>
+          <h2 className="font-heading text-3xl md:text-4xl mb-8 text-[#000000]">About Majo</h2>
+          <p className="font-body text-lg text-black/70 leading-relaxed">
+            Hola! I'm Majo, an energetic latina from Peru who LOVES connecting people through dance. I started BYLA because I missed home. What started as a dance class has become one of the happiest latin-inspired dance communities in Sydney. BYLA ("baila" means "to dance" in Spanish) and it also stands for "By Latina". Thanks for being here.
+          </p>
+          <p className="font-heading text-lg text-[#000000] mt-6">With love, Majo x</p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-[#e2d0fb] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
@@ -146,6 +133,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Banner photo — Majo + instructors */}
+      <div className="relative w-full aspect-[2500/844]">
+        <Image
+          src="/byla-banner-hires.png"
+          alt="Majo and the BYLA instructors dancing"
+          fill
+          sizes="100vw"
+          quality={90}
+          className="object-cover"
+        />
+      </div>
 
       <Footer />
     </div>
