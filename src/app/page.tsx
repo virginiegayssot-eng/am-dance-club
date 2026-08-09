@@ -57,11 +57,12 @@ export default function HomePage() {
           <h2 className="font-heading text-3xl md:text-4xl mb-10 text-[#000000]">Why You'll Love BYLA</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { title: "Stronger Body", desc: "Move to Reggaeton beats that build stamina, tone muscles, and get your heart pumping." },
-              { title: "End-of-Day Energy", desc: "Swap the couch for music and movement that lift your mood after a long day." },
-              { title: "Confidence Boost", desc: "No mirrors, no judgment. Every step, every beat, confidence grows with practice!" },
-              { title: "Improved Coordination", desc: "Master choreography designed to challenge and grow your rhythm skills." },
-              { title: "Feel-Good Community", desc: "Be part of a fun, inclusive, and empowering community." },
+              { title: "Master a Full Song", desc: "Every two weeks, one song, broken into Part 1 and Part 2, so by the end you know the whole routine top to bottom, not just fragments." },
+              { title: "Real Technique, Real Progress", desc: "Proper choreography, taught step by step. Mirrors on, you'll watch yourself actually get better week to week." },
+              { title: "A Room That Roots for You", desc: "Every step, every beat, confidence grows with practice. No judgment, just people learning together." },
+              { title: "Open to Everyone", desc: "BYLA was born from Latin culture, and it's open to anyone who wants in. However you found your way here, you belong on that dance floor." },
+              { title: "End-of-Day Reset", desc: "Trade the couch for a room full of good energy. Nothing resets a long day like showing up to dance." },
+              { title: "A Home Away From Home", desc: "“I built BYLA because I missed home,” Majo says. Whether that's your story too or not, every class carries that same warmth, Alexandria or Manly, you're joining a real community." },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl p-6">
                 <h3 className="font-heading text-lg text-[#000000] mb-2">{f.title}</h3>
