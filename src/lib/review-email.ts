@@ -20,7 +20,7 @@ export function buildReviewEmailHtml(firstName: string) {
               Leave a Review
             </a>
           </div>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Can't wait to see you at the next class!</p>
           <p style="color:#444;font-size:16px;margin:0;">Majo</p>
         </div>
         <div style="background:#e2d0fb;padding:20px;text-align:center;">
@@ -54,7 +54,7 @@ export function buildGenericReviewEmailHtml(firstName: string) {
               Leave a Review
             </a>
           </div>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Can't wait to see you at the next class!</p>
           <p style="color:#444;font-size:16px;margin:0;">Majo</p>
         </div>
         <div style="background:#e2d0fb;padding:20px;text-align:center;">
