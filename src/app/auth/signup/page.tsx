@@ -57,7 +57,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#ffffff] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#e2d0fb] flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
           <Mail className="w-14 h-14 mx-auto mb-6 text-[#000000]" strokeWidth={1.5} />
           <h2 className="font-heading text-2xl mb-3">Check your email!</h2>
@@ -72,7 +72,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#e2d0fb] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-6">
