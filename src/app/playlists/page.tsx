@@ -50,7 +50,7 @@ export default function PlaylistsPage() {
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Members only</p>
           <h1 className="section-title mb-3">Class Playlists</h1>
           <p className="font-body text-gray-500">
-            The music we dance to. Your Friday soundtrack starts here.
+            The music we dance to. Your BYLA soundtrack starts here.
           </p>
         </div>
 
