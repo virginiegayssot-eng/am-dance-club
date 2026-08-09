@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
 
   const { hashed_token } = data.properties;
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token_hash=${hashed_token}&type=recovery`;
-  const firstName = email.split("@")[0];
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error: emailError } = await resend.emails.send({
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
           <div style="padding:36px 32px;">
             <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Reset your password</h2>
             <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-              Hi ${firstName},<br/><br/>
+              Hi,<br/><br/>
               Click the button below to set a new password for your account. This link expires in 1 hour.
             </p>
             <div style="text-align:center;margin:32px 0;">
@@ -56,9 +55,6 @@ export async function POST(req: NextRequest) {
             <p style="color:#888;font-size:13px;line-height:1.5;margin:0;">
               If you didn't request this, you can safely ignore this email.
             </p>
-          </div>
-          <div style="background:#e2d0fb;padding:20px;text-align:center;">
-            <p style="color:#000000;font-size:12px;margin:0;">BYLA City (Alexandria) & BYLA Manly, Sydney</p>
           </div>
         </div>
       </body>
