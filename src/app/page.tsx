@@ -9,9 +9,9 @@ export default function HomePage() {
       <Navbar />
 
       {/* Banner photo — Majo + instructors */}
-      <div className="relative w-full h-40 md:h-56 overflow-hidden">
+      <div className="relative w-full aspect-[2500/844]">
         <Image
-          src="/byla-banner-original.jpeg"
+          src="/byla-banner-hires.png"
           alt="Majo and the BYLA instructors dancing"
           fill
           className="object-cover"
