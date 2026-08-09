@@ -64,7 +64,7 @@ export default function MerchPage() {
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#000000] mb-2">Shop</p>
           <h1 className="section-title mb-3">Merch</h1>
           <p className="font-body text-gray-500">
-            Rep the club. Every purchase goes straight to supporting the studio.
+            Rep BYLA Dance. Every purchase goes straight to supporting the studio.
           </p>
         </div>
 
