@@ -18,10 +18,10 @@ export default function HomePage() {
               <span className="text-[#000000]">BYLA</span>
             </h1>
             <p className="font-body text-lg text-black/70 mb-4 leading-relaxed">
-              Hola! Reggaeton classes made for beginner to intermediate dancers, with sessions in Alexandria and Manly — no experience required, just bring your energy.
+              Hola! Reggaeton classes made for beginner to intermediate dancers, with sessions in Alexandria and Manly. No experience required, just bring your energy.
             </p>
             <p className="font-body text-base text-black/60 mb-8 leading-relaxed">
-              Latin-inspired, high-energy, and full of heart — dance with one of Sydney's happiest communities.
+              Latin-inspired, high-energy, and full of heart. Dance with one of Sydney's happiest communities.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/classes" className="btn-secondary">View Classes</Link>
