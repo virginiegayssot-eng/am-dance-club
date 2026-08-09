@@ -38,7 +38,6 @@ const PASS_OPTIONS: PassOption[] = [
     classes: "5 classes",
     validity: "2 months",
     description: "$24 per class. Use across City or Manly classes.",
-    highlight: true,
   },
   {
     id: "ten",
@@ -47,6 +46,7 @@ const PASS_OPTIONS: PassOption[] = [
     classes: "10 classes",
     validity: "1 year",
     description: "$22 per class. Best value.",
+    highlight: true,
   },
 ];
 
@@ -219,7 +219,7 @@ export default function PassesPage() {
                 {opt.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-[#000000] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
-                      Popular
+                      Best Value
                     </span>
                   </div>
                 )}
