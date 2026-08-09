@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -6,6 +7,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+
+      {/* Banner photo — Majo + instructors */}
+      <div className="relative w-full h-40 md:h-56 overflow-hidden">
+        <Image
+          src="/byla-banner-original.jpeg"
+          alt="Majo and the BYLA instructors dancing"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
 
       {/* Hero */}
       <section className="bg-[#e2d0fb] py-24 md:py-36">
