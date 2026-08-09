@@ -426,6 +426,24 @@ export default function ChatPage() {
               </div>
             )}
           </div>
+
+          {/* WhatsApp links — placeholders until Majo shares the real group links */}
+          <button className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
+            <MessageCircle className="w-5 h-5 text-[#000000] shrink-0" strokeWidth={1.75} />
+            <div className="flex-1 min-w-0">
+              <p className="font-heading text-xs">WhatsApp City</p>
+              <p className="font-body text-xs text-gray-400">Community group</p>
+            </div>
+            <span className="text-xs text-[#25D366]">→</span>
+          </button>
+          <button className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
+            <MessageCircle className="w-5 h-5 text-[#000000] shrink-0" strokeWidth={1.75} />
+            <div className="flex-1 min-w-0">
+              <p className="font-heading text-xs">WhatsApp Manly</p>
+              <p className="font-body text-xs text-gray-400">Community group</p>
+            </div>
+            <span className="text-xs text-[#25D366]">→</span>
+          </button>
         </aside>
 
         {/* Chat panel */}
