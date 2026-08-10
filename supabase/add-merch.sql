@@ -44,7 +44,5 @@ create policy "Instructors view all orders" on public.merch_orders
     auth.uid() in (select id from public.profiles where role = 'instructor')
   );
 
--- Example product so /merch isn't empty out of the box — edit or delete
--- this from the instructor dashboard's Merch tab once real products are ready.
 insert into public.merch_products (title, description, price_cents, sizes, active) values
-  ('BYLA Tee', 'Soft cotton tee with the BYLA logo. Example product — edit me from the instructor dashboard.', 3500, array['S', 'M', 'L', 'XL'], true);
+  ('BYLA Tee', 'Soft cotton tee with the BYLA logo.', 3500, array['S', 'M', 'L', 'XL'], true);
