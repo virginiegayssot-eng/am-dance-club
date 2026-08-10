@@ -14,12 +14,11 @@ function adminClient() {
   );
 }
 
+// BYLA only offers these three tiers — no double/intro pass.
 const PASS_CONFIGS: Record<string, { classes: number; validityDays: number | null }> = {
   casual: { classes: 1,  validityDays: null },
-  double: { classes: 1,  validityDays: null },
-  intro:  { classes: 3,  validityDays: 90   },
-  five:   { classes: 5,  validityDays: 180  },
-  ten:    { classes: 10, validityDays: 120  },
+  five:   { classes: 5,  validityDays: 90   },
+  ten:    { classes: 10, validityDays: 180  },
 };
 
 export async function POST(req: NextRequest) {

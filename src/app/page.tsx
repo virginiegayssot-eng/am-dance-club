@@ -36,7 +36,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y-0 md:divide-x md:divide-white/20">
             {[
               { label: "Location", value: "Alexandria & Manly, Sydney" },
-              { label: "Schedule", value: "Tue (City) · Thu (Manly)" },
+              { label: "Schedule", value: "Tue (Alexandria) · Thu (Manly)" },
               { label: "Who", value: "Beginner to Intermediate" },
               { label: "Booking", value: "Book & pay online" },
             ].map(item => (
@@ -77,7 +77,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Location & Hours</h2>
-              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA City</strong>: Tuesdays 7:30pm</p>
+              <p className="font-body text-lg leading-relaxed mb-1"><strong>BYLA Alexandria</strong>: Tuesdays 7:30pm</p>
               <p className="font-body text-base text-white/70 mb-4">
                 <a href="https://maps.google.com/?q=70+O%27Riordan+St,+Alexandria+NSW+2015,+Australia" target="_blank" rel="noopener noreferrer" className="hover:text-[#e2d0fb] transition-colors">
                   70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)
@@ -89,16 +89,25 @@ export default function HomePage() {
                   St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095
                 </a>
               </p>
-              <p className="font-body text-base text-white/70">
-                <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a> · <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
+              <p className="font-body text-base text-white/70 flex items-center gap-2 flex-wrap">
+                <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
+                <span>·</span>
+                <a href="https://instagram.com/byla.dance" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-[#e2d0fb] transition-colors">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="17.4" cy="6.6" r="1.2" fill="currentColor" />
+                  </svg>
+                  @byla.dance
+                </a>
               </p>
             </div>
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#e2d0fb]">Class Prices</h2>
               <div className="space-y-3 font-body">
                 <p><strong>Casual Drop-In:</strong> $26 per class</p>
-                <p><strong>5-Class Pack:</strong> $120 (Valid 2 months)</p>
-                <p><strong>10-Class Pack:</strong> $220</p>
+                <p><strong>5-Class Pack:</strong> $120 (Valid 3 months)</p>
+                <p><strong>10-Class Pack:</strong> $220 (Valid 6 months)</p>
               </div>
               <Link href="/passes" className="mt-6 inline-block bg-white text-[#000000] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#e2d0fb] transition-colors">
                 Buy a Pass

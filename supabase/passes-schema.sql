@@ -15,8 +15,8 @@ create table public.pass_types (
 -- BYLA only offers these three tiers — no double/intro pass.
 insert into public.pass_types values
   ('casual',    'Casual Class',  'Drop-in, one class', 1,   2600, null, 0, false),
-  ('five',      '5-Class Pack',  'Valid for 2 months',  5,  12000, 60,  0, false),
-  ('ten',       '10-Class Pack', 'Valid for 4 months', 10, 22000, 120, 0, false);
+  ('five',      '5-Class Pack',  'Valid for 3 months',  5,  12000, 90,  0, false),
+  ('ten',       '10-Class Pack', 'Valid for 6 months', 10, 22000, 180, 0, false);
 
 alter table public.pass_types enable row level security;
 create policy "Pass types viewable by authenticated users" on public.pass_types
