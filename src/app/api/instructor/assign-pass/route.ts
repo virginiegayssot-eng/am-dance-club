@@ -20,7 +20,7 @@ function buildBirthdayPassEmailHtml(firstName: string) {
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             It's valid for the next 30 days, so grab a spot whenever suits you.
           </p>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you in class!</p>
           <p style="color:#444;font-size:16px;margin:0;">[Instructor Name]</p>
         </div>
         <div style="background:#e2e8f0;padding:20px;text-align:center;">
@@ -51,7 +51,7 @@ function buildPassAssignedEmailHtml(firstName: string, passName: string, classes
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">${expiryLine}</p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Head to the Classes page any time to book a spot.</p>
-          <p style="color:#444;font-size:16px;margin:0;">See you on the dancefloor!</p>
+          <p style="color:#444;font-size:16px;margin:0;">See you in class!</p>
         </div>
         <div style="background:#e2e8f0;padding:20px;text-align:center;">
           <p style="color:#334155;font-size:12px;margin:0;">[Schedule] · [Studio Location]</p>

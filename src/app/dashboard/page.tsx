@@ -160,7 +160,7 @@ export default function DashboardPage() {
         {justBooked && (
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 font-body text-sm text-green-700 flex items-center gap-3">
             <PartyPopper className="w-5 h-5 shrink-0 text-[#334155]" strokeWidth={1.75} />
-            You're booked! See you on the dancefloor.
+            You're booked!
           </div>
         )}
         {cancelResult && (
