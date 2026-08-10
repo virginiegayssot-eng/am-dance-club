@@ -532,10 +532,20 @@ export default function InstructorPage() {
   }
 
   function cancelClass(cls: ClassWithCount) {
+    const message = cls.registered_count > 0
+      ? `Cancel "${cls.title}"? ${cls.registered_count} member${cls.registered_count !== 1 ? "s" : ""} registered — they'll be notified by email and any pass credits used will be refunded. This cannot be undone.`
+      : `Cancel "${cls.title}"? This cannot be undone.`;
     setConfirmDialog({
-      message: `Cancel "${cls.title}"? This cannot be undone.`,
+      message,
+      confirmLabel: "Cancel Class",
       action: async () => {
-        await supabase.from("classes").update({ is_cancelled: true }).eq("id", cls.id);
+        const res = await fetch("/api/instructor/cancel-class", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classId: cls.id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setActionError(data.error ?? "Failed to cancel class"); return; }
         loadData();
       },
     });
