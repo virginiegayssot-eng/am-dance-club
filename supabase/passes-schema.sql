@@ -35,6 +35,8 @@ create table public.passes (
   classes_remaining int not null,
   expires_at timestamptz,
   stripe_session_id text,
+  source text,               -- 'stripe' | 'cash' | 'card_manual' | 'complimentary'
+  amount_paid_cents int,
   created_at timestamptz default now()
 );
 
