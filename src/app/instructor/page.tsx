@@ -569,6 +569,22 @@ export default function InstructorPage() {
     });
   }
 
+  function deleteAllUpcomingByLocation(label: string, keyword: string) {
+    const matching = upcomingClasses.filter(c => c.location?.toLowerCase().includes(keyword.toLowerCase()));
+    if (matching.length === 0) return;
+    const totalRegistrations = matching.reduce((sum, c) => sum + c.registered_count, 0);
+    const warning = totalRegistrations > 0
+      ? `Delete all ${matching.length} upcoming ${label} classes? This includes ${totalRegistrations} member registration${totalRegistrations !== 1 ? "s" : ""} across them, which will be permanently removed along with any attendance records. This cannot be undone.`
+      : `Delete all ${matching.length} upcoming ${label} classes? This cannot be undone.`;
+    setConfirmDialog({
+      message: warning,
+      action: async () => {
+        await supabase.from("classes").delete().in("id", matching.map(c => c.id));
+        loadData();
+      },
+    });
+  }
+
   async function addVideo(e: React.FormEvent) {
     e.preventDefault();
     setVideoFormLoading(true);
@@ -1155,11 +1171,19 @@ export default function InstructorPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000]">Upcoming</h3>
-                  <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
-                    Remove All Upcoming
-                  </button>
+                  <div className="flex items-center flex-wrap gap-2">
+                    <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-red-400 hover:text-red-600">
+                      Remove All Manly
+                    </button>
+                    <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-red-400 hover:text-red-600">
+                      Remove All Alexandria
+                    </button>
+                    <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
+                      Remove All Upcoming
+                    </button>
+                  </div>
                 </div>
                 {upcomingClasses.map((cls) => (
                   <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} isToday={cls.class_date === today} />
