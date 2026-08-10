@@ -6,12 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Class, Pass, Profile } from "@/lib/supabase";
 import { Clock, MapPin, Users, Check } from "lucide-react";
 
-type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number };
+type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; registration_id: string | null };
 
 export default function ClassesPage() {
   const router = useRouter();
@@ -24,6 +25,8 @@ export default function ClassesPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showSpecialOnly, setShowSpecialOnly] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -57,12 +60,12 @@ export default function ClassesPage() {
     if (!classData) { setLoading(false); return; }
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
-    let userRegs: { class_id: string; guest_count: number }[] = [];
+    let userRegs: { id: string; class_id: string; guest_count: number }[] = [];
     if (profile || (await supabase.auth.getUser()).data.user) {
       const uid = (await supabase.auth.getUser()).data.user?.id;
       if (uid) {
         const { data: regs } = await supabase
-          .from("registrations").select("class_id, guest_count")
+          .from("registrations").select("id, class_id, guest_count")
           .eq("student_id", uid).eq("status", "confirmed");
         userRegs = regs ?? [];
       }
@@ -73,6 +76,7 @@ export default function ClassesPage() {
       registered_count: regCounts?.find(rc => rc.class_id === c.id)?.registered_count ?? 0,
       is_registered: !!userRegs.find(r => r.class_id === c.id),
       guest_count: userRegs.find(r => r.class_id === c.id)?.guest_count ?? 0,
+      registration_id: userRegs.find(r => r.class_id === c.id)?.id ?? null,
     })));
     setLoading(false);
   }
@@ -113,6 +117,19 @@ export default function ClassesPage() {
     const { url, error } = await res.json();
     if (error) { setActionError(error); setActionId(null); return; }
     window.location.href = url;
+  }
+
+  async function cancelBooking(registrationId: string) {
+    setCancellingId(registrationId);
+    const res = await fetch("/api/bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ registrationId }),
+    });
+    const data = await res.json();
+    setCancellingId(null);
+    if (!res.ok) { setActionError(data.error ?? "Something went wrong."); return; }
+    await loadData();
   }
 
   const hasPass = activePasses.length > 0;
@@ -221,9 +238,20 @@ export default function ClassesPage() {
 
                     <div className="border-t border-gray-100 pt-4">
                       {cls.is_registered ? (
-                        <span className="badge-confirmed px-3 py-1.5 rounded-full text-sm inline-flex items-center gap-1.5">
-                          Booked {cls.guest_count > 0 ? `(+${cls.guest_count} guest)` : <Check className="w-3.5 h-3.5" strokeWidth={2} />}
-                        </span>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="badge-confirmed px-3 py-1.5 rounded-full text-sm inline-flex items-center gap-1.5">
+                            Booked {cls.guest_count > 0 ? `(+${cls.guest_count} guest)` : <Check className="w-3.5 h-3.5" strokeWidth={2} />}
+                          </span>
+                          {cls.registration_id && (
+                            <button
+                              onClick={() => setConfirmCancelId(cls.registration_id)}
+                              disabled={cancellingId === cls.registration_id}
+                              className="font-body text-xs text-gray-400 hover:text-red-500"
+                            >
+                              {cancellingId === cls.registration_id ? "Cancelling…" : "Cancel"}
+                            </button>
+                          )}
+                        </div>
                       ) : isFull ? (
                         <p className="font-body text-sm text-gray-400 text-center">Class is full</p>
                       ) : (
@@ -305,6 +333,14 @@ export default function ClassesPage() {
               );
             })}
           </div>
+        )}
+
+        {confirmCancelId && (
+          <ConfirmDialog
+            message="Cancel this booking? This cannot be undone."
+            onCancel={() => setConfirmCancelId(null)}
+            onConfirm={() => { const id = confirmCancelId; setConfirmCancelId(null); cancelBooking(id); }}
+          />
         )}
       </main>
       <Footer />
