@@ -863,6 +863,7 @@ export default function InstructorPage() {
   function debitPass(passId: string) {
     setConfirmDialog({
       message: "Debit 1 class from this pass?",
+      confirmLabel: "Debit",
       action: async () => {
         setDebitingPassId(passId);
 
