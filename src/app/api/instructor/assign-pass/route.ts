@@ -20,7 +20,7 @@ function buildBirthdayPassEmailHtml(firstName: string) {
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             It's valid for the next 30 days, so grab a spot whenever suits you.
           </p>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you on the dancefloor!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you in class!</p>
           <p style="color:#444;font-size:16px;margin:0;">Majo</p>
         </div>
         <div style="background:#e2d0fb;padding:20px;text-align:center;">

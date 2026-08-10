@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
+import { buildPassDebitEmailHtml } from "@/lib/pass-debit-email";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -49,12 +50,12 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: student.email,
-      subject: "Class recorded — see you on the dancefloor!",
-      html: `<p>Hi ${student.full_name?.split(" ")[0] ?? "dancer"},</p>
-<p>1 class has been deducted from your <strong>${passType?.name ?? "pass"}</strong>.</p>
-<p>You have <strong>${newRemaining} class${newRemaining !== 1 ? "es" : ""} remaining</strong>.</p>
-<p>See you next class!</p>
-<p>— Majo</p>`,
+      subject: "Class recorded",
+      html: buildPassDebitEmailHtml({
+        firstName: student.full_name?.split(" ")[0] ?? "dancer",
+        passName: passType?.name ?? "pass",
+        classesRemaining: newRemaining,
+      }),
     }).catch(() => {});
   }
 
