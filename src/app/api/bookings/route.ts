@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
 import { Resend } from "resend";
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createServerSupabaseClient();
+  const admin = adminClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -86,10 +96,14 @@ export async function POST(req: NextRequest) {
 
   if (regError) return NextResponse.json({ error: regError.message }, { status: 500 });
 
-  await supabase
+  // Students have no client-writable RLS policy on passes (by design, see
+  // passes-schema.sql), so this must go through the admin client or the
+  // credit deduction silently fails while the booking itself still succeeds.
+  const { error: passUpdateError } = await admin
     .from("passes")
     .update({ classes_remaining: pass.classes_remaining - creditsNeeded })
     .eq("id", passId);
+  if (passUpdateError) console.error(`Failed to deduct pass credit for pass ${passId}:`, passUpdateError);
 
   // Notify instructor
   const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();

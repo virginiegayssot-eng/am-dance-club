@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
 import { Resend } from "resend";
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createServerSupabaseClient();
+  const admin = adminClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -40,11 +50,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (pass) {
-      await supabase
+      // Students have no client-writable RLS policy on passes (by design,
+      // see passes-schema.sql), so this must go through the admin client
+      // or the refund silently fails while the email still claims it happened.
+      const { error: refundError } = await admin
         .from("passes")
         .update({ classes_remaining: pass.classes_remaining + 1 })
         .eq("id", reg.pass_id);
-      passRefunded = true;
+      if (refundError) {
+        console.error(`Failed to refund pass credit for pass ${reg.pass_id}:`, refundError);
+      } else {
+        passRefunded = true;
+      }
     }
   }
 
