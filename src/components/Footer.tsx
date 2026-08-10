@@ -16,7 +16,7 @@ export default function Footer() {
           <div>
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2d0fb]">Location & Hours</h4>
             <p className="font-body text-sm text-white/70 leading-relaxed">
-              <strong>BYLA City</strong> — Tuesdays 7:30pm<br />
+              <strong>BYLA Alexandria</strong> — Tuesdays 7:30pm<br />
               70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)
             </p>
             <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
@@ -24,8 +24,20 @@ export default function Footer() {
               St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095
             </p>
             <p className="font-body text-sm text-white/70 leading-relaxed mt-3">
-              <a href="tel:+61420822310" className="hover:text-[#e2d0fb] transition-colors">+61 420 822 310</a><br />
-              <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a>
+              <a href="mailto:hello@byla.fit" className="hover:text-[#e2d0fb] transition-colors">hello@byla.fit</a><br />
+              <a
+                href="https://instagram.com/byla.dance"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-[#e2d0fb] transition-colors mt-1"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="17.4" cy="6.6" r="1.2" fill="currentColor" />
+                </svg>
+                @byla.dance
+              </a>
             </p>
           </div>
           <div>

@@ -19,7 +19,7 @@ export default function HomePage() {
               <span className="text-[#000000]">BYLA</span>
             </h1>
             <p className="font-body text-lg text-black/70 mb-8 leading-relaxed">
-              Hola! Reggaeton classes made for beginner to intermediate dancers, with sessions in Alexandria and Manly.
+              Hola BB! Join our reggaeton classes made for beginner to intermediate dancers, with sessions in Alexandria and Manly.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/classes" className="btn-secondary">View Classes</Link>

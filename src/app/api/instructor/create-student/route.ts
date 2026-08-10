@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
             <p style="color:#444;font-size:16px;margin:0;">Majo</p>
           </div>
           <div style="background:#e2d0fb;padding:20px;text-align:center;">
-            <p style="color:#000000;font-size:12px;margin:0;">BYLA City (Alexandria) · BYLA Manly</p>
+            <p style="color:#000000;font-size:12px;margin:0;">BYLA Alexandria · BYLA Manly</p>
           </div>
         </div>
       </body>

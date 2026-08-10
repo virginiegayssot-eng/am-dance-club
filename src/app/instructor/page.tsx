@@ -17,7 +17,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, locatio
 
 // Quick-fill addresses for the Location field — instructors can still type over
 // these freely if a location ever changes, this is just a shortcut.
-const LOCATION_CITY = "BYLA City — 70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)";
+const LOCATION_ALEXANDRIA = "BYLA Alexandria — 70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)";
 const LOCATION_MANLY = "BYLA Manly — St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095";
 
 const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
@@ -1877,12 +1877,12 @@ export default function InstructorPage() {
               <div>
                 <label className="label">Location</label>
                 <div className="flex gap-2 mb-2">
-                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_CITY }))} className="btn-secondary py-1.5 px-3 text-xs">City</button>
+                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
                   <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
                 </div>
                 <input
                   className="input"
-                  placeholder="e.g. BYLA City — Alexandria, or BYLA Manly"
+                  placeholder="e.g. BYLA Alexandria, or BYLA Manly"
                   value={classForm.location}
                   onChange={e => setClassForm(f => ({ ...f, location: e.target.value }))}
                 />
@@ -1988,12 +1988,12 @@ export default function InstructorPage() {
               <div>
                 <label className="label">Location</label>
                 <div className="flex gap-2 mb-2">
-                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_CITY }))} className="btn-secondary py-1.5 px-3 text-xs">City</button>
+                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
                   <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
                 </div>
                 <input
                   className="input"
-                  placeholder="e.g. BYLA City — Alexandria, or BYLA Manly"
+                  placeholder="e.g. BYLA Alexandria, or BYLA Manly"
                   value={bulkForm.location}
                   onChange={e => setBulkForm(f => ({ ...f, location: e.target.value }))}
                 />

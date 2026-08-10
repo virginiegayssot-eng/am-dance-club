@@ -22,7 +22,7 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "special" | "city" | "manly" | "videoshoot">("all");
+  const [filter, setFilter] = useState<"all" | "special" | "alexandria" | "manly" | "videoshoot">("all");
   const [actionError, setActionError] = useState("");
 
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function ClassesPage() {
   const bestPass = activePasses[0];
   const visibleClasses = classes.filter(c => {
     if (filter === "special") return c.is_special;
-    if (filter === "city") return c.location.toLowerCase().includes("city");
+    if (filter === "alexandria") return c.location.toLowerCase().includes("alexandria");
     if (filter === "manly") return c.location.toLowerCase().includes("manly");
     if (filter === "videoshoot") return c.is_special && (c.special_label ?? "").toLowerCase().includes("video");
     return true;
@@ -128,7 +128,7 @@ export default function ClassesPage() {
   const emptyStateLabel: Record<typeof filter, string> = {
     all: "No upcoming classes",
     special: "No special classes right now",
-    city: "No upcoming classes at City",
+    alexandria: "No upcoming classes at Alexandria",
     manly: "No upcoming classes at Manly",
     videoshoot: "No video shoots scheduled right now",
   };
@@ -154,8 +154,8 @@ export default function ClassesPage() {
           <button onClick={() => setFilter("special")} className={filter === "special" ? "btn-primary" : "btn-secondary"}>
             Special Classes
           </button>
-          <button onClick={() => setFilter("city")} className={filter === "city" ? "btn-primary" : "btn-secondary"}>
-            City
+          <button onClick={() => setFilter("alexandria")} className={filter === "alexandria" ? "btn-primary" : "btn-secondary"}>
+            Alexandria
           </button>
           <button onClick={() => setFilter("manly")} className={filter === "manly" ? "btn-primary" : "btn-secondary"}>
             Manly
