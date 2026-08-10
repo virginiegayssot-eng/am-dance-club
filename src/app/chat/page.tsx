@@ -4,9 +4,10 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
-import { MessageCircle, GraduationCap, Pencil, Heart, Image as ImageIcon, X } from "lucide-react";
+import { MessageCircle, GraduationCap, Pencil, Trash2, Heart, Image as ImageIcon, X } from "lucide-react";
 
 type Message = {
   id: string;
@@ -48,6 +49,7 @@ export default function ChatPage() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string; confirmLabel?: string; action: () => void } | null>(null);
   const meRef = useRef<Profile | null>(null);
 
   useEffect(() => { init(); }, []);
@@ -288,6 +290,17 @@ export default function ChatPage() {
     setEditingId(null);
   }
 
+  function deleteMessage(msgId: string) {
+    setConfirmDialog({
+      message: "Delete this message? This cannot be undone.",
+      confirmLabel: "Delete",
+      action: async () => {
+        await supabase.from("messages").delete().eq("id", msgId).eq("sender_id", me!.id);
+        setMessages(prev => prev.filter(m => m.id !== msgId));
+      },
+    });
+  }
+
   function selectDM(profile: Profile) {
     setDmTarget(profile);
     setActiveChannel(profile.id);
@@ -515,6 +528,15 @@ export default function ChatPage() {
                         </div>
                       ) : (
                         <div className="flex items-end gap-1.5">
+                          {isMe && (
+                            <button
+                              onClick={() => deleteMessage(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-500 text-xs pb-1 order-first"
+                              title="Delete message"
+                            >
+                              <Trash2 className="w-3 h-3" strokeWidth={1.75} />
+                            </button>
+                          )}
                           {canEdit && isMe && (
                             <button
                               onClick={() => { setEditingId(msg.id); setEditBody(msg.body); }}
@@ -611,6 +633,15 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+
+      {confirmDialog && (
+        <ConfirmDialog
+          message={confirmDialog.message}
+          confirmLabel={confirmDialog.confirmLabel}
+          onCancel={() => setConfirmDialog(null)}
+          onConfirm={() => { const action = confirmDialog.action; setConfirmDialog(null); action(); }}
+        />
+      )}
     </div>
   );
 }
