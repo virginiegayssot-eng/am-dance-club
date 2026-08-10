@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       : null;
 
     // Create the pass record
-    const { data: pass } = await supabase
+    const { data: pass, error: passInsertError } = await supabase
       .from("passes")
       .insert({
         student_id: studentId,
@@ -100,6 +100,16 @@ export async function POST(req: NextRequest) {
       })
       .select()
       .single();
+
+    if (passInsertError) {
+      console.error(`Failed to create pass for session ${session.id} (passTypeId=${passTypeId}, studentId=${studentId}):`, passInsertError);
+      await resend.emails.send({
+        from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+        subject: `Pass creation failed – needs manual fix`,
+        html: `<p>A customer paid for a <strong>${passTypeId}</strong> pass but the app failed to create it. Stripe session: ${session.id}. Student ID: ${studentId}. Error: ${passInsertError.message}</p><p>They paid successfully, please assign the pass manually and investigate.</p>`,
+      }).catch((e) => console.error("Pass-failure alert email error:", e));
+    }
 
     // For casual and double passes, immediately book the class
     if (classId && pass && (passTypeId === "casual" || passTypeId === "double")) {
