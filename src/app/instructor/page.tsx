@@ -11,7 +11,7 @@ import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } fr
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -86,6 +86,10 @@ export default function InstructorPage() {
   const [showVideoForm, setShowVideoForm] = useState(false);
   const [videoForm, setVideoForm] = useState({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
   const [videoFormLoading, setVideoFormLoading] = useState(false);
+  const [videoFormError, setVideoFormError] = useState("");
+  const [videoMode, setVideoMode] = useState<"upload" | "youtube">("upload");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
   // Merch products
   const [products, setProducts] = useState<MerchProduct[]>([]);
@@ -541,30 +545,90 @@ export default function InstructorPage() {
     });
   }
 
+  function resetVideoForm() {
+    setShowVideoForm(false);
+    setVideoForm({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
+    setVideoFile(null);
+    setVideoUploadProgress(0);
+    setVideoFormError("");
+    setVideoMode("upload");
+  }
+
   async function addVideo(e: React.FormEvent) {
     e.preventDefault();
-    setVideoFormLoading(true);
+    setVideoFormError("");
 
-    const youtubeId = getYouTubeId(videoForm.youtube_url);
-    if (!youtubeId) {
-      alert("Invalid YouTube URL");
+    if (videoMode === "youtube") {
+      const youtubeId = getYouTubeId(videoForm.youtube_url);
+      if (!youtubeId) {
+        setVideoFormError("Invalid YouTube URL");
+        return;
+      }
+
+      setVideoFormLoading(true);
+      await supabase.from("videos").insert({
+        title: videoForm.title,
+        description: videoForm.description || null,
+        video_type: "youtube",
+        youtube_url: videoForm.youtube_url,
+        youtube_id: youtubeId,
+        class_id: videoForm.class_id || null,
+        is_public: videoForm.is_public,
+      });
+      resetVideoForm();
+      loadData();
       setVideoFormLoading(false);
       return;
     }
 
-    await supabase.from("videos").insert({
-      title: videoForm.title,
-      description: videoForm.description || null,
-      youtube_url: videoForm.youtube_url,
-      youtube_id: youtubeId,
-      class_id: videoForm.class_id || null,
-      is_public: videoForm.is_public,
-    });
+    if (!videoFile) {
+      setVideoFormError("Choose a video to upload");
+      return;
+    }
 
-    setShowVideoForm(false);
-    setVideoForm({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
-    loadData();
-    setVideoFormLoading(false);
+    setVideoFormLoading(true);
+    setVideoUploadProgress(0);
+    try {
+      const res = await fetch("/api/videos/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: videoFile.name, contentType: videoFile.type, size: videoFile.size }),
+      });
+      const { uploadUrl, key, error } = await res.json();
+      if (!res.ok || !uploadUrl) throw new Error(error || "Could not start upload");
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", (ev) => {
+          if (ev.lengthComputable) setVideoUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+        });
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error("Upload failed"));
+        });
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", videoFile.type);
+        xhr.send(videoFile);
+      });
+
+      await supabase.from("videos").insert({
+        title: videoForm.title,
+        description: videoForm.description || null,
+        video_type: "r2",
+        r2_key: key,
+        file_size_bytes: videoFile.size,
+        class_id: videoForm.class_id || null,
+        is_public: videoForm.is_public,
+      });
+
+      resetVideoForm();
+      loadData();
+    } catch (err) {
+      setVideoFormError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setVideoFormLoading(false);
+    }
   }
 
   async function addProduct(e: React.FormEvent) {
@@ -735,7 +799,11 @@ export default function InstructorPage() {
     setConfirmDialog({
       message: "Delete this video?",
       action: async () => {
-        await supabase.from("videos").delete().eq("id", id);
+        await fetch("/api/videos/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
         setVideos((v) => v.filter((vid) => vid.id !== id));
       },
     });
@@ -1953,8 +2021,24 @@ export default function InstructorPage() {
 
         {/* ADD VIDEO MODAL */}
         {showVideoForm && (
-          <Modal title="Add Recording" onClose={() => setShowVideoForm(false)}>
+          <Modal title="Add Recording" onClose={resetVideoForm}>
             <form onSubmit={addVideo} className="space-y-4">
+              <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setVideoMode("upload")}
+                  className={`flex-1 py-2 rounded-md text-sm font-body transition-colors ${videoMode === "upload" ? "bg-white shadow text-[#2041d8] font-medium" : "text-gray-500"}`}
+                >
+                  Upload video
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVideoMode("youtube")}
+                  className={`flex-1 py-2 rounded-md text-sm font-body transition-colors ${videoMode === "youtube" ? "bg-white shadow text-[#2041d8] font-medium" : "text-gray-500"}`}
+                >
+                  YouTube URL
+                </button>
+              </div>
               <div>
                 <label className="label">Title</label>
                 <input
@@ -1965,16 +2049,42 @@ export default function InstructorPage() {
                   required
                 />
               </div>
-              <div>
-                <label className="label">YouTube URL</label>
-                <input
-                  className="input"
-                  placeholder="https://youtube.com/watch?v=..."
-                  value={videoForm.youtube_url}
-                  onChange={e => setVideoForm(f => ({ ...f, youtube_url: e.target.value }))}
-                  required
-                />
-              </div>
+              {videoMode === "youtube" ? (
+                <div>
+                  <label className="label">YouTube URL</label>
+                  <input
+                    className="input"
+                    placeholder="https://youtube.com/watch?v=..."
+                    value={videoForm.youtube_url}
+                    onChange={e => setVideoForm(f => ({ ...f, youtube_url: e.target.value }))}
+                    required
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="label">Video file</label>
+                  <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl py-8 cursor-pointer hover:border-[#2041d8] transition-colors">
+                    <Upload className="w-6 h-6 text-[#2041d8]" strokeWidth={1.5} />
+                    <span className="font-body text-sm text-gray-500 text-center px-4">
+                      {videoFile ? videoFile.name : "Tap to choose a video from your camera roll"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={e => setVideoFile(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                  {videoFormLoading && videoUploadProgress > 0 && (
+                    <div className="mt-3">
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#2041d8] transition-all" style={{ width: `${videoUploadProgress}%` }} />
+                      </div>
+                      <p className="font-body text-xs text-gray-400 mt-1">Uploading… {videoUploadProgress}%</p>
+                    </div>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="label">Description</label>
                 <textarea
@@ -2010,10 +2120,13 @@ export default function InstructorPage() {
                   Visible to all members (not just paid registrants)
                 </label>
               </div>
+              {videoFormError && (
+                <p className="font-body text-sm text-red-500">{videoFormError}</p>
+              )}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowVideoForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="button" onClick={resetVideoForm} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={videoFormLoading}>
-                  {videoFormLoading ? "Adding…" : "Add Recording"}
+                  {videoFormLoading ? (videoMode === "upload" ? "Uploading…" : "Adding…") : "Add Recording"}
                 </button>
               </div>
             </form>
@@ -2827,21 +2940,29 @@ function VideoCard({ video, onDelete }: { video: Video; onDelete: () => void }) 
   return (
     <div className="card overflow-hidden">
       <div className="relative aspect-video bg-black">
-        <img
-          src={`https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}
-          alt={video.title}
-          className="w-full h-full object-cover opacity-80"
-        />
-        <a
-          href={video.youtube_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[14px] border-l-[#2041d8] ml-1" />
+        {video.video_type === "r2" ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <Film className="w-10 h-10 text-white/60" strokeWidth={1.5} />
           </div>
-        </a>
+        ) : (
+          <>
+            <img
+              src={`https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}
+              alt={video.title}
+              className="w-full h-full object-cover opacity-80"
+            />
+            <a
+              href={video.youtube_url ?? undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[14px] border-l-[#2041d8] ml-1" />
+              </div>
+            </a>
+          </>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-heading text-sm mb-1 line-clamp-1">{video.title}</h3>

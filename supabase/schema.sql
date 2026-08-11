@@ -92,11 +92,18 @@ create table public.videos (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
   description text,
-  youtube_url text not null,
-  youtube_id text not null,
+  video_type text not null default 'youtube' check (video_type in ('youtube', 'r2')),
+  youtube_url text,
+  youtube_id text,
+  r2_key text,
+  file_size_bytes bigint,
   class_id uuid references public.classes(id) on delete set null,
   is_public boolean default false,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  constraint videos_source_matches_type check (
+    (video_type = 'youtube' and youtube_id is not null) or
+    (video_type = 'r2' and r2_key is not null)
+  )
 );
 
 alter table public.videos enable row level security;
