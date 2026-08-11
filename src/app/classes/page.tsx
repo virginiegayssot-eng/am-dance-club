@@ -49,11 +49,15 @@ export default function ClassesPage() {
 
     const today = new Date().toISOString().split("T")[0];
     const { data: classData } = await supabase
-      .from("classes").select("*, instructor:profiles!instructor_id(full_name), instructor2:profiles!instructor_id_2(full_name)")
+      .from("classes").select("*")
       .eq("is_cancelled", false).gte("class_date", today)
       .order("class_date", { ascending: true });
 
     if (!classData) { setLoading(false); return; }
+
+    const { data: instructorProfiles } = await supabase
+      .from("profiles").select("id, full_name, show_on_instructors_page")
+      .eq("role", "instructor");
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
     let userRegs: { class_id: string; guest_count: number }[] = [];
@@ -72,8 +76,8 @@ export default function ClassesPage() {
       registered_count: regCounts?.find(rc => rc.class_id === c.id)?.registered_count ?? 0,
       is_registered: !!userRegs.find(r => r.class_id === c.id),
       guest_count: userRegs.find(r => r.class_id === c.id)?.guest_count ?? 0,
-      instructor_name: c.instructor?.full_name ?? null,
-      instructor2_name: c.instructor2?.full_name ?? null,
+      instructor_name: instructorProfiles?.find(i => i.id === c.instructor_id && i.show_on_instructors_page)?.full_name ?? null,
+      instructor2_name: instructorProfiles?.find(i => i.id === c.instructor_id_2 && i.show_on_instructors_page)?.full_name ?? null,
     })));
     setLoading(false);
   }
@@ -208,9 +212,9 @@ export default function ClassesPage() {
                     <div className="space-y-1.5 mb-5">
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
-                      {cls.instructor_name && (
+                      {[cls.instructor_name, cls.instructor2_name].filter(Boolean).length > 0 && (
                         <p className="font-body text-xs text-gray-500">
-                          w/ {cls.instructor_name}{cls.instructor2_name && ` & ${cls.instructor2_name}`}
+                          w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
                         </p>
                       )}
                       {isFull && (
