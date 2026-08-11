@@ -3219,8 +3219,8 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
             weekday: "long", day: "numeric", month: "long", year: "numeric"
           })} · {formatTime(cls.class_time)}
         </p>
-        <button onClick={onAssignInstructor} className="font-body text-xs text-[#000000] underline mt-1">
-          {instructorNames || "Assign instructor"}
+        <button onClick={onAssignInstructor} className="font-body text-xs text-[#000000] italic mt-1">
+          {instructorNames ? `w/ ${instructorNames}` : "Assign instructor"}
         </button>
       </div>
       <div className="flex items-center gap-4 flex-wrap shrink-0">
