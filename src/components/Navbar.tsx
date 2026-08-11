@@ -102,6 +102,7 @@ export default function Navbar() {
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-6">
               <Link href="/classes" className={`font-body text-sm transition-colors ${isActive("/classes")}`}>Classes</Link>
+              <Link href="/instructors" className={`font-body text-sm transition-colors ${isActive("/instructors")}`}>Instructors</Link>
               <Link href="/passes" className={`font-body text-sm transition-colors ${isActive("/passes")}`}>Passes</Link>
               <Link href="/videos" className={`font-body text-sm transition-colors ${isActive("/videos")}`}>Videos</Link>
               <a href="https://www.theamdance.com/s/shop" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-black hover:text-[#2041d8] transition-colors">Shop Merch</a>
@@ -158,6 +159,7 @@ export default function Navbar() {
           <div className="md:hidden pb-4 space-y-1 border-t border-[#2041d8]/20 pt-4">
             {[
               { href: "/classes", label: "Classes" },
+              { href: "/instructors", label: "Instructors" },
               { href: "/passes", label: "Passes & Pricing" },
               { href: "/videos", label: "Videos" },
               { href: "https://www.theamdance.com/s/shop", label: "Shop Merch" },

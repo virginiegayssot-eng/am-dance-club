@@ -11,7 +11,7 @@ import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Class, Pass, Profile } from "@/lib/supabase";
 import { Clock, MapPin, Users, Check } from "lucide-react";
 
-type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number };
+type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; instructor_name: string | null; instructor2_name: string | null };
 
 export default function ClassesPage() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function ClassesPage() {
 
     const today = new Date().toISOString().split("T")[0];
     const { data: classData } = await supabase
-      .from("classes").select("*")
+      .from("classes").select("*, instructor:profiles!instructor_id(full_name), instructor2:profiles!instructor_id_2(full_name)")
       .eq("is_cancelled", false).gte("class_date", today)
       .order("class_date", { ascending: true });
 
@@ -67,11 +67,13 @@ export default function ClassesPage() {
       }
     }
 
-    setClasses(classData.map(c => ({
+    setClasses(classData.map((c: any) => ({
       ...c,
       registered_count: regCounts?.find(rc => rc.class_id === c.id)?.registered_count ?? 0,
       is_registered: !!userRegs.find(r => r.class_id === c.id),
       guest_count: userRegs.find(r => r.class_id === c.id)?.guest_count ?? 0,
+      instructor_name: c.instructor?.full_name ?? null,
+      instructor2_name: c.instructor2?.full_name ?? null,
     })));
     setLoading(false);
   }
@@ -206,6 +208,11 @@ export default function ClassesPage() {
                     <div className="space-y-1.5 mb-5">
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
+                      {cls.instructor_name && (
+                        <p className="font-body text-xs text-gray-500">
+                          w/ {cls.instructor_name}{cls.instructor2_name && ` & ${cls.instructor2_name}`}
+                        </p>
+                      )}
                       {isFull && (
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
                       )}

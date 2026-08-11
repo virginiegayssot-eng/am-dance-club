@@ -32,6 +32,7 @@ create table public.classes (
   price_cents int not null default 2000,
   stripe_price_id text,
   instructor_id uuid references public.profiles(id),
+  instructor_id_2 uuid references public.profiles(id),
   is_cancelled boolean default false,
   created_at timestamptz default now()
 );

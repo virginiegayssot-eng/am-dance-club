@@ -15,6 +15,9 @@ export type Profile = {
   avatar_url: string | null;
   phone: string | null;
   birth_date: string | null;
+  title: string | null;
+  bio: string | null;
+  show_on_instructors_page: boolean;
   created_at: string;
 };
 
@@ -32,6 +35,7 @@ export type Class = {
   price_cents: number;
   stripe_price_id: string | null;
   instructor_id: string | null;
+  instructor_id_2: string | null;
   is_special: boolean;
   special_label: string | null;
   is_cancelled: boolean;
