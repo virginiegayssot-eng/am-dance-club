@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
   const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { studentId, passTypeId, source, amountPaidCents } = await req.json();
+  const { studentId, passTypeId, source, amountPaidCents, classesRemaining } = await req.json();
   if (!studentId || !passTypeId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
   const admin = adminClient();
@@ -87,6 +87,11 @@ export async function POST(req: NextRequest) {
   if (passTypeError) return NextResponse.json({ error: `DEBUG pass_types lookup error for id "${passTypeId}": ${passTypeError.message} (code: ${passTypeError.code})` }, { status: 400 });
   if (!passType) return NextResponse.json({ error: `DEBUG no pass_type row for id "${passTypeId}"` }, { status: 404 });
 
+  const classesTotal = passType.classes_included ?? 1;
+  if (classesRemaining != null && (classesRemaining < 0 || classesRemaining > classesTotal)) {
+    return NextResponse.json({ error: `Classes remaining must be between 0 and ${classesTotal}` }, { status: 400 });
+  }
+
   const expiresAt = passType.validity_days
     ? new Date(Date.now() + passType.validity_days * 86400000).toISOString()
     : null;
@@ -94,8 +99,8 @@ export async function POST(req: NextRequest) {
   const { error } = await admin.from("passes").insert({
     student_id: studentId,
     pass_type_id: passTypeId,
-    classes_total: passType.classes_included ?? 1,
-    classes_remaining: passType.classes_included ?? 1,
+    classes_total: classesTotal,
+    classes_remaining: classesRemaining ?? classesTotal,
     expires_at: expiresAt,
     stripe_session_id: null,
     source: source ?? "cash",
@@ -121,7 +126,7 @@ export async function POST(req: NextRequest) {
         from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: student.email,
         subject: `Your ${passType.name} is ready — [Studio Name]`,
-        html: buildPassAssignedEmailHtml(firstName, passType.name, passType.classes_included, expiresAt),
+        html: buildPassAssignedEmailHtml(firstName, passType.name, classesRemaining ?? passType.classes_included, expiresAt),
       }).catch((e) => console.error("Pass assigned email error:", e));
     }
   }
