@@ -26,7 +26,19 @@ export default function InstructorsPage() {
       .eq("show_on_instructors_page", true)
       .order("full_name");
 
-    setInstructors(data ?? []);
+    // Majo, then Luji, then Lucha, then anyone else alphabetically
+    const priority = ["majo", "luji", "lucha"];
+    const priorityIndex = (name: string | null) => {
+      const lower = (name ?? "").toLowerCase();
+      const idx = priority.findIndex(p => lower.includes(p));
+      return idx === -1 ? priority.length : idx;
+    };
+    const sorted = (data ?? []).slice().sort((a, b) =>
+      priorityIndex(a.full_name) - priorityIndex(b.full_name) ||
+      (a.full_name ?? "").localeCompare(b.full_name ?? "")
+    );
+
+    setInstructors(sorted);
     setLoading(false);
   }
 
