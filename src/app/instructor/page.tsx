@@ -15,6 +15,13 @@ import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageI
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
+// Fallback title for a bulk-uploaded video when the instructor leaves the title
+// field blank — e.g. "sneakers_class_1.mov" -> "sneakers class 1".
+function titleFromFilename(filename: string): string {
+  const base = filename.replace(/\.[^./]+$/, "");
+  return base.replace(/[_-]+/g, " ").trim() || "Untitled recording";
+}
+
 const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
 
 type ClassWithCount = Class & { registered_count: number };
@@ -91,8 +98,9 @@ export default function InstructorPage() {
   const [videoForm, setVideoForm] = useState({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
   const [videoFormLoading, setVideoFormLoading] = useState(false);
   const [videoMode, setVideoMode] = useState<"upload" | "youtube">("upload");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [videoUploadIndex, setVideoUploadIndex] = useState(0);
 
   // Merch products
   const [products, setProducts] = useState<MerchProduct[]>([]);
@@ -579,9 +587,45 @@ export default function InstructorPage() {
   function resetVideoForm() {
     setShowVideoForm(false);
     setVideoForm({ title: "", description: "", youtube_url: "", class_id: "", is_public: false });
-    setVideoFile(null);
+    setVideoFiles([]);
     setVideoUploadProgress(0);
+    setVideoUploadIndex(0);
     setVideoMode("upload");
+  }
+
+  async function uploadOneVideo(file: File, title: string, sharedFields: { description: string | null; class_id: string | null; is_public: boolean }) {
+    const res = await fetch("/api/videos/upload-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+    });
+    const { uploadUrl, key, error } = await res.json();
+    if (!res.ok || !uploadUrl) throw new Error(error || "Could not start upload");
+
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", (ev) => {
+        if (ev.lengthComputable) setVideoUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+      });
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve();
+        else reject(new Error(`Upload failed (status ${xhr.status}): ${xhr.responseText?.slice(0, 300) || "no response body"}`));
+      });
+      xhr.addEventListener("error", () => reject(new Error("Upload failed: the browser blocked the request before it reached Cloudflare (likely a CORS policy mismatch on the bucket)")));
+      xhr.open("PUT", uploadUrl);
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.send(file);
+    });
+
+    await supabase.from("videos").insert({
+      title,
+      description: sharedFields.description,
+      video_type: "r2",
+      r2_key: key,
+      file_size_bytes: file.size,
+      class_id: sharedFields.class_id,
+      is_public: sharedFields.is_public,
+    });
   }
 
   async function addVideo(e: React.FormEvent) {
@@ -611,51 +655,40 @@ export default function InstructorPage() {
       return;
     }
 
-    if (!videoFile) {
-      setActionError("Choose a video to upload");
+    if (videoFiles.length === 0) {
+      setActionError("Choose one or more videos to upload");
       return;
     }
 
     setVideoFormLoading(true);
-    setVideoUploadProgress(0);
+    const sharedFields = {
+      description: videoForm.description || null,
+      class_id: videoForm.class_id || null,
+      is_public: videoForm.is_public,
+    };
+    let uploaded = 0;
     try {
-      const res = await fetch("/api/videos/upload-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: videoFile.name, contentType: videoFile.type, size: videoFile.size }),
-      });
-      const { uploadUrl, key, error } = await res.json();
-      if (!res.ok || !uploadUrl) throw new Error(error || "Could not start upload");
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener("progress", (ev) => {
-          if (ev.lengthComputable) setVideoUploadProgress(Math.round((ev.loaded / ev.total) * 100));
-        });
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`Upload failed (status ${xhr.status}): ${xhr.responseText?.slice(0, 300) || "no response body"}`));
-        });
-        xhr.addEventListener("error", () => reject(new Error("Upload failed: the browser blocked the request before it reached Cloudflare (likely a CORS policy mismatch on the bucket)")));
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", videoFile.type);
-        xhr.send(videoFile);
-      });
-
-      await supabase.from("videos").insert({
-        title: videoForm.title,
-        description: videoForm.description || null,
-        video_type: "r2",
-        r2_key: key,
-        file_size_bytes: videoFile.size,
-        class_id: videoForm.class_id || null,
-        is_public: videoForm.is_public,
-      });
+      for (let i = 0; i < videoFiles.length; i++) {
+        setVideoUploadIndex(i + 1);
+        setVideoUploadProgress(0);
+        const file = videoFiles[i];
+        const title = videoForm.title.trim()
+          ? (videoFiles.length > 1 ? `${videoForm.title.trim()} (${i + 1}/${videoFiles.length})` : videoForm.title.trim())
+          : titleFromFilename(file.name);
+        await uploadOneVideo(file, title, sharedFields);
+        uploaded++;
+      }
 
       resetVideoForm();
       loadData();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Upload failed");
+      const base = err instanceof Error ? err.message : "Upload failed";
+      setActionError(
+        videoFiles.length > 1
+          ? `${uploaded} of ${videoFiles.length} video${videoFiles.length !== 1 ? "s" : ""} uploaded. "${videoFiles[uploaded]?.name}" failed: ${base}`
+          : base
+      );
+      if (uploaded > 0) loadData();
     } finally {
       setVideoFormLoading(false);
     }
@@ -2118,13 +2151,13 @@ export default function InstructorPage() {
                 </button>
               </div>
               <div>
-                <label className="label">Title</label>
+                <label className="label">Title{videoMode === "upload" && " (optional)"}</label>
                 <input
                   className="input"
-                  placeholder="e.g. Friday 16 May – Salsa Basics"
+                  placeholder={videoMode === "upload" ? "Leave blank to use each file's name" : "e.g. Friday 16 May – Salsa Basics"}
                   value={videoForm.title}
                   onChange={e => setVideoForm(f => ({ ...f, title: e.target.value }))}
-                  required
+                  required={videoMode === "youtube"}
                 />
               </div>
               {videoMode === "youtube" ? (
@@ -2140,25 +2173,39 @@ export default function InstructorPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="label">Video file</label>
+                  <label className="label">Video file(s)</label>
                   <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl py-8 cursor-pointer hover:border-[#334155] transition-colors">
                     <Upload className="w-6 h-6 text-[#334155]" strokeWidth={1.5} />
                     <span className="font-body text-sm text-gray-500 text-center px-4">
-                      {videoFile ? videoFile.name : "Tap to choose a video from your camera roll"}
+                      {videoFiles.length === 0
+                        ? "Tap to choose one or more videos from your camera roll"
+                        : `${videoFiles.length} video${videoFiles.length !== 1 ? "s" : ""} selected`}
                     </span>
                     <input
                       type="file"
                       accept="video/*"
+                      multiple
                       className="hidden"
-                      onChange={e => setVideoFile(e.target.files?.[0] ?? null)}
+                      onChange={e => setVideoFiles(Array.from(e.target.files ?? []))}
                     />
                   </label>
-                  {videoFormLoading && videoUploadProgress > 0 && (
+                  {videoFiles.length > 1 && (
+                    <ul className="mt-2 space-y-0.5 max-h-24 overflow-y-auto">
+                      {videoFiles.map((f, i) => (
+                        <li key={i} className="font-body text-xs text-gray-500 truncate">{f.name}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {videoFormLoading && (
                     <div className="mt-3">
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full bg-[#334155] transition-all" style={{ width: `${videoUploadProgress}%` }} />
                       </div>
-                      <p className="font-body text-xs text-gray-400 mt-1">Uploading… {videoUploadProgress}%</p>
+                      <p className="font-body text-xs text-gray-400 mt-1">
+                        {videoFiles.length > 1
+                          ? `Uploading video ${videoUploadIndex} of ${videoFiles.length} — ${videoUploadProgress}%`
+                          : `Uploading… ${videoUploadProgress}%`}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -2201,7 +2248,11 @@ export default function InstructorPage() {
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={resetVideoForm} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={videoFormLoading}>
-                  {videoFormLoading ? (videoMode === "upload" ? "Uploading…" : "Adding…") : "Add Recording"}
+                  {videoFormLoading
+                    ? (videoMode === "upload"
+                        ? (videoFiles.length > 1 ? `Uploading ${videoUploadIndex}/${videoFiles.length}…` : "Uploading…")
+                        : "Adding…")
+                    : (videoMode === "upload" && videoFiles.length > 1 ? `Add ${videoFiles.length} Recordings` : "Add Recording")}
                 </button>
               </div>
             </form>
