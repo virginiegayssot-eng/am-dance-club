@@ -3286,8 +3286,9 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   isToday?: boolean;
 }) {
   const instructorNames = [cls.instructor_id, cls.instructor_id_2]
-    .map(id => instructors.find(i => i.id === id)?.full_name)
-    .filter(Boolean)
+    .map(id => instructors.find(i => i.id === id))
+    .filter((i): i is Profile => !!i && i.show_on_instructors_page)
+    .map(i => i.full_name)
     .join(" & ");
 
   return (

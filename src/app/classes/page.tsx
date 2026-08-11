@@ -53,11 +53,15 @@ export default function ClassesPage() {
 
     const today = new Date().toISOString().split("T")[0];
     const { data: classData } = await supabase
-      .from("classes").select("*, instructor:profiles!instructor_id(full_name), instructor2:profiles!instructor_id_2(full_name)")
+      .from("classes").select("*")
       .eq("is_cancelled", false).gte("class_date", today)
       .order("class_date", { ascending: true });
 
     if (!classData) { setLoading(false); return; }
+
+    const { data: instructorProfiles } = await supabase
+      .from("profiles").select("id, full_name, show_on_instructors_page")
+      .eq("role", "instructor");
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
     let userRegs: { id: string; class_id: string; guest_count: number }[] = [];
@@ -77,8 +81,8 @@ export default function ClassesPage() {
       is_registered: !!userRegs.find(r => r.class_id === c.id),
       guest_count: userRegs.find(r => r.class_id === c.id)?.guest_count ?? 0,
       registration_id: userRegs.find(r => r.class_id === c.id)?.id ?? null,
-      instructor_name: c.instructor?.full_name ?? null,
-      instructor2_name: c.instructor2?.full_name ?? null,
+      instructor_name: instructorProfiles?.find(i => i.id === c.instructor_id && i.show_on_instructors_page)?.full_name ?? null,
+      instructor2_name: instructorProfiles?.find(i => i.id === c.instructor_id_2 && i.show_on_instructors_page)?.full_name ?? null,
     })));
     setLoading(false);
   }
@@ -245,9 +249,9 @@ export default function ClassesPage() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="mb-3">
                       <h3 className="font-heading text-lg leading-snug">{cls.title}</h3>
-                      {cls.instructor_name && (
+                      {[cls.instructor_name, cls.instructor2_name].filter(Boolean).length > 0 && (
                         <p className="font-body text-xs text-gray-500 mt-0.5">
-                          w/ {cls.instructor_name}{cls.instructor2_name && ` & ${cls.instructor2_name}`}
+                          w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
                         </p>
                       )}
                     </div>
