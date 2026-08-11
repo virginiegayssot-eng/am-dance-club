@@ -90,8 +90,11 @@ export type Video = {
   id: string;
   title: string;
   description: string | null;
-  youtube_url: string;
-  youtube_id: string;
+  video_type: "youtube" | "r2";
+  youtube_url: string | null;
+  youtube_id: string | null;
+  r2_key: string | null;
+  file_size_bytes: number | null;
   class_id: string | null;
   is_public: boolean;
   created_at: string;
