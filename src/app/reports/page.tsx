@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
+import { todayLocal } from "@/lib/date";
 import Link from "next/link";
 import { Cake, PartyPopper, Calendar, CreditCard, Banknote, Gift } from "lucide-react";
 
@@ -438,7 +439,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {classes.filter(c => c.class_date >= new Date().toISOString().split("T")[0]).map(c => {
+                  {classes.filter(c => c.class_date >= todayLocal()).map(c => {
                     const rate = c.registered > 0 ? Math.round((c.attended / c.registered) * 100) : 0;
                     return (
                       <tr key={c.id} className="hover:bg-gray-50/50">
