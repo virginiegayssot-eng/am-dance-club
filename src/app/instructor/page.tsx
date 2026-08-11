@@ -656,9 +656,9 @@ export default function InstructorPage() {
         });
         xhr.addEventListener("load", () => {
           if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error("Upload failed"));
+          else reject(new Error(`Upload failed (status ${xhr.status}): ${xhr.responseText?.slice(0, 300) || "no response body"}`));
         });
-        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+        xhr.addEventListener("error", () => reject(new Error("Upload failed: the browser blocked the request before it reached Cloudflare (likely a CORS policy mismatch on the bucket)")));
         xhr.open("PUT", uploadUrl);
         xhr.setRequestHeader("Content-Type", videoFile.type);
         xhr.send(videoFile);
