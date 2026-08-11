@@ -40,6 +40,12 @@ export default function InstructorPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string; confirmLabel?: string; action: () => void } | null>(null);
   const [classes, setClasses] = useState<ClassWithCount[]>([]);
+  const [instructors, setInstructors] = useState<Profile[]>([]);
+  const [assignInstructorTarget, setAssignInstructorTarget] = useState<ClassWithCount | null>(null);
+  const [assignInstructor1, setAssignInstructor1] = useState("");
+  const [assignInstructor2, setAssignInstructor2] = useState("");
+  const [assignInstructorLoading, setAssignInstructorLoading] = useState(false);
+  const [assignInstructorError, setAssignInstructorError] = useState("");
   const [videos, setVideos] = useState<Video[]>([]);
   const [allPasses, setAllPasses] = useState<PassRow[]>([]);
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
@@ -199,6 +205,9 @@ export default function InstructorPage() {
       if (prev.class_date < todayStr) return null;
       return enriched.find(c => c.id === prev.id) ?? null;
     });
+
+    const { data: instructorProfiles } = await supabase.from("profiles").select("*").eq("role", "instructor").order("full_name");
+    setInstructors(instructorProfiles ?? []);
 
     const { data: vids } = await supabase.from("videos").select("*").order("created_at", { ascending: false });
     setVideos(vids ?? []);
@@ -1123,6 +1132,43 @@ export default function InstructorPage() {
     setShowAssignPassForm(true);
   }
 
+  function openAssignInstructor(cls: ClassWithCount) {
+    setAssignInstructorTarget(cls);
+    setAssignInstructor1(cls.instructor_id ?? "");
+    setAssignInstructor2(cls.instructor_id_2 ?? "");
+    setAssignInstructorError("");
+  }
+
+  async function assignInstructors(e: React.FormEvent) {
+    e.preventDefault();
+    if (!assignInstructorTarget) return;
+    if (assignInstructor2 && assignInstructor2 === assignInstructor1) {
+      setAssignInstructorError("Pick two different instructors, or leave the second one blank.");
+      return;
+    }
+
+    setAssignInstructorLoading(true);
+    setAssignInstructorError("");
+
+    const { error } = await supabase
+      .from("classes")
+      .update({
+        instructor_id: assignInstructor1 || null,
+        instructor_id_2: assignInstructor2 || null,
+      })
+      .eq("id", assignInstructorTarget.id);
+
+    if (error) {
+      setAssignInstructorError(error.message);
+      setAssignInstructorLoading(false);
+      return;
+    }
+
+    setAssignInstructorTarget(null);
+    setAssignInstructorLoading(false);
+    loadData();
+  }
+
   const tabs = [
     { key: "classes", label: "Classes" },
     { key: "attendance", label: "Attendance" },
@@ -1300,13 +1346,13 @@ export default function InstructorPage() {
                   </div>
                 </div>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
                     <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
-                      <ClassRow key={cls.id} cls={cls} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} past />
+                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} past />
                     ))}
                   </>
                 )}
@@ -2849,6 +2895,49 @@ export default function InstructorPage() {
           </Modal>
         )}
 
+        {/* ASSIGN INSTRUCTOR MODAL */}
+        {assignInstructorTarget && (
+          <Modal title={`Assign Instructor — ${assignInstructorTarget.title}`} onClose={() => setAssignInstructorTarget(null)}>
+            <form onSubmit={assignInstructors} className="space-y-4">
+              <div>
+                <label className="label">Instructor</label>
+                <select
+                  className="input"
+                  value={assignInstructor1}
+                  onChange={e => setAssignInstructor1(e.target.value)}
+                >
+                  <option value="">— None —</option>
+                  {instructors.map(i => (
+                    <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Second instructor (optional)</label>
+                <select
+                  className="input"
+                  value={assignInstructor2}
+                  onChange={e => setAssignInstructor2(e.target.value)}
+                >
+                  <option value="">— None —</option>
+                  {instructors.map(i => (
+                    <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
+                  ))}
+                </select>
+              </div>
+              {assignInstructorError && (
+                <p className="font-body text-sm text-red-500">{assignInstructorError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setAssignInstructorTarget(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={assignInstructorLoading}>
+                  {assignInstructorLoading ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
         {/* ASSIGN PASS MODAL */}
         {showAssignPassForm && assignPassTarget && (
           <Modal title={`Assign Pass — ${assignPassTarget.full_name ?? assignPassTarget.email}`} onClose={() => setShowAssignPassForm(false)}>
@@ -3094,15 +3183,22 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past, isToday }: {
+function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, past, isToday }: {
   cls: ClassWithCount;
+  instructors: Profile[];
   onAttendance: () => void;
   onCancel: () => void;
   onDelete: () => void;
   onBookForMember?: () => void;
+  onAssignInstructor: () => void;
   past?: boolean;
   isToday?: boolean;
 }) {
+  const instructorNames = [cls.instructor_id, cls.instructor_id_2]
+    .map(id => instructors.find(i => i.id === id)?.full_name)
+    .filter(Boolean)
+    .join(" & ");
+
   return (
     <div className={`card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${cls.is_cancelled ? "opacity-60" : ""} ${isToday ? "ring-2 ring-[#000000]" : ""}`}>
       <div>
@@ -3123,6 +3219,9 @@ function ClassRow({ cls, onAttendance, onCancel, onDelete, onBookForMember, past
             weekday: "long", day: "numeric", month: "long", year: "numeric"
           })} · {formatTime(cls.class_time)}
         </p>
+        <button onClick={onAssignInstructor} className="font-body text-xs text-[#000000] underline mt-1">
+          {instructorNames || "Assign instructor"}
+        </button>
       </div>
       <div className="flex items-center gap-4 flex-wrap shrink-0">
         <div className="text-center">

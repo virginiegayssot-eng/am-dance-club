@@ -35,6 +35,7 @@ export type Class = {
   price_cents: number;
   stripe_price_id: string | null;
   instructor_id: string | null;
+  instructor_id_2: string | null;
   is_special: boolean;
   special_label: string | null;
   is_cancelled: boolean;
