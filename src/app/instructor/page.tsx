@@ -117,6 +117,7 @@ export default function InstructorPage() {
   const [assignPassTypeId, setAssignPassTypeId] = useState("");
   const [assignPassSource, setAssignPassSource] = useState("cash");
   const [assignPassAmount, setAssignPassAmount] = useState("");
+  const [assignPassClassesRemaining, setAssignPassClassesRemaining] = useState("");
   const [assignPassLoading, setAssignPassLoading] = useState(false);
   const [assignPassError, setAssignPassError] = useState("");
 
@@ -880,6 +881,7 @@ export default function InstructorPage() {
         passTypeId: assignPassTypeId,
         source: assignPassSource,
         amountPaidCents: assignPassAmount ? Math.round(parseFloat(assignPassAmount) * 100) : null,
+        classesRemaining: assignPassClassesRemaining ? parseInt(assignPassClassesRemaining, 10) : null,
       }),
     });
     const data = await res.json();
@@ -894,6 +896,7 @@ export default function InstructorPage() {
     setAssignPassTarget(null);
     setAssignPassTypeId("");
     setAssignPassAmount("");
+    setAssignPassClassesRemaining("");
     loadData();
     setAssignPassLoading(false);
   }
@@ -1053,6 +1056,7 @@ export default function InstructorPage() {
     setAssignPassTypeId(passTypes[0]?.id ?? "");
     setAssignPassSource("cash");
     setAssignPassAmount("");
+    setAssignPassClassesRemaining("");
     setAssignPassError("");
     setShowAssignPassForm(true);
   }
@@ -2719,6 +2723,24 @@ export default function InstructorPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="label">
+                  Classes remaining
+                  <span className="font-body text-xs text-gray-400 ml-1">(optional — for migrating a client with an already part-used pass)</span>
+                </label>
+                <input
+                  className="input"
+                  type="number"
+                  min="0"
+                  max={passTypes.find(pt => pt.id === assignPassTypeId)?.classes_included ?? undefined}
+                  placeholder={`Leave blank for the full ${passTypes.find(pt => pt.id === assignPassTypeId)?.classes_included ?? ""} classes`}
+                  value={assignPassClassesRemaining}
+                  onChange={e => setAssignPassClassesRemaining(e.target.value)}
+                />
+                <p className="font-body text-xs text-gray-400 mt-1">
+                  Sets the starting balance directly, so you don't need to debit classes afterwards (which would email the student each time).
+                </p>
               </div>
               <div>
                 <label className="label">Payment Method</label>
