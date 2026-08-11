@@ -22,14 +22,25 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { full_name, phone, birth_date } = await req.json();
+  const { full_name, phone, birth_date, title, bio } = await req.json();
 
   // Store as 2000-MM-DD (placeholder year) since DB column is type date
   const dbDate = birth_date ? `2000-${birth_date}` : null;
 
-  const { error } = await adminClient()
+  const admin = adminClient();
+
+  const update: Record<string, unknown> = { full_name, phone: phone || null, birth_date: dbDate };
+
+  // Only instructors can set their public bio/title
+  const { data: existing } = await admin.from("profiles").select("role").eq("id", user.id).single();
+  if (existing?.role === "instructor") {
+    update.title = title || null;
+    update.bio = bio || null;
+  }
+
+  const { error } = await admin
     .from("profiles")
-    .update({ full_name, phone: phone || null, birth_date: dbDate })
+    .update(update)
     .eq("id", user.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
