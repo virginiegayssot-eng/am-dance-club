@@ -17,6 +17,7 @@ export type Profile = {
   birth_date: string | null;
   title: string | null;
   bio: string | null;
+  show_on_instructors_page: boolean;
   created_at: string;
 };
 

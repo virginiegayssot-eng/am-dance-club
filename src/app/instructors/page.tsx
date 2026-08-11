@@ -23,6 +23,7 @@ export default function InstructorsPage() {
       .from("profiles")
       .select("*")
       .eq("role", "instructor")
+      .eq("show_on_instructors_page", true)
       .order("full_name");
 
     setInstructors(data ?? []);
