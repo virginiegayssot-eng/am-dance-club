@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
+import { todayLocal } from "@/lib/date";
 import type { Class, Pass, Profile } from "@/lib/supabase";
 import { Clock, MapPin, Users, Check } from "lucide-react";
 
@@ -51,7 +52,7 @@ export default function ClassesPage() {
       setActivePasses((passes ?? []).filter(p => !p.expires_at || new Date(p.expires_at) > new Date()));
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayLocal();
     const { data: classData } = await supabase
       .from("classes").select("*")
       .eq("is_cancelled", false).gte("class_date", today)

@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime, getYouTubeId } from "@/lib/stripe";
+import { todayLocal, toLocalDateStr } from "@/lib/date";
 import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
@@ -204,7 +205,7 @@ export default function InstructorPage() {
     setClasses(enriched);
 
     // Clear selectedClass if it's in the past (e.g. tab left open overnight)
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = todayLocal();
     setSelectedClass(prev => {
       if (!prev) return null;
       if (prev.class_date < todayStr) return null;
@@ -520,7 +521,7 @@ export default function InstructorPage() {
     const d = new Date();
     while (d <= endDate) {
       d.setDate(d.getDate() + 1);
-      if (d.getDay() === targetDay) matchingDates.push(d.toISOString().split("T")[0]);
+      if (d.getDay() === targetDay) matchingDates.push(toLocalDateStr(d));
     }
 
     const existingDates = new Set(classes.map(c => c.class_date));
@@ -1219,7 +1220,7 @@ export default function InstructorPage() {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayLocal();
   const upcomingClasses = classes.filter(c => !c.is_cancelled && c.class_date >= today);
   const pastClasses = classes.filter(c => c.class_date < today || c.is_cancelled).reverse();
   const todaysClass = classes.find(c => !c.is_cancelled && c.class_date === today);
