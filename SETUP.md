@@ -36,6 +36,7 @@ npm install
    8. `supabase/add-merch.sql`
    9. `supabase/add-chat-image-support.sql`
    10. `supabase/add-news-post-image.sql`
+   11. `supabase/add-video-r2-support.sql`
 3. Go to **Storage** and create three **public** buckets:
    - `avatars`
    - `chat-images`
@@ -73,7 +74,47 @@ where each one comes from (Supabase, Stripe, Resend).
 
 ---
 
-## Step 5: Set up Resend
+## Step 5: Set up Cloudflare R2 (class video storage)
+
+Recordings can be added either by pasting a YouTube URL or by uploading a
+video file directly (from the instructor's phone camera roll, for example).
+Uploads are stored in Cloudflare R2 rather than YouTube — no copyright/length
+claim risk, and members get a real Download button instead of a YouTube
+embed. Each client gets their own bucket in one shared Cloudflare account.
+
+1. In the Cloudflare dashboard, go to **R2** and create a bucket — name it
+   something like `<client-slug>-videos`
+2. Go to **Manage API Tokens → Create Account API Token**:
+   - Permissions: **Object Read & Write**
+   - Scope to that one bucket only (not "all buckets")
+   - TTL: **Forever**
+   - No IP filtering needed
+3. Copy the **Access Key ID**, **Secret Access Key**, and **Endpoint URL**
+   it gives you (labeled "Use the following credentials for S3 clients") —
+   this is different from the general `cfat_...` token also shown on that
+   screen, which won't work here
+4. In the bucket's **Settings → CORS Policy**, add:
+   ```json
+   [
+     {
+       "AllowedOrigins": ["https://your-deployed-domain.com"],
+       "AllowedMethods": ["PUT", "GET"],
+       "AllowedHeaders": ["*"],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+   Without this, uploads will fail with a CORS error even though the
+   credentials are correct. Update this again if the domain ever changes.
+5. Set `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and
+   `R2_BUCKET_NAME` — locally in `.env.local` and in your hosting provider's
+   environment variables (mark the key/secret as sensitive if the option
+   exists, and make sure they're available to serverless functions, not
+   just the build step)
+
+---
+
+## Step 6: Set up Resend
 
 1. Go to [resend.com](https://resend.com), create an account, and verify a
    sending domain (or use their test sender while developing)
@@ -82,7 +123,7 @@ where each one comes from (Supabase, Stripe, Resend).
 
 ---
 
-## Step 6: Make yourself instructor
+## Step 7: Make yourself instructor
 
 Instructor access is a database role, not tied to any environment variable:
 1. Sign up for an account in the app with your own email
@@ -91,7 +132,7 @@ Instructor access is a database role, not tied to any environment variable:
 
 ---
 
-## Step 7: Run the app
+## Step 8: Run the app
 
 ```bash
 npm run dev
@@ -101,7 +142,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Step 8: Replace the placeholder branding
+## Step 9: Replace the placeholder branding
 
 Search the codebase for `[Studio Name]`, `[Studio Location]`, `[Schedule]`,
 `[Price]`, `[Studio Email]`, `[Instructor Name]`, `[WhatsApp group invite URL]`,
