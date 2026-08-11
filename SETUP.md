@@ -37,6 +37,7 @@ npm install
    9. `supabase/add-chat-image-support.sql`
    10. `supabase/add-news-post-image.sql`
    11. `supabase/add-video-r2-support.sql`
+   12. `supabase/instructor-profile-schema.sql`
 3. Go to **Storage** and create three **public** buckets:
    - `avatars`
    - `chat-images`
