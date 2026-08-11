@@ -60,7 +60,7 @@ export default function PassesPage() {
   const [buying, setBuying] = useState<string | null>(null);
   const [discountCode, setDiscountCode] = useState("");
   const [discountInput, setDiscountInput] = useState("");
-  const [discountInfo, setDiscountInfo] = useState<{ type: string; value: number } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{ type: string; value: number; applicablePassType: string | null } | null>(null);
   const [discountError, setDiscountError] = useState("");
   const [buyError, setBuyError] = useState("");
   const [validatingCode, setValidatingCode] = useState(false);
@@ -109,7 +109,7 @@ export default function PassesPage() {
       setDiscountCode("");
     } else {
       setDiscountCode(discountInput.toUpperCase().trim());
-      setDiscountInfo({ type: data.discount_type, value: data.discount_value });
+      setDiscountInfo({ type: data.discount_type, value: data.discount_value, applicablePassType: data.applicable_pass_type ?? null });
     }
     setValidatingCode(false);
   }
@@ -200,7 +200,10 @@ export default function PassesPage() {
             {discountError && <p className="font-body text-sm text-red-500 mt-2">{discountError}</p>}
             {discountInfo && (
               <p className="font-body text-sm text-green-600 mt-2">
-                Code applied: {discountInfo.type === "percentage" ? `${discountInfo.value}% off` : `$${(discountInfo.value / 100).toFixed(0)} off`} every pass!
+                Code applied: {discountInfo.type === "percentage" ? `${discountInfo.value}% off` : `$${(discountInfo.value / 100).toFixed(0)} off`}{" "}
+                {discountInfo.applicablePassType
+                  ? `the ${PASS_OPTIONS.find(p => p.id === discountInfo.applicablePassType)?.name ?? discountInfo.applicablePassType}!`
+                  : "every pass!"}
               </p>
             )}
           </div>

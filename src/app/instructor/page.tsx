@@ -28,6 +28,7 @@ const LOCATION_ALEXANDRIA = "BYLA Alexandria — 70 O'Riordan St, Alexandria NSW
 const LOCATION_MANLY = "BYLA Manly — St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095";
 
 const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
+const PASS_TYPE_LABELS = { casual: "Casual Class only", five: "5-Class Pack only", ten: "10-Class Pack only" };
 
 type ClassWithCount = Class & { registered_count: number };
 type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
@@ -98,7 +99,7 @@ export default function InstructorPage() {
   // Discount codes
   const [discountCodes, setDiscountCodes] = useState<any[]>([]);
   const [showDiscountForm, setShowDiscountForm] = useState(false);
-  const [discountForm, setDiscountForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "" });
+  const [discountForm, setDiscountForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "", applicable_pass_type: "" });
   const [discountFormLoading, setDiscountFormLoading] = useState(false);
   const [editingDiscountId, setEditingDiscountId] = useState<string | null>(null);
   const [editDiscountExpiresAt, setEditDiscountExpiresAt] = useState("");
@@ -828,11 +829,12 @@ export default function InstructorPage() {
         : Math.round(parseFloat(discountForm.discount_value) * 100),
       max_uses: discountForm.max_uses ? parseInt(discountForm.max_uses) : null,
       expires_at: discountForm.expires_at || null,
+      applicable_pass_type: discountForm.applicable_pass_type || null,
       active: true,
     });
     if (error) { setActionError(error.message); setDiscountFormLoading(false); return; }
     setShowDiscountForm(false);
-    setDiscountForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "" });
+    setDiscountForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "", applicable_pass_type: "" });
     loadData();
     setDiscountFormLoading(false);
   }
@@ -1718,6 +1720,7 @@ export default function InstructorPage() {
                       <p className="text-xs text-gray-500 font-body mt-1">
                         {d.discount_type === "percentage" ? `${d.discount_value}% off` : `$${(d.discount_value / 100).toFixed(0)} off`}
                         {" · "}{d.uses_count} use{d.uses_count !== 1 ? "s" : ""}{d.max_uses ? `/${d.max_uses}` : ""}
+                        {" · "}{PASS_TYPE_LABELS[d.applicable_pass_type as keyof typeof PASS_TYPE_LABELS] ?? "All passes"}
                         {" · "}
                         {editingDiscountId === d.id ? (
                           <input
@@ -2536,6 +2539,19 @@ export default function InstructorPage() {
                     onChange={e => setDiscountForm(f => ({ ...f, expires_at: e.target.value }))}
                   />
                 </div>
+              </div>
+              <div>
+                <label className="label">Applies to</label>
+                <select
+                  className="input"
+                  value={discountForm.applicable_pass_type}
+                  onChange={e => setDiscountForm(f => ({ ...f, applicable_pass_type: e.target.value }))}
+                >
+                  <option value="">All passes</option>
+                  <option value="casual">Casual Class (drop-in) only</option>
+                  <option value="five">5-Class Pack only</option>
+                  <option value="ten">10-Class Pack only</option>
+                </select>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowDiscountForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>

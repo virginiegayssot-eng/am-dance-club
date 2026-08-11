@@ -39,5 +39,6 @@ export async function POST(req: NextRequest) {
     id: discount.id,
     discount_type: discount.discount_type,
     discount_value: discount.discount_value,
+    applicable_pass_type: discount.applicable_pass_type,
   });
 }

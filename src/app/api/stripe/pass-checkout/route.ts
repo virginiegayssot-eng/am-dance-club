@@ -76,6 +76,10 @@ export async function POST(req: NextRequest) {
       (!discount.expires_at || new Date(discount.expires_at) > new Date()) &&
       (discount.max_uses === null || discount.uses_count < discount.max_uses)
     ) {
+      if (discount.applicable_pass_type && discount.applicable_pass_type !== passTypeId) {
+        const label = PASS_CONFIGS[discount.applicable_pass_type]?.name ?? discount.applicable_pass_type;
+        return NextResponse.json({ error: `This code only applies to the ${label} pass.` }, { status: 400 });
+      }
       discountId = discount.id;
       if (discount.discount_type === "percentage") {
         finalPrice = Math.round(basePrice * (1 - discount.discount_value / 100));
