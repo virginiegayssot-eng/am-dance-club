@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
+import { instructorEmails } from "@/lib/instructor-email";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   const { error: instructorEmailError } = await resend.emails.send({
     from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
-    to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+    to: instructorEmails(),
     subject: `Cancellation – ${profile?.full_name ?? "A student"}`,
     html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) cancelled their booking for <strong>${reg.classes.title}</strong> on ${classDate}.${passRefunded ? " Their class credit was refunded." : ""}</p>`,
   }).catch((e) => ({ error: e }));

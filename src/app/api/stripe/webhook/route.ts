@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
 import { buildMerchOrderEmailHtml } from "@/lib/merch-order-email";
+import { instructorEmails } from "@/lib/instructor-email";
 import { Resend } from "resend";
 import Stripe from "stripe";
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 
       const { error: merchInstructorEmailError } = await resend.emails.send({
         from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
-        to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+        to: instructorEmails(),
         subject: `New merch order – ${profile?.full_name ?? "A student"}`,
         html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just bought <strong>${product?.title ?? "a product"}</strong>${size ? ` (Size ${size})` : ""}.</p>`,
       }).catch((e) => ({ error: e }));
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
       console.error(`Failed to create pass for session ${session.id} (passTypeId=${passTypeId}, studentId=${studentId}):`, passInsertError);
       await resend.emails.send({
         from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
-        to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+        to: instructorEmails(),
         subject: `Pass creation failed – needs manual fix`,
         html: `<p>A customer paid for a <strong>${passTypeId}</strong> pass but the app failed to create it. Stripe session: ${session.id}. Student ID: ${studentId}. Error: ${passInsertError.message}</p><p>They paid successfully, please assign the pass manually and investigate.</p>`,
       }).catch((e) => console.error("Pass-failure alert email error:", e));
@@ -156,7 +157,7 @@ export async function POST(req: NextRequest) {
     emailBody += `</p>`;
     const { error: instructorEmailError } = await resend.emails.send({
       from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
-      to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+      to: instructorEmails(),
       subject: `New booking – ${profile?.full_name ?? "A student"}`,
       html: emailBody,
     }).catch((e) => ({ error: e }));

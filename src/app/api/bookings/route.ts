@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
+import { instructorEmails } from "@/lib/instructor-email";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const emailResult = await resend.emails.send({
     from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
-    to: process.env.NEXT_PUBLIC_INSTRUCTOR_EMAIL!,
+    to: instructorEmails(),
     subject: `New booking – ${profile?.full_name ?? "A student"}`,
     html: `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email}) just booked <strong>${cls.title}</strong> on ${classDate} using their pass${guestCount > 0 ? ` <strong>(+${guestCount} guest)</strong>` : ""}.</p>`,
   }).catch((e) => { console.error("Email error:", e); return null; });
