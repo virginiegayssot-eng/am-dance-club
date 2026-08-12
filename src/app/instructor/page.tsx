@@ -164,6 +164,7 @@ export default function InstructorPage() {
 
   // Debit pass
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
+  const [deletingPassId, setDeletingPassId] = useState<string | null>(null);
 
   // Book for member
   const [showBookForMember, setShowBookForMember] = useState(false);
@@ -1055,6 +1056,29 @@ export default function InstructorPage() {
     });
   }
 
+  function deletePass(passId: string) {
+    setConfirmDialog({
+      message: "Delete this pass? If it's attached to an upcoming class booking, that booking will be cancelled too so the class spot opens up. This cannot be undone.",
+      action: async () => {
+        setDeletingPassId(passId);
+
+        const res = await fetch("/api/instructor/delete-pass", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passId }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          setActionError(data.error ?? "Failed to delete pass");
+        } else {
+          setAllPasses(prev => prev.filter(p => p.id !== passId));
+        }
+        setDeletingPassId(null);
+      },
+    });
+  }
+
   function openReviewModal(classId?: string) {
     setReviewsSent(null);
     setReviewSendErrors([]);
@@ -1665,15 +1689,24 @@ export default function InstructorPage() {
                           <span className={statusClass}>{status}</span>
                         </div>
                       </div>
-                      {isActive && (
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {isActive && (
+                          <button
+                            onClick={() => debitPass(p.id)}
+                            disabled={debitingPassId === p.id}
+                            className="font-body text-xs text-[#000000] hover:underline disabled:opacity-50"
+                          >
+                            {debitingPassId === p.id ? "…" : "Debit 1"}
+                          </button>
+                        )}
                         <button
-                          onClick={() => debitPass(p.id)}
-                          disabled={debitingPassId === p.id}
-                          className="font-body text-xs text-[#000000] hover:underline disabled:opacity-50 shrink-0"
+                          onClick={() => deletePass(p.id)}
+                          disabled={deletingPassId === p.id}
+                          className="font-body text-xs text-red-400 hover:text-red-600 disabled:opacity-50"
                         >
-                          {debitingPassId === p.id ? "…" : "Debit 1"}
+                          {deletingPassId === p.id ? "…" : "Delete"}
                         </button>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
