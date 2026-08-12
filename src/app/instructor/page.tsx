@@ -1200,16 +1200,25 @@ export default function InstructorPage() {
     if (!editBioTarget) return;
     setEditBioLoading(true);
     setEditBioError("");
-    const res = await fetch("/api/instructor/update-bio", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profileId: editBioTarget.id, title: editBioForm.title, bio: editBioForm.bio }),
-    });
-    const { error } = await res.json();
-    if (error) { setEditBioError(error); setEditBioLoading(false); return; }
-    setEditBioTarget(null);
-    setEditBioLoading(false);
-    loadData();
+    try {
+      const res = await fetch("/api/instructor/update-bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: editBioTarget.id, title: editBioForm.title, bio: editBioForm.bio }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setEditBioError(data.error ?? "Something went wrong. Please try again.");
+        setEditBioLoading(false);
+        return;
+      }
+      setEditBioTarget(null);
+      setEditBioLoading(false);
+      loadData();
+    } catch (err: any) {
+      setEditBioError("Something went wrong: " + (err?.message ?? String(err)));
+      setEditBioLoading(false);
+    }
   }
 
   if (loading) {
