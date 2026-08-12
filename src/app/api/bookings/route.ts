@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,
       subject: `You're booked – ${cls.title}`,
-      html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+      html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, location: cls.location, guestCount }),
     }).catch((e) => console.error("Booking confirmation email error:", e));
   }
 

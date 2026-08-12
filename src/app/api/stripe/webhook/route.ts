@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
     const passLabel = passTypeId === "casual" ? "Casual ($24)" : passTypeId === "double" ? "Double Pass ($38)" : passTypeId === "intro" ? "Intro Pass (3 classes)" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
     let emailBody = `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just purchased a <strong>${passLabel}</strong>.`;
     if (classId) {
-      const { data: cls } = await supabase.from("classes").select("title, class_date").eq("id", classId).single();
+      const { data: cls } = await supabase.from("classes").select("title, class_date, location").eq("id", classId).single();
       if (cls) {
         const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         emailBody += ` They are booked in for <strong>${cls.title}</strong> on ${classDate}.`;
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
             from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
             to: profile.email,
             subject: `You're booked – ${cls.title}`,
-            html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+            html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, location: cls.location, guestCount }),
           }).catch((e) => console.error("Booking confirmation email error:", e));
         }
       }

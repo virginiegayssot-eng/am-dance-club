@@ -16,7 +16,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
   const { data: profile } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
   if (!profile?.email) return;
 
-  const { data: cls } = await admin.from("classes").select("title, class_date").eq("id", classId).single();
+  const { data: cls } = await admin.from("classes").select("title, class_date, location").eq("id", classId).single();
   if (!cls) return;
 
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -27,7 +27,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
     from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: profile.email,
     subject: `You're booked – ${cls.title}`,
-    html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+    html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, location: cls.location, guestCount }),
   }).catch((e) => console.error("Booking confirmation email error:", e));
 }
 

@@ -1,14 +1,29 @@
+function getDirections(location: string): string | null {
+  const loc = location.toLowerCase();
+  if (loc.includes("alexandria")) {
+    return "Enter through the glass gate, look for Studio 1 on the 2nd floor.";
+  }
+  if (loc.includes("manly")) {
+    return "Enter through the white wooden gate. There's a door code, updated and pinned each month on BYLA News.";
+  }
+  return null;
+}
+
 export function buildBookingConfirmationEmailHtml({
   firstName,
   classTitle,
   classDate,
+  location,
   guestCount,
 }: {
   firstName: string;
   classTitle: string;
   classDate: string;
+  location: string;
   guestCount: number;
 }) {
+  const directions = getDirections(location);
+
   return `
     <!DOCTYPE html>
     <html>
@@ -26,12 +41,17 @@ export function buildBookingConfirmationEmailHtml({
             ${classDate}
             ${guestCount > 0 ? `<br>Plus ${guestCount} guest${guestCount !== 1 ? "s" : ""}` : ""}
           </p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 4px;">
+            ${location}
+          </p>
+          ${directions ? `<p style="color:#444;font-size:14px;line-height:1.6;margin:0 0 24px;">${directions}</p>` : `<div style="margin-bottom:24px;"></div>`}
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">See you there!</p>
           <p style="text-align:center;margin:0 0 28px;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/classes" style="background:#000000;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">Manage My Booking</a>
           </p>
           <p style="color:#888;font-size:13px;line-height:1.6;margin:0 0 16px;border-top:1px solid #eee;padding-top:16px;">
             Need to cancel? You can do it any time from the app, free up to 24 hours before class. Cancellations within 24 hours can't be refunded.
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/cancellation-policy" style="color:#000000;">See our full cancellation policy →</a>
           </p>
           <p style="color:#444;font-size:16px;margin:0;">Majo</p>
         </div>
