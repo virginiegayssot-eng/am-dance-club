@@ -1,6 +1,37 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Image from "next/image";
+import { Share, MoreVertical, Plus, ArrowRight } from "lucide-react";
+
+function HomeScreenSteps({ platform, icon1, caption1, caption2, caption3 }: {
+  platform: string;
+  icon1: React.ReactNode;
+  caption1: React.ReactNode;
+  caption2: React.ReactNode;
+  caption3: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="font-heading text-sm text-black mb-4">{platform}</p>
+      <div className="grid grid-cols-[56px_24px_56px_24px_56px] gap-x-2 gap-y-3 items-center">
+        <div className="w-14 h-14 rounded-2xl bg-[#e4c3cc]/50 flex items-center justify-center">{icon1}</div>
+        <div className="flex items-center justify-center text-gray-300"><ArrowRight className="w-4 h-4" /></div>
+        <div className="w-14 h-14 rounded-2xl bg-[#e4c3cc]/50 flex items-center justify-center"><Plus className="w-6 h-6 text-[#2041d8]" strokeWidth={1.75} /></div>
+        <div className="flex items-center justify-center text-gray-300"><ArrowRight className="w-4 h-4" /></div>
+        <div className="w-14 h-14 rounded-2xl bg-black overflow-hidden">
+          <Image src="/icon-192.png" alt="THE A.M" width={56} height={56} className="w-full h-full object-cover" />
+        </div>
+
+        <p className="text-xs text-gray-500 text-center leading-snug">{caption1}</p>
+        <div />
+        <p className="text-xs text-gray-500 text-center leading-snug">{caption2}</p>
+        <div />
+        <p className="text-xs text-gray-500 text-center leading-snug">{caption3}</p>
+      </div>
+    </div>
+  );
+}
 
 export const metadata = { title: "How to Use · THE A.M Dance Club" };
 
@@ -51,6 +82,29 @@ export default function HowToUsePage() {
             <p>
               Check out <Link href="/videos" className="text-[#2041d8] underline">Videos</Link> for class recordings, and Playlists for the music we dance to — great for practicing at home.
             </p>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-lg text-[#2041d8] mb-3">6. Add THE A.M to your home screen</h2>
+            <p className="mb-6">
+              Once it's on your home screen, THE A.M opens full-screen like a real app — no browser bar, and faster to get into.
+            </p>
+            <div className="rounded-2xl border border-[#2041d8]/10 bg-[#fff8f3]/60 p-6 grid sm:grid-cols-2 gap-8">
+              <HomeScreenSteps
+                platform="iPhone — Safari"
+                icon1={<Share className="w-6 h-6 text-[#2041d8]" strokeWidth={1.75} />}
+                caption1={<>Tap the Share icon in Safari's toolbar</>}
+                caption2={<>Scroll down, tap <strong>Add to Home Screen</strong></>}
+                caption3={<>Tap <strong>Add</strong> — THE A.M is on your home screen</>}
+              />
+              <HomeScreenSteps
+                platform="Android — Chrome"
+                icon1={<MoreVertical className="w-6 h-6 text-[#2041d8]" strokeWidth={1.75} />}
+                caption1={<>Tap the ⋮ menu in Chrome's toolbar</>}
+                caption2={<>Tap <strong>Add to Home screen</strong></>}
+                caption3={<>Tap <strong>Add</strong> — done!</>}
+              />
+            </div>
           </section>
 
           <section>
