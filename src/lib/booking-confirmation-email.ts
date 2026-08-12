@@ -1,10 +1,10 @@
 function getDirections(location: string): string | null {
   const loc = location.toLowerCase();
   if (loc.includes("alexandria")) {
-    return "Enter through the glass gate, look for Studio 1 on the 2nd floor.";
+    return "Enter through the glass gate on O'Riordan Street. Look for Studio 1 on the 2nd floor. Street parking available.";
   }
   if (loc.includes("manly")) {
-    return "Enter through the white wooden gate. There's a door code, updated and pinned each month on BYLA News.";
+    return "Enter through the white wooden gate on Darley Road. There's a door code, updated and pinned each month on BYLA News. Allocate time to find street parking.";
   }
   return null;
 }
