@@ -28,6 +28,9 @@ type Conversation = {
   unread: number;
 };
 
+const WHATSAPP_ALEXANDRIA = "https://chat.whatsapp.com/L8Gk62g11tu89DEJP6N360?s=sh&p=i&ilr=4";
+const WHATSAPP_MANLY = "https://chat.whatsapp.com/FWmoZsIsngj2Qy4m9hJT6c?s=sh&p=i&ilr=4";
+
 export default function ChatPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -375,14 +378,14 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Mobile WhatsApp links — placeholders until Majo shares the real group links */}
+        {/* Mobile WhatsApp links */}
         <div className="md:hidden flex flex-row gap-2 px-3 pt-2 pb-1 shrink-0">
-          <button className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
+          <a href={WHATSAPP_ALEXANDRIA} target="_blank" rel="noopener noreferrer" className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
             <MessageCircle className="w-4 h-4 text-[#25D366]" strokeWidth={1.75} /> WhatsApp Alexandria
-          </button>
-          <button className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
+          </a>
+          <a href={WHATSAPP_MANLY} target="_blank" rel="noopener noreferrer" className="flex-1 py-2 rounded-xl font-body text-sm text-center transition-colors inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 text-black hover:bg-gray-50">
             <MessageCircle className="w-4 h-4 text-[#25D366]" strokeWidth={1.75} /> WhatsApp Manly
-          </button>
+          </a>
         </div>
 
         {/* Sidebar */}
@@ -450,23 +453,23 @@ export default function ChatPage() {
             )}
           </div>
 
-          {/* WhatsApp links — placeholders until Majo shares the real group links */}
-          <button className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
+          {/* WhatsApp links */}
+          <a href={WHATSAPP_ALEXANDRIA} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
             <MessageCircle className="w-5 h-5 text-[#000000] shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <p className="font-heading text-xs">WhatsApp Alexandria</p>
               <p className="font-body text-xs text-gray-400">Community group</p>
             </div>
             <span className="text-xs text-[#25D366]">→</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
+          </a>
+          <a href={WHATSAPP_MANLY} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors text-left">
             <MessageCircle className="w-5 h-5 text-[#000000] shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <p className="font-heading text-xs">WhatsApp Manly</p>
               <p className="font-body text-xs text-gray-400">Community group</p>
             </div>
             <span className="text-xs text-[#25D366]">→</span>
-          </button>
+          </a>
         </aside>
 
         {/* Chat panel */}
