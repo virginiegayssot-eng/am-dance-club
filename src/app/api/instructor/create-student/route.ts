@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
             <h1 style="color:#e2d0fb;font-size:28px;margin:0;letter-spacing:2px;">BYLA</h1>
           </div>
           <div style="padding:36px 32px;">
-            <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Hey ${firstName}!</h2>
+            <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Hola ${firstName}!</h2>
             <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
               I'd love to have you join us at BYLA! Reggaeton classes for beginner to intermediate dancers, in Alexandria and Manly.
             </p>
