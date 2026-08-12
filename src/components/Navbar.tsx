@@ -81,6 +81,7 @@ export default function Navbar() {
     pathname === href ? "text-[#000000]" : "text-black hover:text-[#000000]";
 
   const isInstructor = profile?.role === "instructor";
+  const isAdmin = isInstructor && !!profile?.is_admin;
 
   const UnreadBadge = ({ small }: { small?: boolean }) => unread > 0 ? (
     <span className={`bg-[#000000] text-white font-heading rounded-full flex items-center justify-center ${small ? "text-[10px] w-4 h-4" : "text-xs w-5 h-5"}`}>
@@ -118,7 +119,7 @@ export default function Navbar() {
                   <Link href={isInstructor ? "/instructor" : "/dashboard"} className={`font-body text-sm transition-colors ${isActive(isInstructor ? "/instructor" : "/dashboard")}`}>
                     {isInstructor ? "Dashboard" : "My Classes"}
                   </Link>
-                  {isInstructor && (
+                  {isAdmin && (
                     <Link href="/reports" className={`font-body text-sm transition-colors ${isActive("/reports")}`}>Reports</Link>
                   )}
                 </>
@@ -179,7 +180,7 @@ export default function Navbar() {
 
             {profile && [
               { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
-              ...(isInstructor ? [{ href: "/reports", label: "Reports" }] : []),
+              ...(isAdmin ? [{ href: "/reports", label: "Reports" }] : []),
               { href: "/profile", label: "My Profile" },
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#000000]" onClick={() => setMenuOpen(false)}>

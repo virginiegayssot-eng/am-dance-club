@@ -65,8 +65,9 @@ export default function ReportsPage() {
   async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
-    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    const { data: prof } = await supabase.from("profiles").select("role, is_admin").eq("id", user.id).single();
     if (prof?.role !== "instructor") { router.push("/dashboard"); return; }
+    if (!prof.is_admin) { router.push("/instructor"); return; }
     await loadData();
   }
 

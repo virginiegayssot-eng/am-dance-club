@@ -18,6 +18,7 @@ export type Profile = {
   title: string | null;
   bio: string | null;
   show_on_instructors_page: boolean;
+  is_admin: boolean;
   created_at: string;
 };
 

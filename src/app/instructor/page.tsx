@@ -1227,6 +1227,8 @@ export default function InstructorPage() {
     loadData();
   }
 
+  const isAdmin = !!profile?.is_admin;
+
   const tabs = [
     { key: "classes", label: "Classes" },
     { key: "attendance", label: "Attendance" },
@@ -1234,11 +1236,11 @@ export default function InstructorPage() {
     { key: "passes", label: "Passes" },
     { key: "students", label: "Members" },
     { key: "playlists", label: "Playlists" },
-    { key: "discounts", label: "Discounts" },
+    ...(isAdmin ? [{ key: "discounts", label: "Discounts" }] as const : []),
     { key: "news", label: "BYLA News" },
-    { key: "merch", label: "Merch" },
+    ...(isAdmin ? [{ key: "merch", label: "Merch" }] as const : []),
     { key: "instructors", label: "Instructors" },
-  ] as const;
+  ];
 
   function openEditBio(inst: Profile) {
     setEditBioTarget(inst);
@@ -1400,7 +1402,7 @@ export default function InstructorPage() {
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
               className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "border-[#000000] text-[#000000]"
@@ -1424,26 +1426,28 @@ export default function InstructorPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000]">Upcoming</h3>
-                  <div className="flex items-center flex-wrap gap-2">
-                    <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                      Remove All Upcoming Manly
-                    </button>
-                    <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                      Remove All Upcoming Alexandria
-                    </button>
-                    <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5">
-                      Remove All Upcoming
-                    </button>
-                  </div>
+                  {isAdmin && (
+                    <div className="flex items-center flex-wrap gap-2">
+                      <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
+                        Remove All Upcoming Manly
+                      </button>
+                      <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
+                        Remove All Upcoming Alexandria
+                      </button>
+                      <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5">
+                        Remove All Upcoming
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
                     <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
-                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} past />
+                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
                     ))}
                   </>
                 )}
@@ -2035,9 +2039,11 @@ export default function InstructorPage() {
                       {inst.title && <p className="font-body text-xs text-[#000000] mt-0.5">{inst.title}</p>}
                       <p className="font-body text-sm text-gray-500 mt-1 whitespace-pre-wrap">{inst.bio || "No bio yet."}</p>
                     </div>
-                    <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#000000] hover:underline shrink-0">
-                      Edit
-                    </button>
+                    {(isAdmin || inst.id === profile?.id) && (
+                      <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#000000] hover:underline shrink-0">
+                        Edit
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -3031,6 +3037,9 @@ export default function InstructorPage() {
         {assignInstructorTarget && (
           <Modal title={`Assign Instructor — ${assignInstructorTarget.title}`} onClose={() => setAssignInstructorTarget(null)}>
             <form onSubmit={assignInstructors} className="space-y-4">
+              {!isAdmin && (
+                <p className="font-body text-xs text-gray-400">You can only assign yourself to a class.</p>
+              )}
               <div>
                 <label className="label">Instructor</label>
                 <select
@@ -3039,7 +3048,7 @@ export default function InstructorPage() {
                   onChange={e => setAssignInstructor1(e.target.value)}
                 >
                   <option value="">— None —</option>
-                  {instructors.map(i => (
+                  {(isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2)).map(i => (
                     <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
                   ))}
                 </select>
@@ -3052,7 +3061,7 @@ export default function InstructorPage() {
                   onChange={e => setAssignInstructor2(e.target.value)}
                 >
                   <option value="">— None —</option>
-                  {instructors.map(i => (
+                  {(isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2)).map(i => (
                     <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
                   ))}
                 </select>
@@ -3351,7 +3360,7 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, onEdit, past, isToday }: {
+function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, onEdit, canDelete, past, isToday }: {
   cls: ClassWithCount;
   instructors: Profile[];
   onAttendance: () => void;
@@ -3360,6 +3369,7 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   onBookForMember?: () => void;
   onAssignInstructor: () => void;
   onEdit: () => void;
+  canDelete: boolean;
   past?: boolean;
   isToday?: boolean;
 }) {
@@ -3419,9 +3429,11 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
               Cancel
             </button>
           )}
-          <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600 underline">
-            Delete
-          </button>
+          {canDelete && (
+            <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600 underline">
+              Delete
+            </button>
+          )}
         </div>
       </div>
     </div>

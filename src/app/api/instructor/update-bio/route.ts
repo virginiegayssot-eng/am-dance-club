@@ -27,9 +27,12 @@ export async function POST(req: NextRequest) {
 
   const admin = adminClient();
 
-  const { data: requester } = await admin.from("profiles").select("role").eq("id", user.id).single();
+  const { data: requester } = await admin.from("profiles").select("role, is_admin").eq("id", user.id).single();
   if (requester?.role !== "instructor") {
     return NextResponse.json({ error: "Only instructors can edit instructor bios" }, { status: 403 });
+  }
+  if (!requester.is_admin && profileId !== user.id) {
+    return NextResponse.json({ error: "You can only edit your own bio" }, { status: 403 });
   }
 
   const { data: target } = await admin.from("profiles").select("role").eq("id", profileId).single();
