@@ -28,6 +28,25 @@ function titleFromFilename(filename: string): string {
 const LOCATION_ALEXANDRIA = "BYLA Alexandria — 70 O'Riordan St, Alexandria NSW 2015 (Village Nation, Studio 1)";
 const LOCATION_MANLY = "BYLA Manly — St. Matthews Church Hall, 1 Darley Road, Manly NSW 2095";
 
+const DESCRIPTION_ALEXANDRIA = `Hola! Join us in Alexandria on Tuesdays. Our Reggaeton classes hit the perfect in-between for beginner and intermediate level!
+
+Directions:
+Enter through glass gate, look for Studio 1 on the 2nd floor.
+Street parking available.
+
+Cancellation Policy
+All class packages purchased are non-refundable. Packages are valid for the specified duration and cannot be extended unless approved by BYLA Dance in exceptional circumstances. If you are unable to attend a class, you may cancel your booking at least 24 hours before the scheduled start time. Late cancellations or no-shows will result in the loss of the session without a refund or reschedule. If you cannot attend a class, you may transfer your booking to someone else.
+Please notify BYLA Dance with the name of the person attending in your place.`;
+
+const DESCRIPTION_MANLY = `Hola! Join us in Manly on Thursdays. Our Reggaeton classes hit the perfect in-between for beginner and intermediate level!
+
+Directions:
+Enter through white wooden gate. There is a Door Code which is updated and pinned each month on Byla News. Allocate time to find street parking.
+
+Cancellation Policy
+All class packages purchased are non-refundable. Packages are valid for the specified duration and cannot be extended unless approved by BYLA Dance in exceptional circumstances. If you are unable to attend a class, you may cancel your booking at least 24 hours before the scheduled start time. Late cancellations or no-shows will result in the loss of the session without a refund or reschedule. If you cannot attend a class, you may transfer your booking to someone else.
+Please notify BYLA Dance with the name of the person attending in your place.`;
+
 const DAY_NAMES_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
 const PASS_TYPE_LABELS = { casual: "Casual Class only", five: "5-Class Pack only", ten: "10-Class Pack only" };
 
@@ -2137,8 +2156,8 @@ export default function InstructorPage() {
               <div>
                 <label className="label">Location</label>
                 <div className="flex gap-2 mb-2">
-                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
-                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
+                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_ALEXANDRIA, description: f.isSpecial ? f.description : DESCRIPTION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
+                  <button type="button" onClick={() => setClassForm(f => ({ ...f, location: LOCATION_MANLY, description: f.isSpecial ? f.description : DESCRIPTION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
                 </div>
                 <input
                   className="input"
@@ -2248,8 +2267,8 @@ export default function InstructorPage() {
               <div>
                 <label className="label">Location</label>
                 <div className="flex gap-2 mb-2">
-                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
-                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
+                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_ALEXANDRIA, description: DESCRIPTION_ALEXANDRIA }))} className="btn-secondary py-1.5 px-3 text-xs">Alexandria</button>
+                  <button type="button" onClick={() => setBulkForm(f => ({ ...f, location: LOCATION_MANLY, description: DESCRIPTION_MANLY }))} className="btn-secondary py-1.5 px-3 text-xs">Manly</button>
                 </div>
                 <input
                   className="input"
