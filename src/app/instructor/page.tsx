@@ -1330,7 +1330,7 @@ export default function InstructorPage() {
               + Add Playlist
             </button>
             <button onClick={() => setShowVideoForm(true)} className="btn-secondary py-2 px-4 text-sm">
-              + Add Recording
+              + Add Videos
             </button>
             <button onClick={() => { setBulkFormError(""); setShowBulkForm(true); }} className="btn-secondary py-2 px-4 text-sm">
               + Bulk Create
@@ -1601,7 +1601,7 @@ export default function InstructorPage() {
             {videos.length === 0 ? (
               <div className="card p-10 text-center">
                 <p className="font-body text-gray-400 mb-4">No recordings yet. Add your first one!</p>
-                <button onClick={() => setShowVideoForm(true)} className="btn-primary">Add Recording</button>
+                <button onClick={() => setShowVideoForm(true)} className="btn-primary">Add Videos</button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2387,7 +2387,7 @@ export default function InstructorPage() {
 
         {/* ADD VIDEO MODAL */}
         {showVideoForm && (
-          <Modal title="Add Recording" onClose={resetVideoForm}>
+          <Modal title="Add Videos" onClose={resetVideoForm}>
             <form onSubmit={addVideo} className="space-y-4">
               <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
                 <button
@@ -2507,7 +2507,7 @@ export default function InstructorPage() {
                     ? (videoMode === "upload"
                         ? (videoFiles.length > 1 ? `Uploading ${videoUploadIndex}/${videoFiles.length}…` : "Uploading…")
                         : "Adding…")
-                    : (videoMode === "upload" && videoFiles.length > 1 ? `Add ${videoFiles.length} Recordings` : "Add Recording")}
+                    : (videoMode === "upload" && videoFiles.length > 1 ? `Add ${videoFiles.length} Videos` : "Add Video")}
                 </button>
               </div>
             </form>
