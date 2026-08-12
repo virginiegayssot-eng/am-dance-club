@@ -63,11 +63,12 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  // Create class form
+  // Create/edit class form
   const [showClassForm, setShowClassForm] = useState(false);
   const [classForm, setClassForm] = useState({ title: "", description: "", class_date: "", class_time: "19:30", price_cents: "26", capacity: "30", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
   const [classFormLoading, setClassFormLoading] = useState(false);
   const [classFormError, setClassFormError] = useState("");
+  const [editingClassId, setEditingClassId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
 
   // Bulk create recurring classes
@@ -465,12 +466,39 @@ export default function InstructorPage() {
     );
   }
 
-  async function createClass(e: React.FormEvent) {
+  function openNewClass() {
+    setEditingClassId(null);
+    setClassForm({ title: "", description: "", class_date: "", class_time: "19:30", price_cents: "26", capacity: "30", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
+    setClassFormError("");
+    setShowClassForm(true);
+  }
+
+  function openEditClass(cls: ClassWithCount) {
+    setEditingClassId(cls.id);
+    setClassForm({
+      title: cls.title,
+      description: cls.description ?? "",
+      class_date: cls.class_date,
+      class_time: cls.class_time,
+      price_cents: (cls.price_cents / 100).toString(),
+      capacity: cls.capacity.toString(),
+      durationMinutes: cls.duration_minutes.toString(),
+      altDurationMinutes: cls.alt_duration_minutes ? cls.alt_duration_minutes.toString() : "",
+      altPriceCents: cls.alt_price_cents ? (cls.alt_price_cents / 100).toString() : "",
+      location: cls.location,
+      isSpecial: cls.is_special ?? false,
+      specialLabel: cls.special_label ?? "",
+    });
+    setClassFormError("");
+    setShowClassForm(true);
+  }
+
+  async function saveClass(e: React.FormEvent) {
     e.preventDefault();
     setClassFormLoading(true);
     setClassFormError("");
 
-    const { error } = await supabase.from("classes").insert({
+    const payload = {
       title: classForm.title,
       description: classForm.description || null,
       class_date: classForm.class_date,
@@ -478,16 +506,20 @@ export default function InstructorPage() {
       price_cents: Math.round(parseFloat(classForm.price_cents) * 100),
       capacity: parseInt(classForm.capacity),
       duration_minutes: parseInt(classForm.durationMinutes),
-      instructor_id: profile!.id,
       alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
       alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
       ...(classForm.location ? { location: classForm.location } : {}),
       is_special: classForm.isSpecial,
       special_label: classForm.isSpecial ? (classForm.specialLabel || "Special Class") : null,
-    });
+    };
+
+    const { error } = editingClassId
+      ? await supabase.from("classes").update(payload).eq("id", editingClassId)
+      : await supabase.from("classes").insert({ ...payload, instructor_id: profile!.id });
 
     if (!error) {
       setShowClassForm(false);
+      setEditingClassId(null);
       setClassForm({ title: "", description: "", class_date: "", class_time: "19:30", price_cents: "26", capacity: "30", durationMinutes: "60", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
     } else {
@@ -1261,7 +1293,7 @@ export default function InstructorPage() {
             <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
               Send Review Emails
             </button>
-            <button onClick={() => setShowClassForm(true)} className="btn-primary py-2 px-4 text-sm">
+            <button onClick={openNewClass} className="btn-primary py-2 px-4 text-sm">
               + New Class
             </button>
           </div>
@@ -1367,7 +1399,7 @@ export default function InstructorPage() {
             {upcomingClasses.length === 0 ? (
               <div className="card p-10 text-center">
                 <p className="font-body text-gray-400 mb-4">No upcoming classes. Create one!</p>
-                <button onClick={() => setShowClassForm(true)} className="btn-primary">New Class</button>
+                <button onClick={openNewClass} className="btn-primary">New Class</button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1386,13 +1418,13 @@ export default function InstructorPage() {
                   </div>
                 </div>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
                     <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
-                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} past />
+                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} past />
                     ))}
                   </>
                 )}
@@ -1996,8 +2028,8 @@ export default function InstructorPage() {
 
         {/* CREATE CLASS MODAL */}
         {showClassForm && (
-          <Modal title="New Class" onClose={() => setShowClassForm(false)}>
-            <form onSubmit={createClass} className="space-y-4">
+          <Modal title={editingClassId ? "Edit Class" : "New Class"} onClose={() => { setShowClassForm(false); setEditingClassId(null); }}>
+            <form onSubmit={saveClass} className="space-y-4">
               <div>
                 <label className="label">Class Title</label>
                 <input
@@ -2139,9 +2171,9 @@ export default function InstructorPage() {
                 <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{classFormError}</div>
               )}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowClassForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="button" onClick={() => { setShowClassForm(false); setEditingClassId(null); }} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={classFormLoading}>
-                  {classFormLoading ? "Creating…" : "Create Class"}
+                  {classFormLoading ? "Saving…" : editingClassId ? "Save Changes" : "Create Class"}
                 </button>
               </div>
             </form>
@@ -3300,7 +3332,7 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, past, isToday }: {
+function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, onEdit, past, isToday }: {
   cls: ClassWithCount;
   instructors: Profile[];
   onAttendance: () => void;
@@ -3308,6 +3340,7 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   onDelete: () => void;
   onBookForMember?: () => void;
   onAssignInstructor: () => void;
+  onEdit: () => void;
   past?: boolean;
   isToday?: boolean;
 }) {
@@ -3358,6 +3391,9 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
           )}
           <button onClick={onAttendance} className={`py-1.5 px-3 text-xs ${isToday ? "btn-primary" : "btn-secondary"}`}>
             {isToday ? "Take Roll" : "Attendance"}
+          </button>
+          <button onClick={onEdit} className="font-body text-xs text-[#000000] hover:underline">
+            Edit
           </button>
           {!cls.is_cancelled && !past && (
             <button onClick={onCancel} className="font-body text-xs text-red-400 hover:text-red-600 underline">
