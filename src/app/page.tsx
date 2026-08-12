@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ReviewsCarousel from "@/components/ReviewsCarousel";
 
 export default function HomePage() {
   return (
@@ -128,6 +129,8 @@ export default function HomePage() {
           <p className="font-heading text-lg text-[#000000] mt-6">With love, Majo x</p>
         </div>
       </section>
+
+      <ReviewsCarousel />
 
       {/* CTA */}
       <section className="bg-[#e2d0fb] py-20">

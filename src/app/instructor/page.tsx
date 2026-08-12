@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime, getYouTubeId } from "@/lib/stripe";
 import { todayLocal, toLocalDateStr } from "@/lib/date";
-import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
+import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Review, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -76,7 +76,7 @@ export default function InstructorPage() {
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch" | "instructors">("classes");
+  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch" | "reviews" | "instructors">("classes");
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,6 +122,12 @@ export default function InstructorPage() {
   const [showDiscountForm, setShowDiscountForm] = useState(false);
   const [discountForm, setDiscountForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "", applicable_pass_type: "" });
   const [discountFormLoading, setDiscountFormLoading] = useState(false);
+
+  // Google reviews carousel (homepage)
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ author_name: "", rating: "5", review_text: "" });
+  const [reviewFormLoading, setReviewFormLoading] = useState(false);
   const [editingDiscountId, setEditingDiscountId] = useState<string | null>(null);
   const [editDiscountExpiresAt, setEditDiscountExpiresAt] = useState("");
 
@@ -263,6 +269,9 @@ export default function InstructorPage() {
 
     const { data: dcs } = await supabase.from("discount_codes").select("*").order("created_at", { ascending: false });
     setDiscountCodes(dcs ?? []);
+
+    const { data: revs } = await supabase.from("reviews").select("*").order("created_at", { ascending: true });
+    setReviews((revs as Review[]) ?? []);
 
     const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
     setNewsPosts(np ?? []);
@@ -914,6 +923,31 @@ export default function InstructorPage() {
     });
   }
 
+  async function createReview(e: React.FormEvent) {
+    e.preventDefault();
+    setReviewFormLoading(true);
+    const { error } = await supabase.from("reviews").insert({
+      author_name: reviewForm.author_name.trim(),
+      rating: parseInt(reviewForm.rating),
+      review_text: reviewForm.review_text.trim(),
+    });
+    if (error) { setActionError(error.message); setReviewFormLoading(false); return; }
+    setShowReviewForm(false);
+    setReviewForm({ author_name: "", rating: "5", review_text: "" });
+    loadData();
+    setReviewFormLoading(false);
+  }
+
+  function deleteReview(id: string) {
+    setConfirmDialog({
+      message: "Delete this review? It will no longer show in the homepage carousel.",
+      action: async () => {
+        await supabase.from("reviews").delete().eq("id", id);
+        setReviews(prev => prev.filter(r => r.id !== id));
+      },
+    });
+  }
+
   async function addPlaylist(e: React.FormEvent) {
     e.preventDefault();
     setPlaylistFormLoading(true);
@@ -1263,6 +1297,7 @@ export default function InstructorPage() {
     ...(isAdmin ? [{ key: "discounts", label: "Discounts" }] as const : []),
     { key: "news", label: "BYLA News" },
     ...(isAdmin ? [{ key: "merch", label: "Merch" }] as const : []),
+    ...(isAdmin ? [{ key: "reviews", label: "Reviews" }] as const : []),
     { key: "instructors", label: "Instructors" },
   ];
 
@@ -1848,6 +1883,41 @@ export default function InstructorPage() {
                         Delete
                       </button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* REVIEWS TAB (admin only) */}
+        {activeTab === "reviews" && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-body text-sm text-gray-500">{reviews.length} review{reviews.length !== 1 ? "s" : ""} · shown in a carousel on the homepage</p>
+              <button onClick={() => setShowReviewForm(true)} className="btn-primary py-2 px-4 text-sm">
+                + New Review
+              </button>
+            </div>
+            {reviews.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400 mb-4">No reviews yet. Add one to start the homepage carousel.</p>
+                <button onClick={() => setShowReviewForm(true)} className="btn-primary">Add Review</button>
+              </div>
+            ) : (
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {reviews.map(r => (
+                  <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="font-heading">{r.author_name}</span>
+                        <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
+                    </div>
+                    <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600 shrink-0">
+                      Delete
+                    </button>
                   </div>
                 ))}
               </div>
@@ -2657,6 +2727,54 @@ export default function InstructorPage() {
                 <button type="button" onClick={() => setShowDiscountForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={discountFormLoading}>
                   {discountFormLoading ? "Creating…" : "Create Code"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* NEW REVIEW MODAL */}
+        {showReviewForm && (
+          <Modal title="New Review" onClose={() => setShowReviewForm(false)}>
+            <form onSubmit={createReview} className="space-y-4">
+              <div>
+                <label className="label">Reviewer name</label>
+                <input
+                  className="input"
+                  placeholder="e.g. Sofia R."
+                  value={reviewForm.author_name}
+                  onChange={e => setReviewForm(f => ({ ...f, author_name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Rating</label>
+                <select
+                  className="input"
+                  value={reviewForm.rating}
+                  onChange={e => setReviewForm(f => ({ ...f, rating: e.target.value }))}
+                >
+                  <option value="5">★★★★★ (5)</option>
+                  <option value="4">★★★★☆ (4)</option>
+                  <option value="3">★★★☆☆ (3)</option>
+                  <option value="2">★★☆☆☆ (2)</option>
+                  <option value="1">★☆☆☆☆ (1)</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Review text</label>
+                <textarea
+                  className="input min-h-[100px]"
+                  placeholder="Paste or type the review here…"
+                  value={reviewForm.review_text}
+                  onChange={e => setReviewForm(f => ({ ...f, review_text: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowReviewForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={reviewFormLoading}>
+                  {reviewFormLoading ? "Adding…" : "Add Review"}
                 </button>
               </div>
             </form>

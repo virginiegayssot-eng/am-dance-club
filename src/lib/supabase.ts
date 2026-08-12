@@ -112,6 +112,14 @@ export type Playlist = {
   created_at: string;
 };
 
+export type Review = {
+  id: string;
+  author_name: string;
+  rating: number;
+  review_text: string;
+  created_at: string;
+};
+
 export type MerchProduct = {
   id: string;
   title: string;
