@@ -197,16 +197,16 @@ export default function ClassesPage() {
 
         {/* Active pass notice */}
         {hasPass && (
-          <div className="bg-[#9b7fc7]/20 border border-[#9b7fc7] rounded-2xl p-4 mb-8">
-            <div>
-              <p className="font-heading text-sm">
-                {(bestPass as any).pass_types?.name ?? "Your pass"} — {bestPass.classes_remaining} class{bestPass.classes_remaining !== 1 ? "es" : ""} remaining
+          <div className="bg-[#9b7fc7]/20 border border-[#9b7fc7] rounded-2xl p-4 mb-8 space-y-1.5">
+            {activePasses.map(p => (
+              <p key={p.id} className="font-heading text-sm">
+                {(p as any).pass_types?.name ?? "Your pass"} — {p.classes_remaining} class{p.classes_remaining !== 1 ? "es" : ""} remaining
+                {p.expires_at && ` · Expires ${new Date(p.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}`}
               </p>
-              <p className="font-body text-xs text-gray-500">
-                Clicking "Book" will automatically deduct from your pass.
-                {bestPass.expires_at && ` Expires ${new Date(bestPass.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}.`}
-              </p>
-            </div>
+            ))}
+            <p className="font-body text-xs text-gray-500">
+              Clicking "Book" will automatically deduct from the pass expiring soonest.
+            </p>
           </div>
         )}
 
