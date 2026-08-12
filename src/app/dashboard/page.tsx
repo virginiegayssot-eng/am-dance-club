@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
+import { todayLocal } from "@/lib/date";
 import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
@@ -102,7 +103,7 @@ export default function DashboardPage() {
     setLoading(false);
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayLocal();
   const upcoming = registrations.filter(r => r.status === "confirmed" && r.classes?.class_date >= today);
   const past = registrations.filter(r => r.classes?.class_date < today);
   const attendedCount = attendance.filter(a => a.attended).length;
