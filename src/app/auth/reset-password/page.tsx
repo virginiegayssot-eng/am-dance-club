@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import PasswordInput from "@/components/PasswordInput";
+import type { EmailOtpType } from "@supabase/supabase-js";
 
 export default function ResetPasswordPage() {
   const supabase = createClient();
@@ -16,15 +17,20 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const [isInvite, setIsInvite] = useState(false);
 
   useEffect(() => {
     async function verify() {
       const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("type") === "invite") setIsInvite(true);
 
-      // 1. token_hash flow (from admin generateLink)
+      // 1. token_hash flow (from admin generateLink) — the type must match
+      // whatever the link was actually generated as (recovery for password
+      // resets, invite for new-account invites), or Supabase rejects it.
       const token_hash = searchParams.get("token_hash");
+      const otpType = (searchParams.get("type") as EmailOtpType | null) ?? "recovery";
       if (token_hash) {
-        const { error } = await supabase.auth.verifyOtp({ token_hash, type: "recovery" });
+        const { error } = await supabase.auth.verifyOtp({ token_hash, type: otpType });
         if (!error) { setReady(true); return; }
       }
 
@@ -82,8 +88,8 @@ export default function ResetPasswordPage() {
           <Link href="/" className="inline-block mb-6">
             <Image src="/logo-transparent.png" alt="BYLA" width={140} height={100} className="object-contain mx-auto" />
           </Link>
-          <h1 className="font-heading text-3xl mb-2">New password</h1>
-          <p className="font-body text-sm text-gray-500">Choose a new password for your account</p>
+          <h1 className="font-heading text-3xl mb-2">{isInvite ? "Welcome to BYLA!" : "New password"}</h1>
+          <p className="font-body text-sm text-gray-500">{isInvite ? "Set a password to finish creating your account" : "Choose a new password for your account"}</p>
         </div>
 
         <div className="card p-8">
