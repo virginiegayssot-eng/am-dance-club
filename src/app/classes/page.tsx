@@ -12,7 +12,7 @@ import { todayLocal } from "@/lib/date";
 import type { Class, Pass, Profile } from "@/lib/supabase";
 import { Clock, MapPin, Users, Check } from "lucide-react";
 
-type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; instructor_name: string | null; instructor2_name: string | null };
+type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; instructor_name: string | null; instructor2_name: string | null; instructor_avatar: string | null; instructor2_avatar: string | null };
 
 export default function ClassesPage() {
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function ClassesPage() {
     if (!classData) { setLoading(false); return; }
 
     const { data: instructorProfiles } = await supabase
-      .from("profiles").select("id, full_name, show_on_instructors_page")
+      .from("profiles").select("id, full_name, avatar_url, show_on_instructors_page")
       .eq("role", "instructor");
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
@@ -79,6 +79,8 @@ export default function ClassesPage() {
       guest_count: userRegs.find(r => r.class_id === c.id)?.guest_count ?? 0,
       instructor_name: instructorProfiles?.find(i => i.id === c.instructor_id && i.show_on_instructors_page)?.full_name ?? null,
       instructor2_name: instructorProfiles?.find(i => i.id === c.instructor_id_2 && i.show_on_instructors_page)?.full_name ?? null,
+      instructor_avatar: instructorProfiles?.find(i => i.id === c.instructor_id && i.show_on_instructors_page)?.avatar_url ?? null,
+      instructor2_avatar: instructorProfiles?.find(i => i.id === c.instructor_id_2 && i.show_on_instructors_page)?.avatar_url ?? null,
     })));
     setLoading(false);
   }
@@ -214,9 +216,26 @@ export default function ClassesPage() {
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
                       {[cls.instructor_name, cls.instructor2_name].filter(Boolean).length > 0 && (
-                        <p className="font-body text-xs text-gray-500">
-                          w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex -space-x-1.5">
+                            {[
+                              { name: cls.instructor_name, avatar: cls.instructor_avatar },
+                              { name: cls.instructor2_name, avatar: cls.instructor2_avatar },
+                            ].filter(i => i.name).map((i, idx) => (
+                              <div key={idx} className="w-5 h-5 rounded-full overflow-hidden bg-[#e4c3cc]/60 border border-white flex items-center justify-center text-[9px] font-heading shrink-0">
+                                {i.avatar ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={i.avatar} alt="" className="object-cover w-full h-full" />
+                                ) : (
+                                  i.name![0]?.toUpperCase()
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <p className="font-body text-xs text-gray-500">
+                            w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
+                          </p>
+                        </div>
                       )}
                       {isFull && (
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>

@@ -1566,15 +1566,25 @@ export default function InstructorPage() {
               <div className="card divide-y divide-gray-50 overflow-hidden">
                 {allStudents.map((s) => (
                   <div key={s.id} className="px-5 py-4 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
-                      <p className="text-xs text-gray-500 font-body">{s.email}</p>
-                      <p className="text-xs text-gray-400 font-body inline-flex items-center gap-1">
-                        {s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                        {s.birth_date && (
-                          <> · <Cake className="w-3 h-3 text-[#2041d8]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
+                    <div className="min-w-0 flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-sm font-heading overflow-hidden shrink-0">
+                        {s.avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={s.avatar_url} alt="" className="object-cover w-full h-full" />
+                        ) : (
+                          (s.full_name ?? s.email)[0]?.toUpperCase()
                         )}
-                      </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
+                        <p className="text-xs text-gray-500 font-body">{s.email}</p>
+                        <p className="text-xs text-gray-400 font-body inline-flex items-center gap-1">
+                          {s.phone ?? "—"} · {new Date(s.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                          {s.birth_date && (
+                            <> · <Cake className="w-3 h-3 text-[#2041d8]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
+                          )}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <button
