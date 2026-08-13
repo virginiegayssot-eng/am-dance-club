@@ -293,7 +293,7 @@ export default function ChatPage() {
 
       const { error } = await withTimeout(supabase.from("messages").insert(payload), 15000);
       if (error) {
-        setSendError("Message didn't send. Please try again.");
+        setSendError(`Message didn't send: ${error.message}`);
         return;
       }
 
