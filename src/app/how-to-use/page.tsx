@@ -54,6 +54,15 @@ export default function HowToUsePage() {
           </section>
 
           <section>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">6. Leave a review</h2>
+            <p>
+              On your dashboard you'll find a Leave a Review section. Give us a star rating and a few words, any time.
+              It'll be checked before it goes live, then it rotates on our homepage alongside other members' reviews.
+              You can come back and edit it whenever you like.
+            </p>
+          </section>
+
+          <section>
             <h2 className="font-heading text-lg text-[#000000] mb-3">Need help?</h2>
             <p>
               Email us at{" "}
