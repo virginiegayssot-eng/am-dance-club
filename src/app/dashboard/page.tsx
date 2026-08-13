@@ -172,13 +172,6 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
-        {justBoughtPass && (
-          <div className="bg-[#a3bdfe]/20 border border-[#a3bdfe] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
-            <Ticket className="w-5 h-5 shrink-0 text-[#2041d8]" strokeWidth={1.75} />
-            Pass purchased! Head to <Link href="/classes" className="text-[#2041d8] underline font-medium">Classes</Link> to book your first session.
-          </div>
-        )}
-
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
@@ -351,6 +344,34 @@ export default function DashboardPage() {
             onCancel={() => setConfirmCancelId(null)}
             onConfirm={() => { const id = confirmCancelId; setConfirmCancelId(null); cancelBooking(id); }}
           />
+        )}
+
+        {justBoughtPass && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+              <div className="w-14 h-14 rounded-full bg-[#e4c3cc]/40 flex items-center justify-center mx-auto mb-4">
+                <Ticket className="w-7 h-7 text-[#2041d8]" strokeWidth={1.75} />
+              </div>
+              <h3 className="font-heading text-lg mb-1">Purchase successful!</h3>
+              <p className="font-body text-sm text-gray-600 leading-relaxed mb-6">
+                You're ready to book your next class. Head to Classes to reserve your spot.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => { setJustBoughtPass(false); router.push("/classes"); }}
+                  className="btn-primary w-full justify-center"
+                >
+                  Browse Classes
+                </button>
+                <button
+                  onClick={() => setJustBoughtPass(false)}
+                  className="font-body text-sm text-gray-400 hover:text-gray-600 py-1"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
       <Footer />
