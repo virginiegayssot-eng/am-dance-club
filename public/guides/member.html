@@ -199,14 +199,15 @@
     gap: 0.65rem;
   }
   ol.steps li {
-    display: flex;
-    gap: 0.7rem;
-    align-items: baseline;
+    position: relative;
+    padding-left: 2.1rem;
     font-size: 0.95rem;
   }
   ol.steps li::before {
     content: attr(data-n);
-    flex: none;
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
     font-weight: 800;
     font-size: 0.78rem;
     color: var(--accent);
@@ -215,7 +216,6 @@
     width: 1.4rem; height: 1.4rem;
     display: flex; align-items: center; justify-content: center;
     font-variant-numeric: tabular-nums;
-    margin-top: 0.1rem;
   }
 
   .tap {
