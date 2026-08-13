@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
-import type { Class, Profile, Registration, Attendance, Pass } from "@/lib/supabase";
+import type { Class, Profile, Registration, Attendance, Pass, Review } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -33,6 +33,12 @@ export default function DashboardPage() {
   const [justBoughtPass, setJustBoughtPass] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [cancelResult, setCancelResult] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [myReview, setMyReview] = useState<Review | null>(null);
+  const [editingReview, setEditingReview] = useState(false);
+  const [reviewRating, setReviewRating] = useState("5");
+  const [reviewText, setReviewText] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -64,6 +70,22 @@ export default function DashboardPage() {
       setCancelResult({ message: "Booking cancelled. As it's within 24 hours, no refund applies per our policy.", type: "success" });
       loadData();
     }
+  }
+
+  async function submitReview(e: React.FormEvent) {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    setReviewError("");
+    const res = await fetch("/api/reviews/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating: reviewRating, review_text: reviewText }),
+    });
+    const data = await res.json();
+    setReviewSubmitting(false);
+    if (!res.ok) { setReviewError(data.error ?? "Something went wrong."); return; }
+    setEditingReview(false);
+    await loadData();
   }
 
   async function loadData() {
@@ -99,6 +121,9 @@ export default function DashboardPage() {
 
     const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
     setNewsPosts(np ?? []);
+
+    const { data: myRev } = await supabase.from("reviews").select("*").eq("student_id", user.id).maybeSingle();
+    setMyReview((myRev as Review) ?? null);
 
     setLoading(false);
   }
@@ -327,6 +352,78 @@ export default function DashboardPage() {
                 </tbody>
               </table>
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Leave a review */}
+        {attendedCount > 0 && (
+          <section className="mb-10">
+            <h2 className="font-heading text-xl mb-5">Leave a Review</h2>
+            <div className="card p-5">
+              {myReview && !editingReview ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="text-amber-400 text-sm tracking-tight">{"★".repeat(myReview.rating)}{"☆".repeat(5 - myReview.rating)}</span>
+                    {myReview.status === "pending" ? (
+                      <span className="badge bg-amber-50 text-amber-600 border border-amber-200">Awaiting approval</span>
+                    ) : (
+                      <span className="badge-confirmed">Live on homepage</span>
+                    )}
+                  </div>
+                  <p className="font-body text-sm text-gray-600 mb-3">{myReview.review_text}</p>
+                  <button
+                    onClick={() => { setEditingReview(true); setReviewRating(String(myReview.rating)); setReviewText(myReview.review_text); }}
+                    className="font-body text-xs text-[#2041d8] hover:underline"
+                  >
+                    Edit your review
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={submitReview} className="space-y-4">
+                  <div>
+                    <label className="label">Your rating</label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <button
+                          type="button"
+                          key={n}
+                          onClick={() => setReviewRating(String(n))}
+                          className="text-2xl leading-none text-amber-400"
+                        >
+                          {n <= parseInt(reviewRating) ? "★" : "☆"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="label">Your review</label>
+                    <textarea
+                      className="input min-h-[100px]"
+                      placeholder="Tell us what you loved…"
+                      value={reviewText}
+                      onChange={e => setReviewText(e.target.value)}
+                      required
+                    />
+                  </div>
+                  {reviewError && (
+                    <p className="font-body text-xs text-red-500">{reviewError}</p>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <button type="submit" className="btn-primary py-2 px-4 text-sm" disabled={reviewSubmitting}>
+                      {reviewSubmitting ? "Submitting…" : myReview ? "Update Review" : "Submit Review"}
+                    </button>
+                    {editingReview && (
+                      <button type="button" onClick={() => setEditingReview(false)} className="font-body text-xs text-gray-400 hover:underline">
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                  {!myReview && (
+                    <p className="font-body text-xs text-gray-400">Your review will be checked before it appears on the homepage.</p>
+                  )}
+                </form>
+              )}
             </div>
           </section>
         )}
