@@ -359,76 +359,74 @@ export default function DashboardPage() {
         )}
 
         {/* Leave a review */}
-        {attendedCount > 0 && (
-          <section className="mb-10">
-            <h2 className="font-heading text-xl mb-5">Leave a Review</h2>
-            <div className="card p-5">
-              {myReview && !editingReview ? (
-                <div>
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="text-amber-400 text-sm tracking-tight">{"★".repeat(myReview.rating)}{"☆".repeat(5 - myReview.rating)}</span>
-                    {myReview.status === "pending" ? (
-                      <span className="badge bg-amber-50 text-amber-600 border border-amber-200">Awaiting approval</span>
-                    ) : (
-                      <span className="badge-confirmed">Live on homepage</span>
-                    )}
-                  </div>
-                  <p className="font-body text-sm text-gray-600 mb-3">{myReview.review_text}</p>
-                  <button
-                    onClick={() => { setEditingReview(true); setReviewRating(String(myReview.rating)); setReviewText(myReview.review_text); }}
-                    className="font-body text-xs text-[#000000] hover:underline"
-                  >
-                    Edit your review
-                  </button>
+        <section className="mb-10">
+          <h2 className="font-heading text-xl mb-5">Leave a Review</h2>
+          <div className="card p-5">
+            {myReview && !editingReview ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="text-amber-400 text-sm tracking-tight">{"★".repeat(myReview.rating)}{"☆".repeat(5 - myReview.rating)}</span>
+                  {myReview.status === "pending" ? (
+                    <span className="badge bg-amber-50 text-amber-600 border border-amber-200">Awaiting approval</span>
+                  ) : (
+                    <span className="badge-confirmed">Live on homepage</span>
+                  )}
                 </div>
-              ) : (
-                <form onSubmit={submitReview} className="space-y-4">
-                  <div>
-                    <label className="label">Your rating</label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <button
-                          type="button"
-                          key={n}
-                          onClick={() => setReviewRating(String(n))}
-                          className="text-2xl leading-none text-amber-400"
-                        >
-                          {n <= parseInt(reviewRating) ? "★" : "☆"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="label">Your review</label>
-                    <textarea
-                      className="input min-h-[100px]"
-                      placeholder="Tell us what you loved…"
-                      value={reviewText}
-                      onChange={e => setReviewText(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {reviewError && (
-                    <p className="font-body text-xs text-red-500">{reviewError}</p>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <button type="submit" className="btn-primary py-2 px-4 text-sm" disabled={reviewSubmitting}>
-                      {reviewSubmitting ? "Submitting…" : myReview ? "Update Review" : "Submit Review"}
-                    </button>
-                    {editingReview && (
-                      <button type="button" onClick={() => setEditingReview(false)} className="font-body text-xs text-gray-400 hover:underline">
-                        Cancel
+                <p className="font-body text-sm text-gray-600 mb-3">{myReview.review_text}</p>
+                <button
+                  onClick={() => { setEditingReview(true); setReviewRating(String(myReview.rating)); setReviewText(myReview.review_text); }}
+                  className="font-body text-xs text-[#000000] hover:underline"
+                >
+                  Edit your review
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submitReview} className="space-y-4">
+                <div>
+                  <label className="label">Your rating</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        type="button"
+                        key={n}
+                        onClick={() => setReviewRating(String(n))}
+                        className="text-2xl leading-none text-amber-400"
+                      >
+                        {n <= parseInt(reviewRating) ? "★" : "☆"}
                       </button>
-                    )}
+                    ))}
                   </div>
-                  {!myReview && (
-                    <p className="font-body text-xs text-gray-400">Your review will be checked before it appears on the homepage.</p>
+                </div>
+                <div>
+                  <label className="label">Your review</label>
+                  <textarea
+                    className="input min-h-[100px]"
+                    placeholder="Tell us what you loved…"
+                    value={reviewText}
+                    onChange={e => setReviewText(e.target.value)}
+                    required
+                  />
+                </div>
+                {reviewError && (
+                  <p className="font-body text-xs text-red-500">{reviewError}</p>
+                )}
+                <div className="flex items-center gap-3">
+                  <button type="submit" className="btn-primary py-2 px-4 text-sm" disabled={reviewSubmitting}>
+                    {reviewSubmitting ? "Submitting…" : myReview ? "Update Review" : "Submit Review"}
+                  </button>
+                  {editingReview && (
+                    <button type="button" onClick={() => setEditingReview(false)} className="font-body text-xs text-gray-400 hover:underline">
+                      Cancel
+                    </button>
                   )}
-                </form>
-              )}
-            </div>
-          </section>
-        )}
+                </div>
+                {!myReview && (
+                  <p className="font-body text-xs text-gray-400">Your review will be checked before it appears on the homepage.</p>
+                )}
+              </form>
+            )}
+          </div>
+        </section>
 
         <div className="flex flex-wrap gap-4">
           <Link href="/classes" className="btn-primary">Book Next Class</Link>
