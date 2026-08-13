@@ -124,7 +124,7 @@ export default function InstructorPage() {
   const [discountForm, setDiscountForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "", applicable_pass_type: "" });
   const [discountFormLoading, setDiscountFormLoading] = useState(false);
 
-  // Google reviews carousel (homepage)
+  // Independent reviews carousel (homepage)
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ author_name: "", rating: "5", review_text: "" });
