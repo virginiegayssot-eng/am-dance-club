@@ -17,7 +17,7 @@ type Message = {
   body: string;
   image_url?: string | null;
   created_at: string;
-  profiles?: { full_name: string | null; email: string };
+  profiles?: { full_name: string | null; email: string; avatar_url: string | null };
   likeCount?: number;
   likedByMe?: boolean;
 };
@@ -94,7 +94,7 @@ export default function ChatPage() {
 
       const { data } = await supabase
         .from("messages")
-        .select("*, profiles!sender_id(full_name, email)")
+        .select("*, profiles!sender_id(full_name, email, avatar_url)")
         .eq("id", msg.id)
         .single();
       if (data) setMessages(prev => [...prev, data as Message]);
@@ -137,7 +137,7 @@ export default function ChatPage() {
   async function loadConversations(myId: string, studs: Profile[]) {
     const { data: msgs } = await supabase
       .from("messages")
-      .select("*, profiles!sender_id(full_name, email)")
+      .select("*, profiles!sender_id(full_name, email, avatar_url)")
       .eq("channel", "direct")
       .or(`sender_id.eq.${myId},recipient_id.eq.${myId}`)
       .order("created_at", { ascending: false });
@@ -177,7 +177,7 @@ export default function ChatPage() {
     setLoading(true);
     const { data } = await supabase
       .from("messages")
-      .select("*, profiles!sender_id(full_name, email)")
+      .select("*, profiles!sender_id(full_name, email, avatar_url)")
       .eq("channel", "group")
       .order("created_at", { ascending: true })
       .limit(100);
@@ -193,7 +193,7 @@ export default function ChatPage() {
 
     const { data } = await supabase
       .from("messages")
-      .select("*, profiles!sender_id(full_name, email)")
+      .select("*, profiles!sender_id(full_name, email, avatar_url)")
       .eq("channel", "direct")
       .or(
         `and(sender_id.eq.${me.id},recipient_id.eq.${otherId}),and(sender_id.eq.${otherId},recipient_id.eq.${me.id})`
@@ -476,8 +476,14 @@ export default function ChatPage() {
         <div className="flex-1 flex flex-col bg-white sm:rounded-2xl border border-[#e2d0fb]/30 overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-[#ffffff]">
-            <div className="w-9 h-9 rounded-full bg-[#e2d0fb]/50 flex items-center justify-center text-sm font-heading">
-              {activeChannel === "group" ? <MessageCircle className="w-4 h-4 text-[#000000]" strokeWidth={1.75} /> : (dmTarget?.full_name ?? "?")[0]?.toUpperCase()}
+            <div className="w-9 h-9 rounded-full bg-[#e2d0fb]/50 flex items-center justify-center text-sm font-heading overflow-hidden shrink-0">
+              {activeChannel === "group" ? (
+                <MessageCircle className="w-4 h-4 text-[#000000]" strokeWidth={1.75} />
+              ) : dmTarget?.avatar_url ? (
+                <Image src={dmTarget.avatar_url} alt="" width={36} height={36} className="object-cover w-full h-full" />
+              ) : (
+                (dmTarget?.full_name ?? "?")[0]?.toUpperCase()
+              )}
             </div>
             <div>
               <p className="font-heading text-sm">{activeName}</p>
@@ -509,7 +515,16 @@ export default function ChatPage() {
                 const canEdit = isMe && (Date.now() - new Date(msg.created_at).getTime()) < 5 * 60 * 1000;
                 const isEditing = editingId === msg.id;
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
+                  <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} items-end gap-2 group`}>
+                    {activeChannel === "group" && !isMe && (
+                      <div className="w-7 h-7 rounded-full bg-[#e2d0fb]/50 flex items-center justify-center text-[10px] font-heading overflow-hidden shrink-0 mb-1">
+                        {msg.profiles?.avatar_url ? (
+                          <Image src={msg.profiles.avatar_url} alt="" width={28} height={28} className="object-cover w-full h-full" />
+                        ) : (
+                          senderName[0]?.toUpperCase()
+                        )}
+                      </div>
+                    )}
                     <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
                       {activeChannel === "group" && (
                         <span className="font-heading text-xs text-gray-400 px-1">{senderName}</span>
