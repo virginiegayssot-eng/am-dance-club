@@ -980,14 +980,23 @@ export default function InstructorPage() {
   function openReviewModal(classId?: string) {
     setReviewsSent(null);
     setReviewSendErrors([]);
-    setReviewMode("class");
     setReviewCandidates([]);
     setSelectedReviewIds(new Set());
     setReviewPreviewHtml("");
     setMemberSearch("");
-    setReviewModalClassId(classId ?? selectedClass?.id ?? "");
+    const targetClassId = classId ?? selectedClass?.id ?? "";
+    setReviewModalClassId(targetClassId);
     setShowReviewModal(true);
-    if (classId ?? selectedClass?.id) loadReviewCandidates(classId ?? selectedClass!.id);
+    if (targetClassId) {
+      setReviewMode("class");
+      loadReviewCandidates(targetClassId);
+    } else {
+      // No specific class in context (e.g. opened from the Reviews tab) —
+      // "First-timers by class" has nothing to filter on, so default to
+      // "Any members" instead of forcing a class pick first.
+      setReviewMode("any");
+      loadGenericReviewPreview();
+    }
   }
 
   function switchReviewMode(mode: "class" | "any") {
@@ -1715,11 +1724,16 @@ export default function InstructorPage() {
         {/* REVIEWS TAB */}
         {activeTab === "reviews" && (
           <div>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
               <p className="font-body text-sm text-gray-500">{reviews.length} review{reviews.length !== 1 ? "s" : ""} · approved ones shown in a carousel on the homepage</p>
-              <button onClick={() => setShowReviewForm(true)} className="btn-primary py-2 px-4 text-sm">
-                + New Review
-              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
+                  Send Review Emails
+                </button>
+                <button onClick={() => setShowReviewForm(true)} className="btn-primary py-2 px-4 text-sm">
+                  + New Review
+                </button>
+              </div>
             </div>
 
             {reviews.filter(r => r.status === "pending").length > 0 && (
