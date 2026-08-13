@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import type { MerchProduct } from "@/lib/supabase";
+import { MERCH_ENABLED } from "@/lib/feature-flags";
 
 export default function MerchPage() {
   const router = useRouter();
@@ -19,7 +20,10 @@ export default function MerchPage() {
   const [buying, setBuying] = useState<string | null>(null);
   const [buyError, setBuyError] = useState("");
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    if (!MERCH_ENABLED) { router.push("/dashboard"); return; }
+    loadData();
+  }, []);
 
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();

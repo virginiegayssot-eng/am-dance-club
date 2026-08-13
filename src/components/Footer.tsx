@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { MERCH_ENABLED } from "@/lib/feature-flags";
 
 export default function Footer() {
   return (
@@ -49,7 +50,7 @@ export default function Footer() {
                 { href: "/instructors", label: "Instructors" },
                 { href: "/passes", label: "Passes & Pricing" },
                 { href: "/videos", label: "Videos" },
-                { href: "/merch", label: "Merch" },
+                ...(MERCH_ENABLED ? [{ href: "/merch", label: "Merch" }] : []),
                 { href: "/playlists", label: "Playlists" },
                 { href: "/auth/login", label: "Log in" },
               ].map(({ href, label }) => (

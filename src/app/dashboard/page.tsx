@@ -12,6 +12,7 @@ import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Megaphone, MapPin, PartyPopper, Music2, X, Ticket, type LucideIcon } from "lucide-react";
+import { MERCH_ENABLED } from "@/lib/feature-flags";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -336,7 +337,9 @@ export default function DashboardPage() {
           <Link href="/classes" className="btn-primary">Book Next Class</Link>
           <Link href="/passes" className="btn-secondary">Buy a Pass</Link>
           <Link href="/videos" className="btn-secondary">Videos</Link>
-          <Link href="/merch" className="btn-secondary">Merch</Link>
+          {MERCH_ENABLED && (
+            <Link href="/merch" className="btn-secondary">Merch</Link>
+          )}
         </div>
 
         {confirmCancelId && (

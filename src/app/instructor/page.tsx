@@ -13,6 +13,7 @@ import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, type LucideIcon } from "lucide-react";
+import { MERCH_ENABLED } from "@/lib/feature-flags";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -1296,7 +1297,7 @@ export default function InstructorPage() {
     { key: "playlists", label: "Playlists" },
     ...(isAdmin ? [{ key: "discounts", label: "Discounts" }] as const : []),
     { key: "news", label: "BYLA News" },
-    ...(isAdmin ? [{ key: "merch", label: "Merch" }] as const : []),
+    ...(isAdmin && MERCH_ENABLED ? [{ key: "merch", label: "Merch" }] as const : []),
     ...(isAdmin ? [{ key: "reviews", label: "Reviews" }] as const : []),
     { key: "instructors", label: "Instructors" },
   ];
