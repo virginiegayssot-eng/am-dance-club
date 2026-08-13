@@ -26,16 +26,6 @@ export async function POST(req: NextRequest) {
 
   const admin = adminClient();
 
-  const { data: attended } = await admin
-    .from("attendance")
-    .select("id")
-    .eq("student_id", user.id)
-    .eq("attended", true)
-    .limit(1);
-  if (!attended || attended.length === 0) {
-    return NextResponse.json({ error: "You can leave a review after attending your first class." }, { status: 403 });
-  }
-
   const { data: prof } = await admin.from("profiles").select("full_name, email").eq("id", user.id).single();
   const author_name = prof?.full_name ?? prof?.email ?? "Member";
 
