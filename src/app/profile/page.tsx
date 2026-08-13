@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
+import AvatarCropper from "@/components/AvatarCropper";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState("");
+  const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
 
   useEffect(() => { loadProfile(); }, []);
 
@@ -66,25 +68,35 @@ export default function ProfilePage() {
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
 
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file || !profile) return;
+    setAvatarError("");
+
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("FileReader failed"));
+        reader.readAsDataURL(file);
+      });
+      setPendingImageSrc(base64);
+    } catch (err: any) {
+      setAvatarError("Couldn't read that file: " + (err?.message ?? String(err)));
+    }
+  }
+
+  async function handleCropSave(croppedBase64: string) {
+    setPendingImageSrc(null);
     setUploadingAvatar(true);
     setAvatarError("");
 
     try {
-      // Get base64 via FileReader first (most compatible)
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (e) => reject(new Error("FileReader failed"));
-        reader.readAsDataURL(file);
-      });
-
       const res = await fetch("/api/profile/avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64 }),
+        body: JSON.stringify({ base64: croppedBase64 }),
       });
 
       if (!res.ok) { setAvatarError("Upload failed, please try again."); setUploadingAvatar(false); return; }
@@ -128,7 +140,7 @@ export default function ProfilePage() {
             </div>
             <label className="cursor-pointer font-body text-sm text-[#000000] hover:underline">
               {uploadingAvatar ? "Uploading…" : "Change photo"}
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+              <input type="file" accept="image/*" className="hidden" onChange={handleFileSelect} disabled={uploadingAvatar} />
             </label>
             {avatarError && <p className="font-body text-xs text-red-500 mt-1 text-center">{avatarError}</p>}
           </div>
@@ -202,6 +214,14 @@ export default function ProfilePage() {
         </div>
       </main>
       <Footer />
+
+      {pendingImageSrc && (
+        <AvatarCropper
+          imageSrc={pendingImageSrc}
+          onCancel={() => setPendingImageSrc(null)}
+          onSave={handleCropSave}
+        />
+      )}
     </div>
   );
 }
