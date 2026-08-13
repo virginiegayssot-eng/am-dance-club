@@ -28,6 +28,18 @@ type Conversation = {
   unread: number;
 };
 
+// Supabase's auth token refresh can occasionally hang (a known issue with
+// long-idle tabs / iOS standalone PWAs), which would otherwise leave every
+// request stuck forever and the Send button spinning indefinitely. This caps
+// how long we wait so the UI always recovers with an error instead of
+// freezing.
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timed out")), ms)),
+  ]);
+}
+
 const WHATSAPP_ALEXANDRIA = "https://chat.whatsapp.com/L8Gk62g11tu89DEJP6N360?s=sh&p=i&ilr=4";
 const WHATSAPP_MANLY = "https://chat.whatsapp.com/FWmoZsIsngj2Qy4m9hJT6c?s=sh&p=i&ilr=4";
 
@@ -48,6 +60,7 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState("");
+  const [sendError, setSendError] = useState("");
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -254,36 +267,49 @@ export default function ChatPage() {
     if ((!body.trim() && !pendingImage) || !me) return;
     setSending(true);
     setImageError("");
+    setSendError("");
 
-    let imageUrl: string | null = null;
-    if (pendingImage) {
-      const res = await fetch("/api/chat/upload-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64: pendingImage }),
-      });
-      const result = await res.json();
-      if (result.error) {
-        setImageError(result.error);
-        setSending(false);
+    try {
+      let imageUrl: string | null = null;
+      if (pendingImage) {
+        const res = await withTimeout(
+          fetch("/api/chat/upload-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ base64: pendingImage }),
+          }),
+          20000
+        );
+        const result = await res.json();
+        if (result.error) {
+          setImageError(result.error);
+          return;
+        }
+        imageUrl = result.url;
+      }
+
+      const payload: Record<string, string | null> = {
+        sender_id: me.id,
+        channel: activeChannel === "group" ? "group" : "direct",
+        body: body.trim(),
+        image_url: imageUrl,
+      };
+      if (activeChannel !== "group") payload.recipient_id = activeChannel;
+
+      const { error } = await withTimeout(supabase.from("messages").insert(payload), 15000);
+      if (error) {
+        setSendError("Message didn't send. Please try again.");
         return;
       }
-      imageUrl = result.url;
+
+      setBody("");
+      setPendingImage(null);
+    } catch {
+      setSendError("Taking too long to send. Check your connection and try again.");
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
     }
-
-    const payload: Record<string, string | null> = {
-      sender_id: me.id,
-      channel: activeChannel === "group" ? "group" : "direct",
-      body: body.trim(),
-      image_url: imageUrl,
-    };
-    if (activeChannel !== "group") payload.recipient_id = activeChannel;
-
-    await supabase.from("messages").insert(payload);
-    setBody("");
-    setPendingImage(null);
-    setSending(false);
-    inputRef.current?.focus();
   }
 
   async function saveEdit(msgId: string) {
@@ -614,6 +640,9 @@ export default function ChatPage() {
             )}
             {imageError && (
               <p className="px-4 pt-2 font-body text-xs text-red-500">{imageError}</p>
+            )}
+            {sendError && (
+              <p className="px-4 pt-2 font-body text-xs text-red-500">{sendError}</p>
             )}
             <form onSubmit={sendMessage} className="flex items-center gap-3 px-4 py-3">
               <input
