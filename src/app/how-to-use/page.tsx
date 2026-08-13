@@ -2,7 +2,38 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
-import { Share, MoreVertical, Plus, ArrowRight } from "lucide-react";
+import { Share, MoreVertical, Plus, ArrowRight, Mail } from "lucide-react";
+
+export const metadata = { title: "How to Use · THE A.M Dance Club" };
+
+function Chip({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="inline-flex items-center font-bold text-[0.85em] bg-[#2041d8]/10 border border-[#2041d8]/20 text-[#2041d8] rounded-lg px-2 py-0.5 hover:bg-[#2041d8]/20 transition-colors">
+      {children}
+    </Link>
+  );
+}
+
+function StepCard({ id, num, who, title, children }: {
+  id: string;
+  num: number;
+  who: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="bg-white border border-[#2041d8]/10 rounded-2xl shadow-sm p-6 sm:p-7 scroll-mt-28">
+      <div className="flex items-start gap-4 mb-3">
+        <div className="shrink-0 w-10 h-10 rounded-xl bg-[#2041d8]/10 text-[#2041d8] flex items-center justify-center font-heading text-base">{num}</div>
+        <div>
+          <p className="font-body text-xs uppercase tracking-widest text-gray-400 mb-0.5">{who}</p>
+          <h2 className="font-heading text-lg text-black">{title}</h2>
+        </div>
+      </div>
+      <div className="font-body text-sm text-gray-600 leading-relaxed">{children}</div>
+    </section>
+  );
+}
 
 function HomeScreenSteps({ platform, icon1, caption1, caption2, caption3 }: {
   platform: string;
@@ -33,88 +64,110 @@ function HomeScreenSteps({ platform, icon1, caption1, caption2, caption3 }: {
   );
 }
 
-export const metadata = { title: "How to Use · THE A.M Dance Club" };
+const QUICKNAV = [
+  { href: "#account", label: "1. Account" },
+  { href: "#book", label: "2. Book a class" },
+  { href: "#passes", label: "3. Passes" },
+  { href: "#manage", label: "4. Manage a booking" },
+  { href: "#videos", label: "5. Videos & playlists" },
+  { href: "#install", label: "6. Home screen" },
+];
 
 export default function HowToUsePage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#fff8f3]">
       <Navbar />
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-14 w-full">
-        <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Guide</p>
-        <h1 className="section-title mb-10">How to Use the App</h1>
+        <div className="mb-8">
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Guide</p>
+          <h1 className="section-title mb-3">How to Use the App</h1>
+          <p className="font-body text-sm text-gray-500">Everything you need to book, pay, and keep dancing.</p>
+        </div>
 
-        <div className="space-y-8 font-body text-gray-700 leading-relaxed">
+        <nav className="flex gap-2 overflow-x-auto pb-2 mb-8 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+          {QUICKNAV.map(item => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="shrink-0 font-body text-xs font-semibold text-gray-500 bg-white border border-[#2041d8]/10 rounded-full px-3 py-1.5 hover:text-[#2041d8] hover:border-[#2041d8]/30 transition-colors whitespace-nowrap"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">1. Create an account</h2>
+        <div className="space-y-5">
+
+          <StepCard id="account" num={1} who="Getting started" title="Create an account">
             <p>
-              Click <Link href="/auth/signup" className="text-[#2041d8] underline">Sign up</Link> and fill in your details.
+              Click <Chip href="/auth/signup">Sign up</Chip> and fill in your details.
               Once you're in, you'll land on your dashboard where you can book classes, manage passes, and more.
             </p>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">2. Book a class</h2>
+          <StepCard id="book" num={2} who="Find a session" title="Book a class">
             <p>
-              Head to <Link href="/classes" className="text-[#2041d8] underline">Classes</Link> to see what's coming up.
-              Pick a session and book it — if you have an active pass, a credit is used automatically; otherwise you'll be prompted to pay or buy a pass first.
+              Head to <Chip href="/classes">Classes</Chip> to see what's coming up.
+              Pick a session and book it, if you have an active pass, a credit is used automatically; otherwise you'll be prompted to pay or buy a pass first.
             </p>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">3. Passes & pricing</h2>
+          <StepCard id="passes" num={3} who="Credits & pricing" title="Passes & pricing">
             <p>
-              Visit <Link href="/passes" className="text-[#2041d8] underline">Passes</Link> to see pricing options.
-              A pass gives you a set number of class credits to use whenever you like — no need to pay per class once you've got one.
+              Visit <Chip href="/passes">Passes</Chip> to see pricing options.
+              A pass gives you a set number of class credits to use whenever you like, no need to pay per class once you've got one.
             </p>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">4. Manage or cancel a booking</h2>
+          <StepCard id="manage" num={4} who="Change of plans" title="Manage or cancel a booking">
             <p>
-              Your upcoming bookings live on your dashboard. You can cancel directly from there — cancelling 24+ hours before class returns your credit automatically.
-              See our <Link href="/cancellation-policy" className="text-[#2041d8] underline">Cancellation Policy</Link> for full details.
+              Your upcoming bookings live on your dashboard. You can cancel directly from there, cancelling 24+ hours before class returns your credit automatically.
+              See our <Chip href="/cancellation-policy">Cancellation Policy</Chip> for full details.
             </p>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">5. Videos & playlists</h2>
+          <StepCard id="videos" num={5} who="Practice at home" title="Videos & playlists">
             <p>
-              Check out <Link href="/videos" className="text-[#2041d8] underline">Videos</Link> for class recordings, and Playlists for the music we dance to — great for practicing at home.
+              Check out <Chip href="/videos">Videos</Chip> for class recordings, and Playlists for the music we dance to, great for practicing at home.
             </p>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">6. Add THE A.M to your home screen</h2>
+          <StepCard id="install" num={6} who="One-time setup, worth doing" title="Add THE A.M to your home screen">
             <p className="mb-6">
-              Once it's on your home screen, THE A.M opens full-screen like a real app — no browser bar, and faster to get into.
+              Once it's on your home screen, THE A.M opens full-screen like a real app, no browser bar, and faster to get into.
             </p>
-            <div className="rounded-2xl border border-[#2041d8]/10 bg-[#fff8f3]/60 p-6 grid sm:grid-cols-2 gap-8">
+            <div className="rounded-2xl border border-[#2041d8]/10 bg-[#fff8f3] p-6 grid sm:grid-cols-2 gap-8">
               <HomeScreenSteps
                 platform="iPhone — Safari"
                 icon1={<Share className="w-6 h-6 text-[#2041d8]" strokeWidth={1.75} />}
                 caption1={<>Tap the Share icon in Safari's toolbar</>}
                 caption2={<>Scroll down, tap <strong>Add to Home Screen</strong></>}
-                caption3={<>Tap <strong>Add</strong> — THE A.M is on your home screen</>}
+                caption3={<>Tap <strong>Add</strong>, THE A.M is on your home screen</>}
               />
               <HomeScreenSteps
                 platform="Android — Chrome"
                 icon1={<MoreVertical className="w-6 h-6 text-[#2041d8]" strokeWidth={1.75} />}
                 caption1={<>Tap the ⋮ menu in Chrome's toolbar</>}
                 caption2={<>Tap <strong>Add to Home screen</strong></>}
-                caption3={<>Tap <strong>Add</strong> — done!</>}
+                caption3={<>Tap <strong>Add</strong>, done!</>}
               />
             </div>
-          </section>
+          </StepCard>
 
-          <section>
-            <h2 className="font-heading text-lg text-[#2041d8] mb-3">Need help?</h2>
-            <p>
-              Email us at{" "}
-              <a href="mailto:theamdance@gmail.com" className="text-[#2041d8] underline">theamdance@gmail.com</a>{" "}
-              and we'll sort you out.
-            </p>
-          </section>
+          <div className="bg-[#2041d8] rounded-2xl p-6 sm:p-7 text-white flex items-start gap-4">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Mail className="w-5 h-5" strokeWidth={1.75} />
+            </div>
+            <div>
+              <h2 className="font-heading text-lg mb-1">Need help?</h2>
+              <p className="font-body text-sm text-white/80">
+                Email us at{" "}
+                <a href="mailto:theamdance@gmail.com" className="underline hover:text-[#e4c3cc]">theamdance@gmail.com</a>{" "}
+                and we'll sort you out.
+              </p>
+            </div>
+          </div>
+
         </div>
       </main>
       <Footer />
