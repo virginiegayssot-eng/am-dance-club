@@ -24,7 +24,7 @@ function titleFromFilename(filename: string): string {
 }
 
 type ClassWithCount = Class & { registered_count: number };
-type StudentRow = { id: string; full_name: string | null; email: string; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
+type StudentRow = { id: string; full_name: string | null; email: string; avatar_url: string | null; attended: boolean; reg_id: string; guest_count: number; pass_id: string | null; payment_type: string | null };
 type PassRow = Pass & { profiles: { full_name: string | null; email: string } };
 
 export default function InstructorPage() {
@@ -314,7 +314,7 @@ export default function InstructorPage() {
     setSelectedClass(cls);
     const { data: regs } = await supabase
       .from("registrations")
-      .select("id, student_id, pass_id, payment_type, guest_count, profiles(id, full_name, email)")
+      .select("id, student_id, pass_id, payment_type, guest_count, profiles(id, full_name, email, avatar_url)")
       .eq("class_id", cls.id)
       .eq("status", "confirmed");
 
@@ -327,6 +327,7 @@ export default function InstructorPage() {
       id: r.profiles.id,
       full_name: r.profiles.full_name,
       email: r.profiles.email,
+      avatar_url: r.profiles.avatar_url,
       attended: att?.find((a) => a.student_id === r.profiles.id)?.attended ?? false,
       reg_id: r.id,
       guest_count: r.guest_count ?? 0,
@@ -1349,14 +1350,24 @@ export default function InstructorPage() {
                     <div className="divide-y divide-gray-50">
                       {students.map((s) => (
                         <div key={s.id} className="flex items-center justify-between px-5 py-3 group">
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm font-body">
-                              {s.full_name ?? "—"}
-                              {s.guest_count > 0 && (
-                                <span className="ml-2 badge bg-[#e4c3cc]/50 text-black">+{s.guest_count} guest</span>
+                          <div className="min-w-0 flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-xs font-heading overflow-hidden shrink-0">
+                              {s.avatar_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={s.avatar_url} alt="" className="object-cover w-full h-full" />
+                              ) : (
+                                (s.full_name ?? s.email)[0]?.toUpperCase()
                               )}
-                            </p>
-                            <p className="text-xs text-gray-500 font-body">{s.email}</p>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm font-body">
+                                {s.full_name ?? "—"}
+                                {s.guest_count > 0 && (
+                                  <span className="ml-2 badge bg-[#e4c3cc]/50 text-black">+{s.guest_count} guest</span>
+                                )}
+                              </p>
+                              <p className="text-xs text-gray-500 font-body">{s.email}</p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
                             <button
