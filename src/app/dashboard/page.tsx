@@ -418,9 +418,6 @@ export default function DashboardPage() {
                     </button>
                   )}
                 </div>
-                {!myReview && (
-                  <p className="font-body text-xs text-gray-400">Your review will be checked before it appears on the homepage.</p>
-                )}
               </form>
             )}
           </div>
