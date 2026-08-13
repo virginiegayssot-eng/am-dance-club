@@ -12,7 +12,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState({ full_name: "", phone: "", birth_month: "", birth_day: "" });
+  const [form, setForm] = useState({ full_name: "", phone: "", birth_month: "", birth_day: "", title: "", bio: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,6 +37,8 @@ export default function ProfilePage() {
       phone: data?.phone ?? "",
       birth_month: bMonth ? String(parseInt(bMonth)) : "",
       birth_day: bDay ? String(parseInt(bDay)) : "",
+      title: data?.title ?? "",
+      bio: data?.bio ?? "",
     });
     setAvatarUrl(data?.avatar_url ?? null);
     setLoading(false);
@@ -52,7 +54,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/profile/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ full_name: form.full_name, phone: form.phone, birth_date }),
+      body: JSON.stringify({ full_name: form.full_name, phone: form.phone, birth_date, title: form.title, bio: form.bio }),
     });
     const { error } = await res.json();
     setSaving(false);
@@ -61,7 +63,7 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 3000);
   }
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -138,7 +140,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label className="label">Email</label>
-              <input type="email" className="input" value={profile?.email ?? ""} disabled className="input bg-gray-50 text-gray-400 cursor-not-allowed" />
+              <input type="email" value={profile?.email ?? ""} disabled className="input bg-gray-50 text-gray-400 cursor-not-allowed" />
               <p className="font-body text-xs text-gray-400 mt-1">Email cannot be changed here</p>
             </div>
             <div>
@@ -162,6 +164,20 @@ export default function ProfilePage() {
                 </select>
               </div>
             </div>
+
+            {profile?.role === "instructor" && (
+              <>
+                <div>
+                  <label className="label">Title</label>
+                  <input type="text" className="input" placeholder="e.g. Founder" value={form.title} onChange={set("title")} />
+                  <p className="font-body text-xs text-gray-400 mt-1">Shown under your name on the public Instructors page.</p>
+                </div>
+                <div>
+                  <label className="label">Bio</label>
+                  <textarea className="input min-h-[120px]" placeholder="Tell people about yourself…" value={form.bio} onChange={set("bio")} />
+                </div>
+              </>
+            )}
 
             {saved && (
               <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-body px-4 py-3 rounded-xl">

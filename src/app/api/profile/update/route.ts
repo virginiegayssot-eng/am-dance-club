@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { full_name, phone, birth_date } = await req.json();
+  const { full_name, phone, birth_date, title, bio } = await req.json();
 
   // Store as 2000-MM-DD (placeholder year) since DB column is type date
   const dbDate = birth_date ? `2000-${birth_date}` : null;
 
   const { error } = await adminClient()
     .from("profiles")
-    .update({ full_name, phone: phone || null, birth_date: dbDate })
+    .update({ full_name, phone: phone || null, birth_date: dbDate, title: title || null, bio: bio || null })
     .eq("id", user.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
