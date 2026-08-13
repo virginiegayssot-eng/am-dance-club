@@ -117,6 +117,8 @@ export type Review = {
   author_name: string;
   rating: number;
   review_text: string;
+  student_id: string | null;
+  status: "pending" | "approved";
   created_at: string;
 };
 

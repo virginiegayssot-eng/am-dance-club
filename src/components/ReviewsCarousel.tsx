@@ -24,7 +24,7 @@ export default function ReviewsCarousel() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("reviews").select("*").order("created_at", { ascending: true });
+      const { data } = await supabase.from("reviews").select("*").eq("status", "approved").order("created_at", { ascending: true });
       setReviews(data ?? []);
       setLoaded(true);
     })();

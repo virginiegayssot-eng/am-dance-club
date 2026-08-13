@@ -932,6 +932,7 @@ export default function InstructorPage() {
       author_name: reviewForm.author_name.trim(),
       rating: parseInt(reviewForm.rating),
       review_text: reviewForm.review_text.trim(),
+      status: "approved",
     });
     if (error) { setActionError(error.message); setReviewFormLoading(false); return; }
     setShowReviewForm(false);
@@ -948,6 +949,11 @@ export default function InstructorPage() {
         setReviews(prev => prev.filter(r => r.id !== id));
       },
     });
+  }
+
+  async function approveReview(id: string) {
+    await supabase.from("reviews").update({ status: "approved" }).eq("id", id);
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, status: "approved" } : r));
   }
 
   async function addPlaylist(e: React.FormEvent) {
@@ -1916,32 +1922,65 @@ export default function InstructorPage() {
         {activeTab === "reviews" && (
           <div>
             <div className="flex items-center justify-between mb-5">
-              <p className="font-body text-sm text-gray-500">{reviews.length} review{reviews.length !== 1 ? "s" : ""} · shown in a carousel on the homepage</p>
+              <p className="font-body text-sm text-gray-500">{reviews.length} review{reviews.length !== 1 ? "s" : ""} · approved ones shown in a carousel on the homepage</p>
               <button onClick={() => setShowReviewForm(true)} className="btn-primary py-2 px-4 text-sm">
                 + New Review
               </button>
             </div>
-            {reviews.length === 0 ? (
+
+            {reviews.filter(r => r.status === "pending").length > 0 && (
+              <div className="mb-6">
+                <p className="font-body text-xs uppercase tracking-widest text-amber-600 mb-2">Awaiting approval</p>
+                <div className="card divide-y divide-gray-50 overflow-hidden border-amber-200">
+                  {reviews.filter(r => r.status === "pending").map(r => (
+                    <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 bg-amber-50/40">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-heading">{r.author_name}</span>
+                          <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <button onClick={() => approveReview(r.id)} className="font-body text-xs text-green-600 hover:underline">
+                          Approve
+                        </button>
+                        <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {reviews.filter(r => r.status === "approved").length === 0 ? (
               <div className="card p-10 text-center">
-                <p className="font-body text-gray-400 mb-4">No reviews yet. Add one to start the homepage carousel.</p>
+                <p className="font-body text-gray-400 mb-4">No approved reviews yet — add one, or approve a member's submission above.</p>
                 <button onClick={() => setShowReviewForm(true)} className="btn-primary">Add Review</button>
               </div>
             ) : (
-              <div className="card divide-y divide-gray-50 overflow-hidden">
-                {reviews.map(r => (
-                  <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-heading">{r.author_name}</span>
-                        <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+              <div>
+                {reviews.some(r => r.status === "pending") && (
+                  <p className="font-body text-xs uppercase tracking-widest text-gray-400 mb-2">Live on homepage</p>
+                )}
+                <div className="card divide-y divide-gray-50 overflow-hidden">
+                  {reviews.filter(r => r.status === "approved").map(r => (
+                    <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-heading">{r.author_name}</span>
+                          <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
                       </div>
-                      <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
+                      <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600 shrink-0">
+                        Delete
+                      </button>
                     </div>
-                    <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600 shrink-0">
-                      Delete
-                    </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
