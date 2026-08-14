@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
 import { MessageCircle, GraduationCap, Pencil, Heart, Image as ImageIcon, X } from "lucide-react";
+import { notifyPush } from "@/lib/push";
 
 type Message = {
   id: string;
@@ -297,6 +298,7 @@ export default function ChatPage() {
         return;
       }
 
+      if (activeChannel === "group") notifyPush("chat", "", payload.body || "Sent a photo");
       setBody("");
       setPendingImage(null);
     } catch {

@@ -13,6 +13,7 @@ import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, type LucideIcon } from "lucide-react";
+import { notifyPush } from "@/lib/push";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -280,6 +281,7 @@ export default function InstructorPage() {
     }
 
     await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned, image_url: imageUrl });
+    notifyPush("news", newsForm.title);
     setNewsForm({ title: "", body: "", category: "general", pinned: false });
     setNewsImage(null);
     setShowNewsForm(false);
@@ -640,6 +642,7 @@ export default function InstructorPage() {
         class_id: videoForm.class_id || null,
         is_public: videoForm.is_public,
       });
+      if (videoForm.is_public) notifyPush("video", videoForm.title);
       resetVideoForm();
       loadData();
       setVideoFormLoading(false);
@@ -670,6 +673,9 @@ export default function InstructorPage() {
         uploaded++;
       }
 
+      if (sharedFields.is_public) {
+        notifyPush("video", videoForm.title.trim() || titleFromFilename(videoFiles[0].name));
+      }
       resetVideoForm();
       loadData();
     } catch (err) {
