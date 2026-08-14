@@ -33,15 +33,20 @@ export default function ProfilePage() {
   async function togglePush() {
     setPushBusy(true);
     setPushError("");
-    if (pushEnabled) {
-      await disablePush();
-      setPushEnabled(false);
-    } else {
-      const result = await enablePush();
-      if (result.ok) setPushEnabled(true);
-      else setPushError(result.error ?? "Something went wrong.");
+    try {
+      if (pushEnabled) {
+        await disablePush();
+        setPushEnabled(false);
+      } else {
+        const result = await enablePush();
+        if (result.ok) setPushEnabled(true);
+        else setPushError(result.error ?? "Something went wrong.");
+      }
+    } catch (err: any) {
+      setPushError(err?.message ?? String(err));
+    } finally {
+      setPushBusy(false);
     }
-    setPushBusy(false);
   }
 
   async function loadProfile() {

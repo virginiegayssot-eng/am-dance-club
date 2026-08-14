@@ -20,17 +20,28 @@ export async function getPushSubscriptionStatus(): Promise<boolean> {
 
 export async function enablePush(): Promise<{ ok: boolean; error?: string }> {
   if (!pushSupported()) return { ok: false, error: "Not supported on this browser." };
+  if (typeof Notification === "undefined") {
+    return { ok: false, error: "Notifications aren't available in this app (Notification API missing)." };
+  }
+  if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+    return { ok: false, error: "Server isn't configured for push yet (missing VAPID key)." };
+  }
 
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") return { ok: false, error: "Notifications permission was not granted." };
+  if (permission !== "granted") return { ok: false, error: `Notifications permission was ${permission}.` };
 
   const reg = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
 
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
-  });
+  let sub;
+  try {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+    });
+  } catch (err: any) {
+    return { ok: false, error: `Subscribe failed: ${err?.message ?? err}` };
+  }
 
   const json = sub.toJSON();
   const res = await fetch("/api/push/subscribe", {
@@ -38,7 +49,10 @@ export async function enablePush(): Promise<{ ok: boolean; error?: string }> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
   });
-  if (!res.ok) return { ok: false, error: "Could not save subscription." };
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return { ok: false, error: `Could not save subscription (${res.status}): ${text.slice(0, 200)}` };
+  }
 
   return { ok: true };
 }
