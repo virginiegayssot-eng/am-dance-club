@@ -101,6 +101,9 @@ export default function Navbar() {
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-6">
+              {profile && (
+                <Link href="/" className={`font-body text-sm transition-colors ${isActive("/")}`}>Home</Link>
+              )}
               <Link href="/classes" className={`font-body text-sm transition-colors ${isActive("/classes")}`}>Classes</Link>
               <Link href="/instructors" className={`font-body text-sm transition-colors ${isActive("/instructors")}`}>Instructors</Link>
               <Link href="/passes" className={`font-body text-sm transition-colors ${isActive("/passes")}`}>Passes</Link>
@@ -158,6 +161,7 @@ export default function Navbar() {
         {menuOpen && (
           <div className="md:hidden pb-4 space-y-1 border-t border-[#2041d8]/20 pt-4">
             {[
+              ...(profile ? [{ href: "/", label: "Home" }] : []),
               { href: "/classes", label: "Classes" },
               { href: "/instructors", label: "Instructors" },
               { href: "/passes", label: "Passes & Pricing" },
