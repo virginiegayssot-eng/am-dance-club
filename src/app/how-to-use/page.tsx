@@ -71,6 +71,7 @@ const QUICKNAV = [
   { href: "#manage", label: "4. Manage a booking" },
   { href: "#videos", label: "5. Videos & playlists" },
   { href: "#install", label: "6. Home screen" },
+  { href: "#notifications", label: "7. Notifications" },
 ];
 
 export default function HowToUsePage() {
@@ -152,6 +153,16 @@ export default function HowToUsePage() {
                 caption3={<>Tap <strong>Add</strong>, done!</>}
               />
             </div>
+          </StepCard>
+
+          <StepCard id="notifications" num={7} who="Stay in the loop" title="Turn on notifications">
+            <p>
+              Head to <Chip href="/profile">My Profile</Chip> and switch on <strong>Push Notifications</strong>.
+              You'll get an alert on this device whenever there's a new video, a message in the group chat, or club news, no need to have the app open.
+            </p>
+            <p className="mt-2 text-xs text-gray-400">
+              On iPhone, this only works once THE A.M is added to your home screen (see step 6 above) — Safari will ask you to allow notifications the first time you turn it on.
+            </p>
           </StepCard>
 
           <div className="bg-[#2041d8] rounded-2xl p-6 sm:p-7 text-white flex items-start gap-4">
