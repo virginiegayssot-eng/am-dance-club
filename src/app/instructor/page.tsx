@@ -76,6 +76,7 @@ export default function InstructorPage() {
   const [newsForm, setNewsForm] = useState({ title: "", body: "", category: "general", pinned: false });
   const [newsImage, setNewsImage] = useState<string | null>(null);
   const [newsImageError, setNewsImageError] = useState("");
+  const [newsSubmitError, setNewsSubmitError] = useState("");
   const [newsLoading, setNewsLoading] = useState(false);
   const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
   const [editNewsForm, setEditNewsForm] = useState({ title: "", body: "", category: "general", pinned: false, image_url: null as string | null });
@@ -268,6 +269,7 @@ export default function InstructorPage() {
     e.preventDefault();
     setNewsLoading(true);
     setNewsImageError("");
+    setNewsSubmitError("");
 
     let imageUrl: string | null = null;
     if (newsImage) {
@@ -280,7 +282,12 @@ export default function InstructorPage() {
       }
     }
 
-    await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned, image_url: imageUrl });
+    const { error } = await supabase.from("news_posts").insert({ title: newsForm.title, body: newsForm.body, category: newsForm.category, pinned: newsForm.pinned, image_url: imageUrl });
+    if (error) {
+      setNewsSubmitError(error.message);
+      setNewsLoading(false);
+      return;
+    }
     notifyPush("news", newsForm.title);
     setNewsForm({ title: "", body: "", category: "general", pinned: false });
     setNewsImage(null);
@@ -1863,6 +1870,7 @@ export default function InstructorPage() {
                       <label htmlFor="pinned" className="font-body text-sm">Pin to top</label>
                     </div>
                   </div>
+                  {newsSubmitError && <p className="font-body text-xs text-red-500">Couldn't publish: {newsSubmitError}</p>}
                   <div className="flex gap-3">
                     <button type="button" onClick={() => setShowNewsForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                     <button type="submit" className="btn-primary flex-1 justify-center" disabled={newsLoading}>{newsLoading ? "Posting…" : "Publish"}</button>
