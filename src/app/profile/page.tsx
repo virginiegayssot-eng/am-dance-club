@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
 import AvatarCropper from "@/components/AvatarCropper";
+import { pushSupported, getPushSubscriptionStatus, enablePush, disablePush } from "@/lib/push";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,8 +23,31 @@ export default function ProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushError, setPushError] = useState("");
 
   useEffect(() => { loadProfile(); }, []);
+  useEffect(() => { if (pushSupported()) getPushSubscriptionStatus().then(setPushEnabled); }, []);
+
+  async function togglePush() {
+    setPushBusy(true);
+    setPushError("");
+    try {
+      if (pushEnabled) {
+        await disablePush();
+        setPushEnabled(false);
+      } else {
+        const result = await enablePush();
+        if (result.ok) setPushEnabled(true);
+        else setPushError(result.error ?? "Something went wrong.");
+      }
+    } catch (err: any) {
+      setPushError(err?.message ?? String(err));
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   async function loadProfile() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -212,6 +236,30 @@ export default function ProfilePage() {
             </button>
           </form>
         </div>
+
+        {pushSupported() && (
+          <div className="card p-8 mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-heading text-base mb-1">Push Notifications</h2>
+                <p className="font-body text-sm text-gray-500">
+                  Get notified on this device for new videos, chat messages, and club news.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={pushEnabled}
+                onClick={togglePush}
+                disabled={pushBusy}
+                className={`shrink-0 w-12 h-7 rounded-full transition-colors relative ${pushEnabled ? "bg-[#000000]" : "bg-gray-200"} ${pushBusy ? "opacity-60" : ""}`}
+              >
+                <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${pushEnabled ? "translate-x-5" : ""}`} />
+              </button>
+            </div>
+            {pushError && <p className="font-body text-xs text-red-500 mt-3">{pushError}</p>}
+          </div>
+        )}
       </main>
       <Footer />
 
