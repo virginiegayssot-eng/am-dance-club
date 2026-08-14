@@ -63,6 +63,14 @@ export default function HowToUsePage() {
           </section>
 
           <section>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">7. Turn on notifications</h2>
+            <p>
+              Head to <Link href="/profile" className="text-[#000000] underline">My Profile</Link> and switch on Push Notifications to get an alert on this device for a new video, a chat message, or club news, no need to have the app open.
+              On iPhone, add BYLA to your home screen first (Share → Add to Home Screen), then Safari will ask you to allow notifications the first time you turn it on. On Android, just tap Allow when prompted.
+            </p>
+          </section>
+
+          <section>
             <h2 className="font-heading text-lg text-[#000000] mb-3">Need help?</h2>
             <p>
               Email us at{" "}
