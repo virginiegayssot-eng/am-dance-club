@@ -5,12 +5,19 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
-import type { Profile } from "@/lib/supabase";
 import { GraduationCap } from "lucide-react";
+
+type PublicInstructor = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  title: string | null;
+  bio: string | null;
+};
 
 export default function InstructorsPage() {
   const supabase = createClient();
-  const [instructors, setInstructors] = useState<Profile[]>([]);
+  const [instructors, setInstructors] = useState<PublicInstructor[]>([]);
   const [loading, setLoading] = useState(true);
   const [failedAvatarIds, setFailedAvatarIds] = useState<Set<string>>(new Set());
 
@@ -19,11 +26,13 @@ export default function InstructorsPage() {
   }, []);
 
   async function loadInstructors() {
+    // public_instructors is a view exposing only the columns this page
+    // renders — the underlying profiles table has real PII and requires
+    // login, so this page can't query it directly. See
+    // supabase/fix-public-instructors-page.sql.
     const { data } = await supabase
-      .from("profiles")
+      .from("public_instructors")
       .select("*")
-      .eq("role", "instructor")
-      .eq("show_on_instructors_page", true)
       .order("full_name");
 
     // Majo, then Luji, then Lucha, then anyone else alphabetically
@@ -81,10 +90,10 @@ export default function InstructorsPage() {
                       onError={() => setFailedAvatarIds(prev => new Set(prev).add(inst.id))}
                     />
                   ) : (
-                    (inst.full_name ?? inst.email)[0].toUpperCase()
+                    (inst.full_name ?? "?")[0].toUpperCase()
                   )}
                 </div>
-                <h3 className="font-heading text-lg mb-0.5">{inst.full_name ?? inst.email}</h3>
+                <h3 className="font-heading text-lg mb-0.5">{inst.full_name ?? "Instructor"}</h3>
                 {inst.title && (
                   <p className="font-body text-xs uppercase tracking-widest text-[#000000] mb-3">{inst.title}</p>
                 )}
