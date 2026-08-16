@@ -22,9 +22,8 @@ export async function sendPushToAll(
   const admin = pushAdminClient();
   let query = admin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
   if (excludeStudentId) query = query.neq("student_id", excludeStudentId);
-  const { data: subs, error: queryError } = await query;
-  if (queryError) { console.error("push_subscriptions query failed:", queryError.message); return; }
-  if (!subs || subs.length === 0) { console.log("sendPushToAll: no subscriptions to notify"); return; }
+  const { data: subs } = await query;
+  if (!subs || subs.length === 0) return;
 
   const json = JSON.stringify(payload);
   await Promise.all(
@@ -35,12 +34,6 @@ export async function sendPushToAll(
           json
         );
       } catch (err: any) {
-        console.error(
-          "web-push send failed:",
-          "status=", err?.statusCode,
-          "endpoint=", sub.endpoint?.slice(0, 60),
-          "body=", err?.body || err?.message
-        );
         if (err?.statusCode === 404 || err?.statusCode === 410) {
           await admin.from("push_subscriptions").delete().eq("id", sub.id);
         }
