@@ -17,17 +17,22 @@ export async function POST(req: NextRequest) {
     if (prof?.role !== "instructor") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (type === "chat") {
-    const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
-    const senderName = prof?.full_name?.split(" ")[0] ?? "Someone";
-    await sendPushToAll(
-      { title: `${senderName} in the group chat`, body: String(body ?? "").slice(0, 140), url: "/chat" },
-      user.id
-    );
-  } else if (type === "video") {
-    await sendPushToAll({ title: "New video uploaded", body: String(title ?? "").slice(0, 140), url: "/videos" });
-  } else {
-    await sendPushToAll({ title: "New club news", body: String(title ?? "").slice(0, 140), url: "/dashboard" });
+  try {
+    if (type === "chat") {
+      const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+      const senderName = prof?.full_name?.split(" ")[0] ?? "Someone";
+      await sendPushToAll(
+        { title: `${senderName} in the group chat`, body: String(body ?? "").slice(0, 140), url: "/chat" },
+        user.id
+      );
+    } else if (type === "video") {
+      await sendPushToAll({ title: "New video uploaded", body: String(title ?? "").slice(0, 140), url: "/videos" });
+    } else {
+      await sendPushToAll({ title: "New club news", body: String(title ?? "").slice(0, 140), url: "/dashboard" });
+    }
+  } catch (err: any) {
+    console.error("push notify failed:", err?.message ?? err);
+    return NextResponse.json({ error: err?.message ?? "Push failed" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
