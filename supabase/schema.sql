@@ -40,6 +40,12 @@ create table public.classes (
 alter table public.classes enable row level security;
 create policy "Classes viewable by all authenticated users" on public.classes
   for select using (auth.role() = 'authenticated');
+-- Non-cancelled classes are also public — the /classes page is linked in
+-- Navbar for logged-out visitors and shared as links to people with no
+-- account yet. See supabase/fix-classes-anon-read.sql for why this is a
+-- separate policy from the one above rather than a broadened version of it.
+create policy "Non-cancelled classes are publicly viewable" on public.classes
+  for select using (is_cancelled = false);
 create policy "Instructors can manage classes" on public.classes
   for all using (
     auth.uid() in (select id from public.profiles where role = 'instructor')
