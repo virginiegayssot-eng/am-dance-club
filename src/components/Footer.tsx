@@ -44,8 +44,10 @@ export default function Footer() {
           <div>
             <h4 className="font-heading text-sm uppercase tracking-widest mb-3 text-[#e2d0fb]">Quick Links</h4>
             <div className="flex flex-col gap-2">
+              <a href="/guides/member.html" className="font-body text-sm text-white/70 hover:text-[#e2d0fb] transition-colors">
+                How to Use
+              </a>
               {[
-                { href: "/how-to-use", label: "How to Use" },
                 { href: "/classes", label: "Classes" },
                 { href: "/instructors", label: "Instructors" },
                 { href: "/passes", label: "Passes & Pricing" },
