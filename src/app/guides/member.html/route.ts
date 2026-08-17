@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+import { NextResponse } from "next/server";
+
+const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -494,3 +496,10 @@
 </footer>
 </body>
 </html>
+`;
+
+export function GET() {
+  return new NextResponse(html, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+}
