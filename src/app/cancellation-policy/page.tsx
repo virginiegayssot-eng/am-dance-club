@@ -15,6 +15,13 @@ export default function CancellationPolicyPage() {
         <div className="space-y-8 font-body text-gray-700 leading-relaxed">
 
           <section>
+            <h2 className="font-heading text-lg text-[#000000] mb-3">Passes are non-refundable</h2>
+            <p>
+              Once purchased, a class pass itself cannot be refunded or exchanged for cash. What you can do is cancel individual bookings — cancelling 24+ hours ahead returns that one credit to your pass to use on another class, as set out below.
+            </p>
+          </section>
+
+          <section>
             <h2 className="font-heading text-lg text-[#000000] mb-3">Cancellations with 24+ hours notice</h2>
             <p>
               You may cancel your booking up to 24 hours before your class without any penalty.
