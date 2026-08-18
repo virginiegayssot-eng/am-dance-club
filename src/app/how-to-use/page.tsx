@@ -67,11 +67,16 @@ function HomeScreenSteps({ platform, icon1, caption1, caption2, caption3 }: {
 const QUICKNAV = [
   { href: "#account", label: "1. Account" },
   { href: "#book", label: "2. Book a class" },
-  { href: "#passes", label: "3. Passes" },
-  { href: "#manage", label: "4. Manage a booking" },
-  { href: "#videos", label: "5. Videos & playlists" },
-  { href: "#install", label: "6. Home screen" },
-  { href: "#notifications", label: "7. Notifications" },
+  { href: "#passes", label: "3. Passes & pricing" },
+  { href: "#cancel", label: "4. Cancel a booking" },
+  { href: "#videos", label: "5. Videos" },
+  { href: "#playlists", label: "6. Playlists" },
+  { href: "#chat", label: "7. Chat" },
+  { href: "#news", label: "8. Club News" },
+  { href: "#profile", label: "9. Your profile" },
+  { href: "#policy", label: "10. Cancellation policy" },
+  { href: "#install", label: "11. Home screen" },
+  { href: "#notifications", label: "12. Notifications" },
 ];
 
 export default function HowToUsePage() {
@@ -120,20 +125,52 @@ export default function HowToUsePage() {
             </p>
           </StepCard>
 
-          <StepCard id="manage" num={4} who="Change of plans" title="Manage or cancel a booking">
+          <StepCard id="cancel" num={4} who="Change of plans" title="Cancel a booking">
             <p>
-              Your upcoming bookings live on your dashboard. You can cancel directly from there, cancelling 24+ hours before class returns your credit automatically.
-              See our <Chip href="/cancellation-policy">Cancellation Policy</Chip> for full details.
+              Your upcoming bookings live on your dashboard. Tap <strong>Cancel booking</strong> next to the one you can't make.
+              Cancelling 24+ hours before class returns your credit automatically, see the <Chip href="#policy">Cancellation Policy</Chip> below for what happens inside that window.
             </p>
           </StepCard>
 
-          <StepCard id="videos" num={5} who="Practice at home" title="Videos & playlists">
+          <StepCard id="videos" num={5} who="Practice at home" title="Watch class videos">
             <p>
-              Check out <Chip href="/videos">Videos</Chip> for class recordings, and Playlists for the music we dance to, great for practicing at home.
+              Check out <Chip href="/videos">Videos</Chip> for the choreo library. Tap any thumbnail to play it in the app.
             </p>
           </StepCard>
 
-          <StepCard id="install" num={6} who="One-time setup, worth doing" title="Add THE A.M to your home screen">
+          <StepCard id="playlists" num={6} who="The vibe" title="Playlists">
+            <p>
+              Head to <Chip href="/playlists">Playlists</Chip> to see what's been curated for class, each one opens straight into Spotify.
+            </p>
+          </StepCard>
+
+          <StepCard id="chat" num={7} who="Stay connected" title="Chat">
+            <p>
+              Tap <Chip href="/chat">Chat</Chip> in the menu. <strong>Group Chat</strong> is open to everyone in the club, or message an instructor directly for anything private, they'll get notified.
+            </p>
+          </StepCard>
+
+          <StepCard id="news" num={8} who="Don't miss an update" title="Club News">
+            <p>
+              Announcements, schedule changes, events, that kind of thing, show right at the top of your <Chip href="/dashboard">Dashboard</Chip> whenever you open the app. Pinned posts stay at the top.
+            </p>
+          </StepCard>
+
+          <StepCard id="profile" num={9} who="Keep your details current" title="Your profile">
+            <p>
+              Tap <Chip href="/profile">My Profile</Chip> to update your name, phone or birthday any time, and tap <strong>Change photo</strong> to add or update your profile picture.
+            </p>
+          </StepCard>
+
+          <StepCard id="policy" num={10} who="Worth knowing before you book" title="Cancellation policy">
+            <p>
+              Cancel at least <strong>24 hours</strong> before class and your credit is returned automatically, or a refund is arranged if you paid casually.
+              Cancel later than that, or don't show up, and the credit or payment isn't refunded or rescheduled.
+              Full details on the <Chip href="/cancellation-policy">Cancellation Policy</Chip> page.
+            </p>
+          </StepCard>
+
+          <StepCard id="install" num={11} who="One-time setup, worth doing" title="Add THE A.M to your home screen">
             <p className="mb-6">
               Once it's on your home screen, THE A.M opens full-screen like a real app, no browser bar, and faster to get into.
             </p>
@@ -155,13 +192,13 @@ export default function HowToUsePage() {
             </div>
           </StepCard>
 
-          <StepCard id="notifications" num={7} who="Stay in the loop" title="Turn on notifications">
+          <StepCard id="notifications" num={12} who="Stay in the loop" title="Turn on notifications">
             <p>
               Head to <Chip href="/profile">My Profile</Chip> and switch on <strong>Push Notifications</strong>.
               You'll get an alert on this device whenever there's a new video, a message in the group chat, or club news, no need to have the app open.
             </p>
             <p className="mt-2 text-xs text-gray-400">
-              On iPhone, this only works once THE A.M is added to your home screen (see step 6 above) — Safari will ask you to allow notifications the first time you turn it on.
+              On iPhone, this only works once THE A.M is added to your home screen (see step 11 above) — Safari will ask you to allow notifications the first time you turn it on.
             </p>
           </StepCard>
 

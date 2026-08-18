@@ -343,11 +343,16 @@ const bodyHtml = `
   <nav class="quicknav">
     <a href="#account">1. Account</a>
     <a href="#book">2. Book a class</a>
-    <a href="#passes">3. Passes</a>
-    <a href="#manage">4. Manage a booking</a>
-    <a href="#videos">5. Videos &amp; playlists</a>
-    <a href="#install">6. Home screen</a>
-    <a href="#notifications">7. Notifications</a>
+    <a href="#passes">3. Passes &amp; pricing</a>
+    <a href="#cancel">4. Cancel a booking</a>
+    <a href="#videos">5. Videos</a>
+    <a href="#playlists">6. Playlists</a>
+    <a href="#chat">7. Chat</a>
+    <a href="#news">8. Club News</a>
+    <a href="#profile">9. Your profile</a>
+    <a href="#policy">10. Cancellation policy</a>
+    <a href="#install">11. Home screen</a>
+    <a href="#notifications">12. Notifications</a>
   </nav>
 </div>
 
@@ -386,15 +391,15 @@ const bodyHtml = `
     <p>Visit <span class="tap">Passes</span> to see pricing options. A pass gives you a set number of class credits to use whenever you like — no need to pay per class once you've got one.</p>
   </section>
 
-  <section class="step" id="manage">
+  <section class="step" id="cancel">
     <div class="step-head">
       <div class="step-num">4</div>
       <div class="step-titles">
         <p class="who">Change of plans</p>
-        <h2>Manage or cancel a booking</h2>
+        <h2>Cancel a booking</h2>
       </div>
     </div>
-    <p>Your upcoming bookings live on your dashboard. You can cancel directly from there — cancelling 24+ hours before class returns your credit automatically. See our Cancellation Policy for full details.</p>
+    <p>Your upcoming bookings live on your dashboard. Tap <strong>Cancel booking</strong> next to the one you can't make. Cancelling 24+ hours before class returns your credit automatically — see Cancellation Policy below for what happens inside that window.</p>
   </section>
 
   <section class="step" id="videos">
@@ -402,15 +407,70 @@ const bodyHtml = `
       <div class="step-num">5</div>
       <div class="step-titles">
         <p class="who">Practice at home</p>
-        <h2>Videos &amp; playlists</h2>
+        <h2>Watch class videos</h2>
       </div>
     </div>
-    <p>Check out <span class="tap">Videos</span> for class recordings, and Playlists for the music we dance to — great for practicing at home.</p>
+    <p>Check out <span class="tap">Videos</span> for the choreo library. Tap any thumbnail to play it in the app.</p>
+  </section>
+
+  <section class="step" id="playlists">
+    <div class="step-head">
+      <div class="step-num">6</div>
+      <div class="step-titles">
+        <p class="who">The vibe</p>
+        <h2>Playlists</h2>
+      </div>
+    </div>
+    <p>Head to <span class="tap">Playlists</span> to see what's been curated for class — each one opens straight into Spotify.</p>
+  </section>
+
+  <section class="step" id="chat">
+    <div class="step-head">
+      <div class="step-num">7</div>
+      <div class="step-titles">
+        <p class="who">Stay connected</p>
+        <h2>Chat</h2>
+      </div>
+    </div>
+    <p>Tap <span class="tap">Chat</span> in the menu. <strong>Group Chat</strong> is open to everyone in the club, or message an instructor directly for anything private — they'll get notified.</p>
+  </section>
+
+  <section class="step" id="news">
+    <div class="step-head">
+      <div class="step-num">8</div>
+      <div class="step-titles">
+        <p class="who">Don't miss an update</p>
+        <h2>Club News</h2>
+      </div>
+    </div>
+    <p>Announcements — schedule changes, events, that kind of thing — show right at the top of your <span class="tap">Dashboard</span> whenever you open the app. Pinned posts stay at the top.</p>
+  </section>
+
+  <section class="step" id="profile">
+    <div class="step-head">
+      <div class="step-num">9</div>
+      <div class="step-titles">
+        <p class="who">Keep your details current</p>
+        <h2>Your profile</h2>
+      </div>
+    </div>
+    <p>Tap <span class="tap">My Profile</span> to update your name, phone or birthday any time, and tap <strong>Change photo</strong> to add or update your profile picture.</p>
+  </section>
+
+  <section class="step" id="policy">
+    <div class="step-head">
+      <div class="step-num">10</div>
+      <div class="step-titles">
+        <p class="who">Worth knowing before you book</p>
+        <h2>Cancellation policy</h2>
+      </div>
+    </div>
+    <p>Cancel at least <strong>24 hours</strong> before class and your credit is returned automatically, or a refund is arranged if you paid casually. Cancel later than that, or don't show up, and the credit or payment isn't refunded or rescheduled. Full details on the Cancellation Policy page in the app.</p>
   </section>
 
   <section class="step" id="install">
     <div class="step-head">
-      <div class="step-num">6</div>
+      <div class="step-num">11</div>
       <div class="step-titles">
         <p class="who">One-time setup, worth doing</p>
         <h2>Add THE A.M to your home screen</h2>
@@ -473,14 +533,14 @@ const bodyHtml = `
 
   <section class="step" id="notifications">
     <div class="step-head">
-      <div class="step-num">7</div>
+      <div class="step-num">12</div>
       <div class="step-titles">
         <p class="who">Stay in the loop</p>
         <h2>Turn on notifications</h2>
       </div>
     </div>
     <p>Head to <span class="tap">My Profile</span> and switch on <strong>Push Notifications</strong>. You'll get an alert on this device whenever there's a new video, a message in the group chat, or club news — no need to have the app open.</p>
-    <p class="small">On iPhone, this only works once THE A.M is added to your home screen (see step 6 above) — Safari will ask you to allow notifications the first time you turn it on.</p>
+    <p class="small">On iPhone, this only works once THE A.M is added to your home screen (see step 11 above) — Safari will ask you to allow notifications the first time you turn it on.</p>
   </section>
 
   <div class="help-card">
