@@ -1,15 +1,11 @@
-import { NextResponse } from "next/server";
+import type { Metadata } from "next";
 
-const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>THE A.M Dance Club — How to Use</title>
-<meta name="description" content="A step-by-step guide to booking classes, passes and getting set up on THE A.M Dance Club app." />
-<link rel="icon" href="/icon-192.png" type="image/png" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<style>
+export const metadata: Metadata = {
+  title: "THE A.M Dance Club — How to Use",
+  description: "A step-by-step guide to booking classes, passes and getting set up on THE A.M Dance Club app.",
+};
+
+const css = `
   :root {
     --ink: #17161c;
     --ink-soft: #6b6a72;
@@ -323,9 +319,9 @@ const html = `<!DOCTYPE html>
   .help-card h2 { font-size: 1.2rem; margin: 0 0 0.3rem; }
   .help-card p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 0.92rem; }
   .help-card a { color: white; text-decoration: underline; }
-</style>
-</head>
-<body>
+`;
+
+const bodyHtml = `
 <header class="hero">
   <div class="hero-badge">
     <img src="/logo.png" alt="THE A.M Dance Club logo" />
@@ -494,12 +490,15 @@ const html = `<!DOCTYPE html>
 <footer>
   <p>Questions about anything here? Reach out any time.</p>
 </footer>
-</body>
-</html>
 `;
 
-export function GET() {
-  return new NextResponse(html, {
-    headers: { "Content-Type": "text/html; charset=utf-8" },
-  });
+export default function MemberGuidePage() {
+  return (
+    <>
+      {/* eslint-disable-next-line react/no-danger */}
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      {/* eslint-disable-next-line react/no-danger */}
+      <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+    </>
+  );
 }
