@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 
+// Forces this to compile as a Netlify Function instead of a prerendered
+// static file. Netlify's Next.js plugin (v5.15.13 on this site) isn't
+// publishing this page's static HTML output — confirmed via the deploy's
+// file browser, which only contains the page's JS chunk, not its HTML.
+// Functions are unaffected by that gap (every /api/* route on this site
+// is one and works fine), so this sidesteps the bug entirely.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "THE A.M Dance Club — How to Use",
   description: "A step-by-step guide to booking classes, passes and getting set up on THE A.M Dance Club app.",
