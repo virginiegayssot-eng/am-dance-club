@@ -41,12 +41,16 @@ export default function InstructorPage() {
   const [assignInstructor2, setAssignInstructor2] = useState("");
   const [assignInstructorLoading, setAssignInstructorLoading] = useState(false);
   const [assignInstructorError, setAssignInstructorError] = useState("");
+  const [editBioTarget, setEditBioTarget] = useState<Profile | null>(null);
+  const [editBioForm, setEditBioForm] = useState({ title: "", bio: "" });
+  const [editBioLoading, setEditBioLoading] = useState(false);
+  const [editBioError, setEditBioError] = useState("");
   const [videos, setVideos] = useState<Video[]>([]);
   const [allPasses, setAllPasses] = useState<PassRow[]>([]);
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch" | "reviews">("classes");
+  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch" | "reviews" | "instructors">("classes");
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1171,6 +1175,38 @@ export default function InstructorPage() {
     loadData();
   }
 
+  function openEditBio(inst: Profile) {
+    setEditBioTarget(inst);
+    setEditBioForm({ title: inst.title ?? "", bio: inst.bio ?? "" });
+    setEditBioError("");
+  }
+
+  async function saveBio(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editBioTarget) return;
+    setEditBioLoading(true);
+    setEditBioError("");
+    try {
+      const res = await fetch("/api/instructor/update-bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: editBioTarget.id, title: editBioForm.title, bio: editBioForm.bio }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setEditBioError(data.error ?? "Something went wrong. Please try again.");
+        setEditBioLoading(false);
+        return;
+      }
+      setEditBioTarget(null);
+      setEditBioLoading(false);
+      loadData();
+    } catch (err: any) {
+      setEditBioError("Something went wrong: " + (err?.message ?? String(err)));
+      setEditBioLoading(false);
+    }
+  }
+
   const tabs = [
     { key: "classes", label: "Classes" },
     { key: "attendance", label: "Attendance" },
@@ -1182,6 +1218,7 @@ export default function InstructorPage() {
     { key: "reviews", label: "Reviews" },
     { key: "news", label: "Club News" },
     { key: "merch", label: "Merch" },
+    { key: "instructors", label: "Instructors" },
   ] as const;
 
   if (loading) {
@@ -2001,6 +2038,33 @@ export default function InstructorPage() {
                         Delete
                       </button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* INSTRUCTORS TAB */}
+        {activeTab === "instructors" && (
+          <div>
+            <p className="font-body text-sm text-gray-500 mb-5">{instructors.length} instructor{instructors.length !== 1 ? "s" : ""}</p>
+            {instructors.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400">No instructors yet.</p>
+              </div>
+            ) : (
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {instructors.map((inst) => (
+                  <div key={inst.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm font-body">{inst.full_name ?? inst.email}</p>
+                      {inst.title && <p className="font-body text-xs text-[#2041d8] mt-0.5">{inst.title}</p>}
+                      <p className="font-body text-sm text-gray-500 mt-1 whitespace-pre-wrap">{inst.bio || "No bio yet."}</p>
+                    </div>
+                    <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#2041d8] hover:underline shrink-0">
+                      Edit
+                    </button>
                   </div>
                 ))}
               </div>
@@ -2992,6 +3056,42 @@ export default function InstructorPage() {
                 <button type="button" onClick={() => setAssignInstructorTarget(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={assignInstructorLoading}>
                   {assignInstructorLoading ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* EDIT INSTRUCTOR BIO MODAL */}
+        {editBioTarget && (
+          <Modal title={`Edit Bio — ${editBioTarget.full_name ?? editBioTarget.email}`} onClose={() => setEditBioTarget(null)}>
+            <form onSubmit={saveBio} className="space-y-4">
+              <div>
+                <label className="label">Title</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. Founder & Lead Instructor"
+                  value={editBioForm.title}
+                  onChange={e => setEditBioForm(f => ({ ...f, title: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Bio</label>
+                <textarea
+                  className="input min-h-[120px]"
+                  placeholder="Tell people a bit about them…"
+                  value={editBioForm.bio}
+                  onChange={e => setEditBioForm(f => ({ ...f, bio: e.target.value }))}
+                />
+              </div>
+              {editBioError && (
+                <p className="font-body text-sm text-red-500">{editBioError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setEditBioTarget(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={editBioLoading}>
+                  {editBioLoading ? "Saving…" : "Save"}
                 </button>
               </div>
             </form>
