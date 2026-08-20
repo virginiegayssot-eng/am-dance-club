@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [reviewText, setReviewText] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
+  const [showFilmingPolicyPrompt, setShowFilmingPolicyPrompt] = useState(false);
+  const [acceptingFilmingPolicy, setAcceptingFilmingPolicy] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -73,6 +75,20 @@ export default function DashboardPage() {
     }
   }
 
+  async function acceptFilmingPolicy() {
+    if (!profile) return;
+    setAcceptingFilmingPolicy(true);
+    const acceptedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ filming_policy_accepted_at: acceptedAt })
+      .eq("id", profile.id);
+    setAcceptingFilmingPolicy(false);
+    if (error) return;
+    setProfile(p => p ? { ...p, filming_policy_accepted_at: acceptedAt } : p);
+    setShowFilmingPolicyPrompt(false);
+  }
+
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
     setReviewSubmitting(true);
@@ -96,6 +112,9 @@ export default function DashboardPage() {
     const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     if (prof?.role === "instructor") { router.push("/instructor"); return; }
     setProfile(prof);
+    if (prof && prof.role === "student" && !prof.filming_policy_accepted_at) {
+      setShowFilmingPolicyPrompt(true);
+    }
 
     const { data: regs } = await supabase
       .from("registrations")
@@ -148,6 +167,22 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {showFilmingPolicyPrompt && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+            <h2 className="font-heading text-lg mb-3">Filming &amp; Photography Policy</h2>
+            <p className="font-body text-sm text-gray-600 leading-relaxed mb-4">
+              Our classes may be filmed or photographed for social media and/or marketing purposes. By attending a class, you acknowledge that filming or photography may take place during the session — if you'd rather not appear, just let the instructor know before filming begins.
+            </p>
+            <p className="font-body text-sm mb-6">
+              <Link href="/filming-policy" target="_blank" className="text-[#000000] underline">Read the full policy</Link>
+            </p>
+            <button onClick={acceptFilmingPolicy} className="btn-primary w-full justify-center" disabled={acceptingFilmingPolicy}>
+              {acceptingFilmingPolicy ? "Saving…" : "I understand"}
+            </button>
+          </div>
+        </div>
+      )}
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
 
