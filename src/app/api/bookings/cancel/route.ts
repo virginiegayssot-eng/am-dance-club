@@ -3,6 +3,24 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
 import { Resend } from "resend";
 
+// class_date/class_time store Sydney wall-clock time with no timezone
+// offset. The server runs in UTC, so parsing that string directly (e.g.
+// `new Date(`${date}T${time}`)`) silently misreads it as UTC — a 7pm Sydney
+// class was treated as 7pm UTC, 10-11 hours later than reality. That let
+// cancellations inside the real 24-hour window slip through as refundable.
+// This converts the Sydney wall-clock time to the correct UTC instant,
+// using Sydney's actual offset for that specific date (handles DST).
+function getTimezoneOffsetMs(date: Date, timeZone: string): number {
+  const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+function sydneyDateTimeToUTC(dateStr: string, timeStr: string): Date {
+  const guess = new Date(`${dateStr}T${timeStr}Z`);
+  const offsetMs = getTimezoneOffsetMs(guess, "Australia/Sydney");
+  return new Date(guess.getTime() - offsetMs);
+}
+
 export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createServerSupabaseClient();
@@ -22,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!reg) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   if (reg.status === "cancelled") return NextResponse.json({ error: "Already cancelled" }, { status: 400 });
 
-  const classDateTime = new Date(`${reg.classes.class_date}T${reg.classes.class_time ?? "07:00:00"}`);
+  const classDateTime = sydneyDateTimeToUTC(reg.classes.class_date, reg.classes.class_time ?? "07:00:00");
   const hoursUntilClass = (classDateTime.getTime() - Date.now()) / 3_600_000;
   const isRefundable = hoursUntilClass >= 24;
 
