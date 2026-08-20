@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [reviewError, setReviewError] = useState("");
   const [showFilmingPolicyPrompt, setShowFilmingPolicyPrompt] = useState(false);
   const [acceptingFilmingPolicy, setAcceptingFilmingPolicy] = useState(false);
+  const [filmingPolicyError, setFilmingPolicyError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -78,13 +79,17 @@ export default function DashboardPage() {
   async function acceptFilmingPolicy() {
     if (!profile) return;
     setAcceptingFilmingPolicy(true);
+    setFilmingPolicyError("");
     const acceptedAt = new Date().toISOString();
     const { error } = await supabase
       .from("profiles")
       .update({ filming_policy_accepted_at: acceptedAt })
       .eq("id", profile.id);
     setAcceptingFilmingPolicy(false);
-    if (error) return;
+    if (error) {
+      setFilmingPolicyError("Couldn't save that — you can still continue, we'll ask again next time.");
+      return;
+    }
     setProfile(p => p ? { ...p, filming_policy_accepted_at: acceptedAt } : p);
     setShowFilmingPolicyPrompt(false);
   }
@@ -177,9 +182,17 @@ export default function DashboardPage() {
             <p className="font-body text-sm mb-6">
               <Link href="/filming-policy" target="_blank" className="text-[#000000] underline">Read the full policy</Link>
             </p>
+            {filmingPolicyError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl mb-4">{filmingPolicyError}</div>
+            )}
             <button onClick={acceptFilmingPolicy} className="btn-primary w-full justify-center" disabled={acceptingFilmingPolicy}>
               {acceptingFilmingPolicy ? "Saving…" : "I understand"}
             </button>
+            {filmingPolicyError && (
+              <button onClick={() => setShowFilmingPolicyPrompt(false)} className="font-body text-xs text-gray-400 hover:text-gray-600 underline mt-3 block mx-auto">
+                Continue for now
+              </button>
+            )}
           </div>
         </div>
       )}
