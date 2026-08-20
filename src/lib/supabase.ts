@@ -19,6 +19,7 @@ export type Profile = {
   bio: string | null;
   show_on_instructors_page: boolean;
   is_admin: boolean;
+  filming_policy_accepted_at: string | null;
   created_at: string;
 };
 

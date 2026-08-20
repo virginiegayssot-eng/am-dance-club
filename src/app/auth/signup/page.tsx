@@ -13,6 +13,7 @@ export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
   const [form, setForm] = useState({ fullName: "", email: "", password: "", phone: "", birthMonth: "", birthDay: "" });
+  const [filmingPolicyAccepted, setFilmingPolicyAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -26,6 +27,7 @@ export default function SignupPage() {
 
     if (!/^\+?[\d\s\-]{8,15}$/.test(form.phone.trim())) { setError("Please enter a valid phone number."); return; }
     if (!form.birthMonth || !form.birthDay) { setError("Birthday is required."); return; }
+    if (!filmingPolicyAccepted) { setError("Please confirm you've read the Filming & Photography Policy."); return; }
 
     setLoading(true);
 
@@ -48,6 +50,7 @@ export default function SignupPage() {
         full_name: form.fullName,
         phone: form.phone,
         birth_date: birthDate,
+        filming_policy_accepted_at: new Date().toISOString(),
       }).eq("id", data.user.id);
     }
 
@@ -117,6 +120,22 @@ export default function SignupPage() {
                 </select>
               </div>
             </div>
+
+            <label className="flex items-start gap-2.5 text-sm font-body text-gray-600">
+              <input
+                type="checkbox"
+                className="mt-0.5 shrink-0"
+                checked={filmingPolicyAccepted}
+                onChange={e => setFilmingPolicyAccepted(e.target.checked)}
+                required
+              />
+              <span>
+                I've read the{" "}
+                <Link href="/filming-policy" target="_blank" className="text-[#000000] underline">
+                  Filming &amp; Photography Policy
+                </Link>
+              </span>
+            </label>
 
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{error}</div>
