@@ -15,6 +15,7 @@ export type Profile = {
   avatar_url: string | null;
   phone: string | null;
   birth_date: string | null;
+  filming_policy_accepted_at: string | null;
   created_at: string;
 };
 
