@@ -1852,6 +1852,14 @@ export default function InstructorPage() {
                             <> · <Cake className="w-3 h-3 text-[#000000]" strokeWidth={1.75} /> {new Date(s.birth_date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}</>
                           )}
                         </p>
+                        {s.filming_policy_accepted_at && (
+                          <span
+                            className="badge-confirmed mt-1 inline-block"
+                            title={`Accepted the Filming & Photography Policy on ${new Date(s.filming_policy_accepted_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}`}
+                          >
+                            Filming policy accepted
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
