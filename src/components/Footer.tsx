@@ -72,6 +72,9 @@ export default function Footer() {
             <Link href="/filming-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
               Filming Policy
             </Link>
+            <Link href="/safety-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
+              Safety Policy
+            </Link>
           </div>
         </div>
       </div>
