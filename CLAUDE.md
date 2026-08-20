@@ -49,3 +49,26 @@ function deleteThing(id: string) {
 ```
 
 For non-destructive error/info messages, prefer inline UI state (an error banner, a toast) over `alert()` for the same reason — it hasn't caused a reported bug yet since it's not delete-blocking, but it's the same underlying risk.
+
+## Timezone-sensitive date math
+
+`class_date` and `class_time` are stored as the studio's local wall-clock time with no timezone offset (e.g. `"19:00:00"` for a 7pm class). The server (Netlify Functions) runs in UTC. Constructing a `Date` directly from those columns — `new Date(`${class_date}T${class_time}`)` — gets silently parsed as if `class_time` were already UTC, not Sydney time. A 7pm class becomes "7pm UTC", 10-11 hours later than reality.
+
+This is invisible for anything that only *displays* the date (`new Date(class_date + "T00:00:00").toLocaleDateString(...)` is fine — no time-of-day math involved). It's a real bug only when the result feeds a genuine elapsed/remaining-time calculation against `Date.now()`. That happened once already: `src/app/api/bookings/cancel/route.ts` compared `classDateTime` to now to decide whether a cancellation was inside the 24-hour refund window, and the 10-hour skew let cancellations well inside the real window slip through as refundable.
+
+Whenever you add logic that needs "how many hours until/since this class," convert with the studio's real timezone instead of parsing the raw string:
+
+```ts
+function getTimezoneOffsetMs(date: Date, timeZone: string): number {
+  const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+function studioDateTimeToUTC(dateStr: string, timeStr: string): Date {
+  const guess = new Date(`${dateStr}T${timeStr}Z`);
+  const offsetMs = getTimezoneOffsetMs(guess, "Australia/Sydney");
+  return new Date(guess.getTime() - offsetMs);
+}
+```
+
+This also handles daylight saving correctly, since it looks up the real offset for that specific date rather than hardcoding +10 or +11. Every VIA studio so far is Sydney/Melbourne (same offset) — swap the timezone string if a future client is elsewhere.
