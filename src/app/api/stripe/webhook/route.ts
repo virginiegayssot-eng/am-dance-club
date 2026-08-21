@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     // Notify instructor
     const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", studentId).single();
-    const passLabel = passTypeId === "casual" ? "Casual ($24)" : passTypeId === "double" ? "Double Pass ($38)" : passTypeId === "intro" ? "Intro Pass (3 classes)" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
+    const passLabel = passTypeId === "casual" ? "Casual ($32)" : passTypeId === "double" ? "Double Pass ($58)" : passTypeId === "intro" ? "Intro Pass (3 classes)" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
     let emailBody = `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just purchased a <strong>${passLabel}</strong>.`;
     if (classId) {
       const { data: cls } = await supabase.from("classes").select("title, class_date").eq("id", classId).single();

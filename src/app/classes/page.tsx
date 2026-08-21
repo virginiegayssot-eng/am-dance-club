@@ -316,7 +316,7 @@ export default function ClassesPage() {
                                   disabled={!!actionId}
                                   className="btn-secondary w-full justify-center text-sm py-2"
                                 >
-                                  {actionId === cls.id + "double" ? "Loading…" : "Double Pass $38 (+ 1 guest)"}
+                                  {actionId === cls.id + "double" ? "Loading…" : "Double Pass $58 (+ 1 guest)"}
                                 </button>
                               )}
                               {!cls.is_special && (
