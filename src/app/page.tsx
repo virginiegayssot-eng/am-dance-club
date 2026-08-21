@@ -85,11 +85,11 @@ export default function HomePage() {
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#f0e8dd]">Class Prices</h2>
               <div className="space-y-3 font-body">
-                <p><strong>Casual Drop-In:</strong> $25 per class</p>
-                <p><strong>Double Pass:</strong> $45, two spots in the same class</p>
-                <p><strong>Intro Offer:</strong> $49 for 4 classes, first-timers only</p>
-                <p><strong>5-Class Pass:</strong> $110, valid 2 months</p>
-                <p><strong>10-Class Pass:</strong> $200, valid 3 months</p>
+                <p><strong>Casual Drop-In:</strong> $24 per class</p>
+                <p><strong>Double Pass:</strong> $38, two spots in the same class</p>
+                <p><strong>Intro Offer:</strong> $39 for 3 classes, first-timers only</p>
+                <p><strong>5-Class Pass:</strong> $100, valid 6 months</p>
+                <p><strong>10-Class Pass:</strong> $200, valid 1 year</p>
               </div>
               <Link href="/passes" className="mt-6 inline-block bg-white text-[#7d6653] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#f0e8dd] transition-colors">
                 Buy a Pass
