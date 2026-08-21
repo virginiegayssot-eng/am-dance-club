@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
   }
 
   const descriptions: Record<string, string> = {
-    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class · [Studio Location]",
+    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class · Sydney, NSW",
     double: "Two spots in one class (bring a friend!)",
     intro:  "3 classes · Valid 3 months · New students only",
     five:   "5 classes · Valid 6 months",

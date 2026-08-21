@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const student = (pass as any).profiles;
     const passType = (pass as any).pass_types;
     await resend.emails.send({
-      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: student.email,
       subject: "Class recorded",
       html: buildPassDebitEmailHtml({

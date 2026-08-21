@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     const firstName = (student.full_name ?? "dancer").split(" ")[0];
     const { error } = await resend.emails.send({
-      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: student.email,
       subject: `Class cancelled – ${cls.title}`,
       html: buildBookingCancellationEmailHtml({ firstName, classTitle: cls.title, classDate, passRefunded, cancelledByInstructor: true }),

@@ -9,11 +9,11 @@ function buildBirthdayPassEmailHtml(firstName: string) {
     <html>
     <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
       <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-        <div style="background:#334155;padding:32px;text-align:center;">
-          <h1 style="color:#e2e8f0;font-size:28px;margin:0;letter-spacing:2px;">[Studio Name]</h1>
+        <div style="background:#7d6653;padding:32px;text-align:center;">
+          <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#334155;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
+          <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             To celebrate your birthday, I've added a <strong>free class</strong> to your account.
           </p>
@@ -21,10 +21,10 @@ function buildBirthdayPassEmailHtml(firstName: string) {
             It's valid for the next 30 days, so grab a spot whenever suits you.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you in class!</p>
-          <p style="color:#444;font-size:16px;margin:0;">[Instructor Name]</p>
+          <p style="color:#444;font-size:16px;margin:0;">— The Sable Studio Team</p>
         </div>
-        <div style="background:#e2e8f0;padding:20px;text-align:center;">
-          <p style="color:#334155;font-size:12px;margin:0;">[Schedule] · [Studio Location]</p>
+        <div style="background:#f0e8dd;padding:20px;text-align:center;">
+          <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
         </div>
       </div>
     </body>
@@ -41,11 +41,11 @@ function buildPassAssignedEmailHtml(firstName: string, passName: string, classes
     <html>
     <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
       <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-        <div style="background:#334155;padding:32px;text-align:center;">
-          <h1 style="color:#e2e8f0;font-size:28px;margin:0;letter-spacing:2px;">[Studio Name]</h1>
+        <div style="background:#7d6653;padding:32px;text-align:center;">
+          <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#334155;font-size:22px;margin:0 0 16px;">You're all set, ${firstName}!</h2>
+          <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">You're all set, ${firstName}!</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             Your <strong>${passName}</strong>${classesIncluded ? ` (${classesIncluded} class${classesIncluded !== 1 ? "es" : ""})` : ""} has been added to your account and is ready to use.
           </p>
@@ -53,8 +53,8 @@ function buildPassAssignedEmailHtml(firstName: string, passName: string, classes
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Head to the Classes page any time to book a spot.</p>
           <p style="color:#444;font-size:16px;margin:0;">See you in class!</p>
         </div>
-        <div style="background:#e2e8f0;padding:20px;text-align:center;">
-          <p style="color:#334155;font-size:12px;margin:0;">[Schedule] · [Studio Location]</p>
+        <div style="background:#f0e8dd;padding:20px;text-align:center;">
+          <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
         </div>
       </div>
     </body>
@@ -116,16 +116,16 @@ export async function POST(req: NextRequest) {
 
     if (passTypeId === "birthday") {
       await resend.emails.send({
-        from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: student.email,
-        subject: "Happy Birthday from [Studio Name]! 🎂",
+        subject: "Happy Birthday from Sable Studio! 🎂",
         html: buildBirthdayPassEmailHtml(firstName),
       }).catch((e) => console.error("Birthday pass email error:", e));
     } else {
       await resend.emails.send({
-        from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: student.email,
-        subject: `Your ${passType.name} is ready — [Studio Name]`,
+        subject: `Your ${passType.name} is ready — Sable Studio`,
         html: buildPassAssignedEmailHtml(firstName, passType.name, classesRemaining ?? passType.classes_included, expiresAt),
       }).catch((e) => console.error("Pass assigned email error:", e));
     }

@@ -1,11 +1,11 @@
 {
-  "name": "[Studio Name]",
-  "short_name": "[Studio Name]",
-  "description": "Dance classes at [Studio Location]",
+  "name": "Sable Studio",
+  "short_name": "Sable Studio",
+  "description": "Movement classes in Sydney",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e2e8f0",
-  "theme_color": "#334155",
+  "background_color": "#f0e8dd",
+  "theme_color": "#7d6653",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

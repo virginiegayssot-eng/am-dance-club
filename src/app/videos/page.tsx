@@ -55,7 +55,7 @@ export default function VideosPage() {
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Watch anytime</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#7d6653] mb-2">Watch anytime</p>
           <h1 className="section-title mb-3">Videos</h1>
           <p className="font-body text-gray-500">
             Your choreo library. Keep practising between classes.
@@ -76,7 +76,7 @@ export default function VideosPage() {
           </div>
         ) : videos.length === 0 ? (
           <div className="text-center py-20">
-            <Film className="w-12 h-12 mx-auto mb-4 text-[#334155]" strokeWidth={1.5} />
+            <Film className="w-12 h-12 mx-auto mb-4 text-[#7d6653]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">No recordings yet</h3>
             <p className="font-body text-gray-500">Check back after your first class!</p>
           </div>
@@ -106,7 +106,7 @@ export default function VideosPage() {
                       >
                         <Film className="absolute w-10 h-10 text-white/30" strokeWidth={1.5} />
                         <div className="w-14 h-14 bg-white/90 group-hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all group-hover:scale-110">
-                          <div className="w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[16px] border-l-[#334155] ml-1" />
+                          <div className="w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[16px] border-l-[#7d6653] ml-1" />
                         </div>
                       </button>
                     )
@@ -130,7 +130,7 @@ export default function VideosPage() {
                         className="absolute inset-0 flex items-center justify-center"
                       >
                         <div className="w-14 h-14 bg-white/90 group-hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all group-hover:scale-110">
-                          <div className="w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[16px] border-l-[#334155] ml-1" />
+                          <div className="w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[16px] border-l-[#7d6653] ml-1" />
                         </div>
                       </button>
                     </>
@@ -151,7 +151,7 @@ export default function VideosPage() {
                       <button
                         onClick={() => downloadR2Video(v)}
                         disabled={downloadingId === v.id}
-                        className="font-body text-xs text-[#334155] hover:underline flex items-center gap-1 disabled:opacity-50"
+                        className="font-body text-xs text-[#7d6653] hover:underline flex items-center gap-1 disabled:opacity-50"
                       >
                         <Download className="w-3.5 h-3.5" />
                         {downloadingId === v.id ? "Preparing…" : "Download"}
@@ -161,7 +161,7 @@ export default function VideosPage() {
                         href={v.youtube_url ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-body text-xs text-[#334155] hover:underline"
+                        className="font-body text-xs text-[#7d6653] hover:underline"
                       >
                         Watch on YouTube ↗
                       </a>

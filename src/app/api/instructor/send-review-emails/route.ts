@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
     const firstName = (profile?.full_name ?? "dancer").split(" ")[0];
 
     const { error } = await resend.emails.send({
-      from: `[Studio Name] <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+      from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: email,
-      subject: generic ? "Loving [Studio Name]?" : "How was your first class?",
+      subject: generic ? "Loving Sable Studio?" : "How was your first class?",
       html: generic ? buildGenericReviewEmailHtml(firstName) : buildReviewEmailHtml(firstName),
     });
 

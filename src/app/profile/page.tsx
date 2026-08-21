@@ -97,7 +97,7 @@ export default function ProfilePage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+    <div className="min-h-screen flex items-center justify-center bg-[#fbf8f4]">
       <div className="font-body text-gray-400">Loading…</div>
     </div>
   );
@@ -107,24 +107,24 @@ export default function ProfilePage() {
       <Navbar />
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-14 w-full">
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#334155] mb-2">Account</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#7d6653] mb-2">Account</p>
           <h1 className="section-title">My Profile</h1>
         </div>
 
         <div className="card p-8">
           {/* Avatar */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-[#e2e8f0]/50 mb-3">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-[#f0e8dd]/50 mb-3">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarUrl} alt="Profile photo" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center font-heading text-3xl text-[#334155]">
+                <div className="w-full h-full flex items-center justify-center font-heading text-3xl text-[#7d6653]">
                   {(form.full_name || profile?.email || "?")[0].toUpperCase()}
                 </div>
               )}
             </div>
-            <label className="cursor-pointer font-body text-sm text-[#334155] hover:underline">
+            <label className="cursor-pointer font-body text-sm text-[#7d6653] hover:underline">
               {uploadingAvatar ? "Uploading…" : "Change photo"}
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
             </label>
