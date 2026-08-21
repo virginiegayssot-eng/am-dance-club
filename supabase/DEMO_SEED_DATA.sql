@@ -29,7 +29,14 @@ insert into auth.users (
   '', '', '', ''
 );
 
-update public.profiles set role = 'instructor' where email = 'jordan@example.com';
+update public.profiles set role = 'instructor', title = 'Lead Instructor',
+  bio = 'Jordan has been teaching movement classes for over eight years and loves helping first-timers feel at home in the room.'
+where email = 'jordan@example.com';
+
+-- ---- A couple of sample reviews for the homepage carousel ----
+insert into public.reviews (author_name, rating, review_text, status) values
+  ('Emma T.', 5, 'Such a welcoming space — I was nervous as a complete beginner and left feeling like part of the community already.', 'approved'),
+  ('Chris P.', 5, 'Jordan is a brilliant instructor. Classes are structured but still really fun. Highly recommend the 10-class pass.', 'approved');
 
 -- ---- Classes, taught by Jordan ----
 insert into public.classes (title, description, location, class_date, class_time, duration_minutes, capacity, price_cents, instructor_id) values

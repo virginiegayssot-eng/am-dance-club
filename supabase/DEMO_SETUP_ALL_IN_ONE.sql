@@ -515,3 +515,77 @@ drop policy if exists "System can update passes" on public.passes;
 --    in the Supabase dashboard: Authentication -> Policies (or Providers) ->
 --    Password -> turn on "Leaked password protection". Safe to flip anytime.
 
+
+-- ---- fix-classes-anon-read.sql ----
+-- Fixes the public /classes page (and any shared class link) showing
+-- "No upcoming classes" for anyone who isn't logged in. Adds an extra
+-- permissive SELECT policy (Postgres combines multiple with OR), so
+-- authenticated users keep seeing everything they already could, and
+-- anonymous visitors can additionally see non-cancelled classes.
+drop policy if exists "Non-cancelled classes are publicly viewable" on public.classes;
+create policy "Non-cancelled classes are publicly viewable" on public.classes
+  for select using (is_cancelled = false);
+
+-- ---- instructor-profile-schema.sql ----
+-- Add bio and title to profiles (instructor profile display on /instructors)
+alter table public.profiles
+  add column if not exists title text,
+  add column if not exists bio text;
+
+-- ---- add-instructor-visibility.sql ----
+-- Lets an instructor account keep full dashboard/RLS access without
+-- appearing on the public /instructors page.
+alter table public.profiles
+  add column if not exists show_on_instructors_page boolean not null default true;
+
+-- ---- fix-public-instructors-page.sql ----
+-- profiles' only SELECT policy requires auth.role() = 'authenticated', so
+-- the public /instructors page would return zero rows for anonymous
+-- visitors. profiles holds real PII (email, phone, birth_date), so instead
+-- of a public policy on the table itself, publish a curated VIEW with only
+-- the columns the public instructors page renders.
+drop view if exists public.public_instructors;
+create view public.public_instructors as
+  select id, full_name, avatar_url, title, bio
+  from public.profiles
+  where role = 'instructor' and show_on_instructors_page = true;
+
+grant select on public.public_instructors to anon, authenticated;
+
+-- ---- add-reviews-carousel.sql ----
+-- Independent, non-Google review system. Members submit a star rating +
+-- text review directly from their dashboard; it lands in a "pending" queue
+-- until the instructor approves it, at which point it shows in a rotating
+-- carousel on the homepage. The instructor can also add reviews manually
+-- (e.g. copied from elsewhere) — those insert as already-approved.
+create table public.reviews (
+  id uuid primary key default uuid_generate_v4(),
+  author_name text not null,
+  rating int not null check (rating between 1 and 5),
+  review_text text not null,
+  student_id uuid references public.profiles(id) on delete cascade,
+  status text not null default 'approved' check (status in ('pending', 'approved')),
+  created_at timestamptz not null default now()
+);
+
+-- One review per member — resubmitting updates their existing row instead
+-- of creating a second one.
+create unique index reviews_one_per_student
+  on public.reviews (student_id) where student_id is not null;
+
+alter table public.reviews enable row level security;
+
+-- Public homepage carousel only ever shows approved reviews.
+create policy "Approved reviews are publicly viewable" on public.reviews
+  for select using (status = 'approved');
+
+-- Members can see their own review regardless of its approval status, so
+-- their dashboard can show "awaiting approval".
+create policy "Members can view their own review" on public.reviews
+  for select using (auth.uid() = student_id);
+
+-- Instructors manage everything (approve/delete/add manual reviews).
+create policy "Instructors can manage reviews" on public.reviews
+  for all using (
+    auth.uid() in (select id from public.profiles where role = 'instructor')
+  );

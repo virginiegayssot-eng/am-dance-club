@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime, getYouTubeId } from "@/lib/stripe";
 import { todayLocal, toLocalDateStr } from "@/lib/date";
-import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
+import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Review, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -41,7 +41,16 @@ export default function InstructorPage() {
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch">("classes");
+  const [instructors, setInstructors] = useState<Profile[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ author_name: "", rating: "5", review_text: "" });
+  const [reviewFormLoading, setReviewFormLoading] = useState(false);
+  const [editBioTarget, setEditBioTarget] = useState<Profile | null>(null);
+  const [editBioForm, setEditBioForm] = useState({ title: "", bio: "" });
+  const [editBioLoading, setEditBioLoading] = useState(false);
+  const [editBioError, setEditBioError] = useState("");
+  const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "discounts" | "news" | "merch" | "reviews" | "instructors">("classes");
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,6 +235,16 @@ export default function InstructorPage() {
 
     const { data: np } = await supabase.from("news_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
     setNewsPosts(np ?? []);
+
+    const { data: insts } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "instructor")
+      .order("full_name", { ascending: true });
+    setInstructors((insts as Profile[]) ?? []);
+
+    const { data: revs } = await supabase.from("reviews").select("*").order("created_at", { ascending: true });
+    setReviews((revs as Review[]) ?? []);
 
     setLoading(false);
   }
@@ -1102,6 +1121,69 @@ export default function InstructorPage() {
     setShowAssignPassForm(true);
   }
 
+  async function createReview(e: React.FormEvent) {
+    e.preventDefault();
+    setReviewFormLoading(true);
+    const { error } = await supabase.from("reviews").insert({
+      author_name: reviewForm.author_name.trim(),
+      rating: parseInt(reviewForm.rating),
+      review_text: reviewForm.review_text.trim(),
+      status: "approved",
+    });
+    if (error) { alert(error.message); setReviewFormLoading(false); return; }
+    setShowReviewForm(false);
+    setReviewForm({ author_name: "", rating: "5", review_text: "" });
+    loadData();
+    setReviewFormLoading(false);
+  }
+
+  function deleteReview(id: string) {
+    setConfirmDialog({
+      message: "Delete this review? It will no longer show in the homepage carousel.",
+      action: async () => {
+        await supabase.from("reviews").delete().eq("id", id);
+        setReviews(prev => prev.filter(r => r.id !== id));
+      },
+    });
+  }
+
+  async function approveReview(id: string) {
+    await supabase.from("reviews").update({ status: "approved" }).eq("id", id);
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, status: "approved" } : r));
+  }
+
+  function openEditBio(inst: Profile) {
+    setEditBioTarget(inst);
+    setEditBioForm({ title: inst.title ?? "", bio: inst.bio ?? "" });
+    setEditBioError("");
+  }
+
+  async function saveBio(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editBioTarget) return;
+    setEditBioLoading(true);
+    setEditBioError("");
+    try {
+      const res = await fetch("/api/instructor/update-bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: editBioTarget.id, title: editBioForm.title, bio: editBioForm.bio }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setEditBioError(data.error ?? "Something went wrong. Please try again.");
+        setEditBioLoading(false);
+        return;
+      }
+      setEditBioTarget(null);
+      setEditBioLoading(false);
+      loadData();
+    } catch (err: any) {
+      setEditBioError("Something went wrong: " + (err?.message ?? String(err)));
+      setEditBioLoading(false);
+    }
+  }
+
   const tabs = [
     { key: "classes", label: "Classes" },
     { key: "attendance", label: "Attendance" },
@@ -1110,8 +1192,10 @@ export default function InstructorPage() {
     { key: "students", label: "Members" },
     { key: "playlists", label: "Playlists" },
     { key: "discounts", label: "Discounts" },
+    { key: "reviews", label: "Reviews" },
     { key: "news", label: "Club News" },
     { key: "merch", label: "Merch" },
+    { key: "instructors", label: "Instructors" },
   ] as const;
 
   if (loading) {
@@ -1852,6 +1936,101 @@ export default function InstructorPage() {
                         Delete
                       </button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* REVIEWS TAB */}
+        {activeTab === "reviews" && (
+          <div>
+            <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+              <p className="font-body text-sm text-gray-500">{reviews.length} review{reviews.length !== 1 ? "s" : ""} · approved ones shown in a carousel on the homepage</p>
+              <button onClick={() => setShowReviewForm(true)} className="btn-primary py-2 px-4 text-sm">
+                + New Review
+              </button>
+            </div>
+
+            {reviews.filter(r => r.status === "pending").length > 0 && (
+              <div className="mb-6">
+                <p className="font-body text-xs uppercase tracking-widest text-amber-600 mb-2">Awaiting approval</p>
+                <div className="card divide-y divide-gray-50 overflow-hidden border-amber-200">
+                  {reviews.filter(r => r.status === "pending").map(r => (
+                    <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 bg-amber-50/40">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-heading">{r.author_name}</span>
+                          <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <button onClick={() => approveReview(r.id)} className="font-body text-xs text-green-600 hover:underline">
+                          Approve
+                        </button>
+                        <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {reviews.filter(r => r.status === "approved").length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400 mb-4">No approved reviews yet — add one, or approve a member's submission above.</p>
+                <button onClick={() => setShowReviewForm(true)} className="btn-primary">Add Review</button>
+              </div>
+            ) : (
+              <div>
+                {reviews.some(r => r.status === "pending") && (
+                  <p className="font-body text-xs uppercase tracking-widest text-gray-400 mb-2">Live on homepage</p>
+                )}
+                <div className="card divide-y divide-gray-50 overflow-hidden">
+                  {reviews.filter(r => r.status === "approved").map(r => (
+                    <div key={r.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-heading">{r.author_name}</span>
+                          <span className="text-amber-400 text-xs tracking-tight">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 font-body">{r.review_text}</p>
+                      </div>
+                      <button onClick={() => deleteReview(r.id)} className="font-body text-xs text-red-400 hover:text-red-600 shrink-0">
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* INSTRUCTORS TAB */}
+        {activeTab === "instructors" && (
+          <div>
+            <p className="font-body text-sm text-gray-500 mb-5">{instructors.length} instructor{instructors.length !== 1 ? "s" : ""}</p>
+            {instructors.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-gray-400">No instructors yet.</p>
+              </div>
+            ) : (
+              <div className="card divide-y divide-gray-50 overflow-hidden">
+                {instructors.map((inst) => (
+                  <div key={inst.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm font-body">{inst.full_name ?? inst.email}</p>
+                      {inst.title && <p className="font-body text-xs text-[#221f1c] mt-0.5">{inst.title}</p>}
+                      <p className="font-body text-sm text-gray-500 mt-1 whitespace-pre-wrap">{inst.bio || "No bio yet."}</p>
+                    </div>
+                    <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#221f1c] hover:underline shrink-0">
+                      Edit
+                    </button>
                   </div>
                 ))}
               </div>
@@ -2805,6 +2984,90 @@ export default function InstructorPage() {
                 <button type="button" onClick={() => setShowAddToRoll(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={walkInLoading || (addToRollMode === "member" && !bookForStudentId) || (addToRollMode === "walkin" && !walkInName)}>
                   {walkInLoading ? "Adding…" : "Add to Roll"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* NEW REVIEW MODAL */}
+        {showReviewForm && (
+          <Modal title="New Review" onClose={() => setShowReviewForm(false)}>
+            <form onSubmit={createReview} className="space-y-4">
+              <div>
+                <label className="label">Reviewer name</label>
+                <input
+                  className="input"
+                  placeholder="e.g. Sofia R."
+                  value={reviewForm.author_name}
+                  onChange={e => setReviewForm(f => ({ ...f, author_name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Rating</label>
+                <select
+                  className="input"
+                  value={reviewForm.rating}
+                  onChange={e => setReviewForm(f => ({ ...f, rating: e.target.value }))}
+                >
+                  <option value="5">★★★★★ (5)</option>
+                  <option value="4">★★★★☆ (4)</option>
+                  <option value="3">★★★☆☆ (3)</option>
+                  <option value="2">★★☆☆☆ (2)</option>
+                  <option value="1">★☆☆☆☆ (1)</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Review text</label>
+                <textarea
+                  className="input min-h-[100px]"
+                  placeholder="Paste or type the review here…"
+                  value={reviewForm.review_text}
+                  onChange={e => setReviewForm(f => ({ ...f, review_text: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowReviewForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={reviewFormLoading}>
+                  {reviewFormLoading ? "Adding…" : "Add Review"}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* EDIT BIO MODAL */}
+        {editBioTarget && (
+          <Modal title={`Edit Bio — ${editBioTarget.full_name ?? editBioTarget.email}`} onClose={() => setEditBioTarget(null)}>
+            <form onSubmit={saveBio} className="space-y-4">
+              <div>
+                <label className="label">Title</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. Founder & Lead Instructor"
+                  value={editBioForm.title}
+                  onChange={e => setEditBioForm(f => ({ ...f, title: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Bio</label>
+                <textarea
+                  className="input min-h-[120px]"
+                  placeholder="Tell people a bit about them…"
+                  value={editBioForm.bio}
+                  onChange={e => setEditBioForm(f => ({ ...f, bio: e.target.value }))}
+                />
+              </div>
+              {editBioError && (
+                <p className="font-body text-sm text-red-500">{editBioError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setEditBioTarget(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={editBioLoading}>
+                  {editBioLoading ? "Saving…" : "Save"}
                 </button>
               </div>
             </form>

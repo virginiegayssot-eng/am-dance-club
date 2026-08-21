@@ -27,6 +27,7 @@ export default function Footer() {
               {[
                 { href: "/how-to-use", label: "How to Use" },
                 { href: "/classes", label: "Classes" },
+                { href: "/instructors", label: "Instructors" },
                 { href: "/passes", label: "Passes & Pricing" },
                 { href: "/videos", label: "Videos" },
                 { href: "/merch", label: "Merch" },

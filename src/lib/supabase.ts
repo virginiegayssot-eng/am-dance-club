@@ -15,7 +15,20 @@ export type Profile = {
   avatar_url: string | null;
   phone: string | null;
   birth_date: string | null;
+  title: string | null;
+  bio: string | null;
+  show_on_instructors_page: boolean;
   filming_policy_accepted_at: string | null;
+  created_at: string;
+};
+
+export type Review = {
+  id: string;
+  author_name: string;
+  rating: number;
+  review_text: string;
+  student_id: string | null;
+  status: "pending" | "approved";
   created_at: string;
 };
 
