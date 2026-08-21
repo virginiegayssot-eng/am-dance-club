@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
         <div className="card p-8">
           {sent ? (
             <div className="text-center space-y-4">
-              <Mail className="w-12 h-12 mx-auto text-[#7d6653]" strokeWidth={1.5} />
+              <Mail className="w-12 h-12 mx-auto text-[#221f1c]" strokeWidth={1.5} />
               <p className="font-heading text-lg">Check your email</p>
               <p className="font-body text-sm text-gray-500">
                 We sent a reset link to <strong>{email}</strong>. Click it to set a new password.

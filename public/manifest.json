@@ -4,8 +4,8 @@
   "description": "Movement classes in Sydney",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0e8dd",
-  "theme_color": "#7d6653",
+  "background_color": "#f4efe6",
+  "theme_color": "#221f1c",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

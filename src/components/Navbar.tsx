@@ -78,18 +78,18 @@ export default function Navbar() {
   };
 
   const isActive = (href: string) =>
-    pathname === href ? "text-[#7d6653]" : "text-black hover:text-[#7d6653]";
+    pathname === href ? "text-[#221f1c]" : "text-black hover:text-[#221f1c]";
 
   const isInstructor = profile?.role === "instructor";
 
   const UnreadBadge = ({ small }: { small?: boolean }) => unread > 0 ? (
-    <span className={`bg-[#7d6653] text-white font-heading rounded-full flex items-center justify-center ${small ? "text-[10px] w-4 h-4" : "text-xs w-5 h-5"}`}>
+    <span className={`bg-[#221f1c] text-white font-heading rounded-full flex items-center justify-center ${small ? "text-[10px] w-4 h-4" : "text-xs w-5 h-5"}`}>
       {unread > 9 ? "9+" : unread}
     </span>
   ) : null;
 
   return (
-    <nav className="bg-[#f0e8dd] sticky top-0 z-50">
+    <nav className="bg-[#f4efe6] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-end">
           {/* Logo */}
@@ -97,7 +97,7 @@ export default function Navbar() {
             <Image src="/logo.png" alt="Sable Studio" width={100} height={70} className="object-contain" />
           </Link>
 
-          <div className="flex-1 flex items-center justify-between border-b border-[#7d6653]/20 pb-3 pt-4">
+          <div className="flex-1 flex items-center justify-between border-b border-[#221f1c]/20 pb-3 pt-4">
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-6">
@@ -135,19 +135,19 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login" className="font-body text-sm text-black hover:text-[#7d6653] transition-colors">Log in</Link>
+                  <Link href="/auth/login" className="font-body text-sm text-black hover:text-[#221f1c] transition-colors">Log in</Link>
                   <Link href="/auth/signup" className="btn-primary py-2 px-4 text-xs">Sign up</Link>
                 </>
               )}
             </div>
 
             {/* Mobile menu button */}
-            <button className="md:hidden p-2 rounded-lg hover:bg-[#7d6653]/10 relative ml-auto" onClick={() => setMenuOpen(!menuOpen)}>
+            <button className="md:hidden p-2 rounded-lg hover:bg-[#221f1c]/10 relative ml-auto" onClick={() => setMenuOpen(!menuOpen)}>
               <div className="w-5 h-0.5 bg-black mb-1" />
               <div className="w-5 h-0.5 bg-black mb-1" />
               <div className="w-5 h-0.5 bg-black" />
               {unread > 0 && (
-                <span className="absolute top-1 right-1 bg-[#7d6653] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
+                <span className="absolute top-1 right-1 bg-[#221f1c] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
               )}
             </button>
           </div>
@@ -155,7 +155,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden pb-4 space-y-1 border-t border-[#7d6653]/20 pt-4">
+          <div className="md:hidden pb-4 space-y-1 border-t border-[#221f1c]/20 pt-4">
             {[
               { href: "/classes", label: "Classes" },
               { href: "/passes", label: "Passes & Pricing" },
@@ -163,13 +163,13 @@ export default function Navbar() {
               { href: "/merch", label: "Merch" },
               ...(profile ? [{ href: "/playlists", label: "Playlists" }] : []),
             ].map(({ href, label }) => (
-              <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#7d6653]" onClick={() => setMenuOpen(false)}>
+              <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#221f1c]" onClick={() => setMenuOpen(false)}>
                 {label}
               </Link>
             ))}
 
             {profile && (
-              <Link href="/chat" className="flex items-center gap-2 font-body text-sm text-black py-2.5 px-1 hover:text-[#7d6653]" onClick={() => setMenuOpen(false)}>
+              <Link href="/chat" className="flex items-center gap-2 font-body text-sm text-black py-2.5 px-1 hover:text-[#221f1c]" onClick={() => setMenuOpen(false)}>
                 Chat
                 <UnreadBadge />
               </Link>
@@ -180,12 +180,12 @@ export default function Navbar() {
               ...(isInstructor ? [{ href: "/reports", label: "Reports" }] : []),
               { href: "/profile", label: "My Profile" },
             ].map(({ href, label }) => (
-              <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#7d6653]" onClick={() => setMenuOpen(false)}>
+              <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#221f1c]" onClick={() => setMenuOpen(false)}>
                 {label}
               </Link>
             ))}
 
-            <div className="pt-3 border-t border-[#7d6653]/20 flex flex-col gap-2">
+            <div className="pt-3 border-t border-[#221f1c]/20 flex flex-col gap-2">
               {profile ? (
                 <button onClick={handleSignOut} className="btn-secondary w-full justify-center py-2 text-xs">Sign out</button>
               ) : (

@@ -9,11 +9,11 @@ function buildBirthdayPassEmailHtml(firstName: string) {
     <html>
     <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
       <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-        <div style="background:#7d6653;padding:32px;text-align:center;">
-          <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
+        <div style="background:#221f1c;padding:32px;text-align:center;">
+          <h1 style="color:#f4efe6;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
+          <h2 style="color:#221f1c;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             To celebrate your birthday, I've added a <strong>free class</strong> to your account.
           </p>
@@ -23,8 +23,8 @@ function buildBirthdayPassEmailHtml(firstName: string) {
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you in class!</p>
           <p style="color:#444;font-size:16px;margin:0;">— The Sable Studio Team</p>
         </div>
-        <div style="background:#f0e8dd;padding:20px;text-align:center;">
-          <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
+        <div style="background:#f4efe6;padding:20px;text-align:center;">
+          <p style="color:#221f1c;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
         </div>
       </div>
     </body>
@@ -41,11 +41,11 @@ function buildPassAssignedEmailHtml(firstName: string, passName: string, classes
     <html>
     <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
       <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-        <div style="background:#7d6653;padding:32px;text-align:center;">
-          <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
+        <div style="background:#221f1c;padding:32px;text-align:center;">
+          <h1 style="color:#f4efe6;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">You're all set, ${firstName}!</h2>
+          <h2 style="color:#221f1c;font-size:22px;margin:0 0 16px;">You're all set, ${firstName}!</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
             Your <strong>${passName}</strong>${classesIncluded ? ` (${classesIncluded} class${classesIncluded !== 1 ? "es" : ""})` : ""} has been added to your account and is ready to use.
           </p>
@@ -53,8 +53,8 @@ function buildPassAssignedEmailHtml(firstName: string, passName: string, classes
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Head to the Classes page any time to book a spot.</p>
           <p style="color:#444;font-size:16px;margin:0;">See you in class!</p>
         </div>
-        <div style="background:#f0e8dd;padding:20px;text-align:center;">
-          <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
+        <div style="background:#f4efe6;padding:20px;text-align:center;">
+          <p style="color:#221f1c;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
         </div>
       </div>
     </body>

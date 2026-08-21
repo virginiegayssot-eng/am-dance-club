@@ -38,17 +38,17 @@ export async function POST(req: NextRequest) {
       <html>
       <body style="margin:0;padding:0;background:#fbf8f4;font-family:Arial,sans-serif;">
         <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-          <div style="background:#7d6653;padding:32px;text-align:center;">
-            <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
+          <div style="background:#221f1c;padding:32px;text-align:center;">
+            <h1 style="color:#f4efe6;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
           </div>
           <div style="padding:36px 32px;">
-            <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">Reset your password</h2>
+            <h2 style="color:#221f1c;font-size:22px;margin:0 0 16px;">Reset your password</h2>
             <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
               Hi,<br/><br/>
               Click the button below to set a new password for your account. This link expires in 1 hour.
             </p>
             <div style="text-align:center;margin:32px 0;">
-              <a href="${resetUrl}" style="background:#7d6653;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
+              <a href="${resetUrl}" style="background:#221f1c;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
                 Set New Password
               </a>
             </div>
@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
               If you didn't request this, you can safely ignore this email.
             </p>
           </div>
-          <div style="background:#f0e8dd;padding:20px;text-align:center;">
-            <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
+          <div style="background:#f4efe6;padding:20px;text-align:center;">
+            <p style="color:#221f1c;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
           </div>
         </div>
       </body>

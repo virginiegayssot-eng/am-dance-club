@@ -154,7 +154,7 @@ export default function DashboardPage() {
               Our classes may be filmed or photographed for social media and/or marketing purposes. By attending a class, you acknowledge that filming or photography may take place during the session — if you'd rather not appear, just let the instructor know before filming begins.
             </p>
             <p className="font-body text-sm mb-6">
-              <Link href="/filming-policy" target="_blank" className="text-[#7d6653] underline">Read the full policy</Link>
+              <Link href="/filming-policy" target="_blank" className="text-[#221f1c] underline">Read the full policy</Link>
             </p>
             {filmingPolicyError && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl mb-4">{filmingPolicyError}</div>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
 
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#7d6653] mb-2">Your account</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#221f1c] mb-2">Your account</p>
           <h1 className="section-title">
             Hey, {profile?.full_name?.split(" ")[0] ?? "dancer"}
           </h1>
@@ -184,13 +184,13 @@ export default function DashboardPage() {
         {newsPosts.length > 0 && (
           <div className="mb-8 space-y-3">
             {newsPosts.map(post => {
-              const catColor: Record<string, string> = { location: "bg-[#7d6653] text-white", event: "bg-[#f0e8dd] text-black border border-[#ddd0bd]", routine: "bg-[#fbf8f4] text-black border border-[#f0e8dd]", general: "bg-[#fbf8f4] text-black border border-[#f0e8dd]" };
+              const catColor: Record<string, string> = { location: "bg-[#221f1c] text-white", event: "bg-[#f4efe6] text-black border border-[#ddd3c0]", routine: "bg-[#fbf8f4] text-black border border-[#f4efe6]", general: "bg-[#fbf8f4] text-black border border-[#f4efe6]" };
               const colorClass = catColor[post.category] ?? catColor.general;
               const Icon = CATEGORY_ICONS[post.category] ?? Megaphone;
               return (
                 <div key={post.id} className={`rounded-2xl p-5 ${colorClass}`}>
                   <p className="font-heading text-base mb-1 flex items-center gap-2">
-                    <Icon className={`w-4 h-4 shrink-0 ${post.category === "location" ? "text-white" : "text-[#7d6653]"}`} strokeWidth={1.75} />
+                    <Icon className={`w-4 h-4 shrink-0 ${post.category === "location" ? "text-white" : "text-[#221f1c]"}`} strokeWidth={1.75} />
                     {post.title}
                   </p>
                   <p className={`font-body text-sm whitespace-pre-wrap ${post.category === "location" ? "text-white/90" : "text-gray-700"}`}><Linkify text={post.body} /></p>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         {/* Success banners */}
         {justBooked && (
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 font-body text-sm text-green-700 flex items-center gap-3">
-            <PartyPopper className="w-5 h-5 shrink-0 text-[#7d6653]" strokeWidth={1.75} />
+            <PartyPopper className="w-5 h-5 shrink-0 text-[#221f1c]" strokeWidth={1.75} />
             You're booked!
           </div>
         )}
@@ -221,9 +221,9 @@ export default function DashboardPage() {
           </div>
         )}
         {justBoughtPass && (
-          <div className="bg-[#a89783]/20 border border-[#a89783] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
-            <Ticket className="w-5 h-5 shrink-0 text-[#7d6653]" strokeWidth={1.75} />
-            Pass purchased! Head to <Link href="/classes" className="text-[#7d6653] underline font-medium">Classes</Link> to book your first session.
+          <div className="bg-[#6b6259]/20 border border-[#6b6259] rounded-2xl p-4 mb-6 font-body text-sm flex items-center gap-3">
+            <Ticket className="w-5 h-5 shrink-0 text-[#221f1c]" strokeWidth={1.75} />
+            Pass purchased! Head to <Link href="/classes" className="text-[#221f1c] underline font-medium">Classes</Link> to book your first session.
           </div>
         )}
 
@@ -247,13 +247,13 @@ export default function DashboardPage() {
           <section className="mb-10">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-heading text-xl">Your Passes</h2>
-              <Link href="/passes" className="font-body text-sm text-[#7d6653] hover:underline">
+              <Link href="/passes" className="font-body text-sm text-[#221f1c] hover:underline">
                 Buy more →
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {activePasses.map(p => (
-                <div key={p.id} className="card p-5 bg-gradient-to-br from-[#a89783]/10 to-[#f0e8dd]/10">
+                <div key={p.id} className="card p-5 bg-gradient-to-br from-[#6b6259]/10 to-[#f4efe6]/10">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <p className="font-heading text-sm">{p.pass_types?.name}</p>
@@ -267,7 +267,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-1.5">
                     <div
-                      className="bg-[#7d6653] h-1.5 rounded-full transition-all"
+                      className="bg-[#221f1c] h-1.5 rounded-full transition-all"
                       style={{ width: `${(p.classes_remaining / p.classes_total) * 100}%` }}
                     />
                   </div>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
 
         {/* No pass prompt */}
         {activePasses.length === 0 && (
-          <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f0e8dd]/10">
+          <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f4efe6]/10">
             <div>
               <p className="font-heading text-sm">Save with a class pass</p>
               <p className="font-body text-xs text-gray-500 mt-0.5">5-class pass from $100 · 10-class pass from $200</p>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading text-xl">Upcoming Classes</h2>
-            <Link href="/classes" className="font-body text-sm text-[#7d6653] hover:underline">
+            <Link href="/classes" className="font-body text-sm text-[#221f1c] hover:underline">
               Browse all →
             </Link>
           </div>
@@ -313,10 +313,10 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="badge-confirmed">Confirmed</span>
                       {reg.payment_type === "pass" && (
-                        <span className="badge bg-[#a89783]/30 text-[#7d6653]">Pass</span>
+                        <span className="badge bg-[#6b6259]/30 text-[#221f1c]">Pass</span>
                       )}
                       {reg.payment_type === "double" && (
-                        <span className="badge bg-[#f0e8dd]/50 text-black">Double (+1 guest)</span>
+                        <span className="badge bg-[#f4efe6]/50 text-black">Double (+1 guest)</span>
                       )}
                     </div>
                     <h3 className="font-heading text-base">{reg.classes?.title}</h3>

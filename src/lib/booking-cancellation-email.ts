@@ -14,7 +14,7 @@ export function buildBookingCancellationEmailHtml({
   const refundNote = passRefunded
     ? "Your class credit has been refunded back to your pass, so you're free to book another session."
     : cancelledByInstructor
-      ? `If you paid for this class directly, please reach out to us at <a href="mailto:hello@sablestudio.au" style="color:#7d6653;">hello@sablestudio.au</a> and we'll sort out a refund.`
+      ? `If you paid for this class directly, please reach out to us at <a href="mailto:hello@sablestudio.au" style="color:#221f1c;">hello@sablestudio.au</a> and we'll sort out a refund.`
       : "This booking was inside the 24-hour window, so no credit was refunded for this cancellation.";
 
   return `
@@ -22,11 +22,11 @@ export function buildBookingCancellationEmailHtml({
     <html>
     <body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,sans-serif;">
       <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;">
-        <div style="background:#7d6653;padding:32px;text-align:center;">
-          <h1 style="color:#f0e8dd;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
+        <div style="background:#221f1c;padding:32px;text-align:center;">
+          <h1 style="color:#f4efe6;font-size:28px;margin:0;letter-spacing:2px;">Sable Studio</h1>
         </div>
         <div style="padding:36px 32px;">
-          <h2 style="color:#7d6653;font-size:22px;margin:0 0 16px;">
+          <h2 style="color:#221f1c;font-size:22px;margin:0 0 16px;">
             ${cancelledByInstructor ? `This class has been cancelled` : `Booking cancelled, ${firstName}`}
           </h2>
           ${cancelledByInstructor
@@ -44,8 +44,8 @@ export function buildBookingCancellationEmailHtml({
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Hope to see you at another class soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">— The Sable Studio Team</p>
         </div>
-        <div style="background:#f0e8dd;padding:20px;text-align:center;">
-          <p style="color:#7d6653;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
+        <div style="background:#f4efe6;padding:20px;text-align:center;">
+          <p style="color:#221f1c;font-size:12px;margin:0;">Weekly classes · Sydney, NSW</p>
         </div>
       </div>
     </body>

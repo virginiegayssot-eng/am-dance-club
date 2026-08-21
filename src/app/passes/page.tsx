@@ -155,7 +155,7 @@ export default function PassesPage() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
 
         <div className="mb-10">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#7d6653] mb-2">Pricing</p>
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-[#221f1c] mb-2">Pricing</p>
           <h1 className="section-title mb-3">Class Passes</h1>
           <p className="font-body text-gray-500">
             Buy a pass and use it to book any upcoming class.
@@ -171,11 +171,11 @@ export default function PassesPage() {
 
         {/* Active passes banner */}
         {validPasses.length > 0 && (
-          <div className="bg-[#a89783]/20 border border-[#a89783] rounded-2xl p-5 mb-10">
+          <div className="bg-[#6b6259]/20 border border-[#6b6259] rounded-2xl p-5 mb-10">
             <h3 className="font-heading text-sm mb-3">Your Active Passes</h3>
             <div className="flex flex-wrap gap-3">
               {validPasses.map((p) => (
-                <div key={p.id} className="bg-white rounded-xl px-4 py-3 border border-[#a89783]/50">
+                <div key={p.id} className="bg-white rounded-xl px-4 py-3 border border-[#6b6259]/50">
                   <p className="font-heading text-sm">{p.pass_types?.name}</p>
                   <p className="font-body text-xs text-gray-500 mt-0.5">
                     {p.classes_remaining} class{p.classes_remaining !== 1 ? "es" : ""} remaining
@@ -187,7 +187,7 @@ export default function PassesPage() {
               ))}
             </div>
             <p className="font-body text-xs text-gray-500 mt-3">
-              Head to the <Link href="/classes" className="text-[#7d6653] underline">Classes page</Link> to use your pass to book a class.
+              Head to the <Link href="/classes" className="text-[#221f1c] underline">Classes page</Link> to use your pass to book a class.
             </p>
           </div>
         )}
@@ -230,36 +230,36 @@ export default function PassesPage() {
             return (
               <div
                 key={opt.id}
-                className={`card overflow-visible flex flex-col relative ${opt.highlight ? "ring-2 ring-[#7d6653]" : ""} ${isDisabled ? "opacity-50" : ""}`}
+                className={`card overflow-visible flex flex-col relative ${opt.highlight ? "ring-2 ring-[#221f1c]" : ""} ${isDisabled ? "opacity-50" : ""}`}
               >
                 {opt.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-[#7d6653] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
+                    <span className="bg-[#221f1c] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
                       Popular
                     </span>
                   </div>
                 )}
                 {opt.newOnly && (
                   <div className="absolute -top-3 left-4">
-                    <span className="bg-[#7d6653] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
+                    <span className="bg-[#221f1c] text-white text-xs font-heading px-3 py-1 rounded-full uppercase tracking-wide">
                       New members
                     </span>
                   </div>
                 )}
 
-                <div className={`p-6 rounded-t-2xl ${opt.highlight ? "bg-gradient-to-br from-[#7d6653] to-[#a89783] text-white" : "bg-gradient-to-br from-[#f0e8dd]/30 to-[#a89783]/20"}`}>
+                <div className={`p-6 rounded-t-2xl ${opt.highlight ? "bg-gradient-to-br from-[#221f1c] to-[#6b6259] text-white" : "bg-gradient-to-br from-[#f4efe6]/30 to-[#6b6259]/20"}`}>
                   <h3 className={`font-heading text-lg mb-1 ${opt.highlight ? "text-white" : ""}`}>{opt.name}</h3>
-                  <p className={`font-heading text-4xl ${opt.highlight ? "text-white" : "text-[#7d6653]"}`}>{opt.price}</p>
+                  <p className={`font-heading text-4xl ${opt.highlight ? "text-white" : "text-[#221f1c]"}`}>{opt.price}</p>
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center gap-2 font-body text-sm">
-                      <Check className="w-4 h-4 text-[#7d6653] shrink-0" strokeWidth={2} />
+                      <Check className="w-4 h-4 text-[#221f1c] shrink-0" strokeWidth={2} />
                       <span>{opt.classes}</span>
                     </div>
                     <div className="flex items-center gap-2 font-body text-sm">
-                      <Check className="w-4 h-4 text-[#7d6653] shrink-0" strokeWidth={2} />
+                      <Check className="w-4 h-4 text-[#221f1c] shrink-0" strokeWidth={2} />
                       <span>Valid: {opt.validity}</span>
                     </div>
                     <p className="font-body text-xs text-gray-500 mt-2 leading-relaxed">{opt.description}</p>
@@ -284,8 +284,8 @@ export default function PassesPage() {
 
         {!isLoggedIn && (
           <p className="text-center font-body text-sm text-gray-500 mt-10">
-            <Link href="/auth/login" className="text-[#7d6653] underline">Log in</Link> or{" "}
-            <Link href="/auth/signup" className="text-[#7d6653] underline">create an account</Link> to purchase a pass.
+            <Link href="/auth/login" className="text-[#221f1c] underline">Log in</Link> or{" "}
+            <Link href="/auth/signup" className="text-[#221f1c] underline">create an account</Link> to purchase a pass.
           </p>
         )}
       </main>
