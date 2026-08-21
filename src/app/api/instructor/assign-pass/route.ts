@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
   const { data: student } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
   if (student?.email && process.env.RESEND_API_KEY) {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const firstName = (student.full_name ?? "dancer").split(" ")[0];
+    const firstName = (student.full_name ?? "there").split(" ")[0];
 
     if (passTypeId === "birthday") {
       await resend.emails.send({

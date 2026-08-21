@@ -20,7 +20,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
   if (!cls) return;
 
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+  const firstName = (profile.full_name ?? "there").split(" ")[0];
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({

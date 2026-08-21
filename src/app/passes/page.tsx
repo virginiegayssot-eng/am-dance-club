@@ -25,7 +25,7 @@ const PASS_OPTIONS: PassOption[] = [
   {
     id: "casual",
     name: "Casual Class",
-    price: "$24",
+    price: "$32",
     classes: "1 class",
     validity: "One-time",
     description: "Drop in whenever you like. Pay per class.",
@@ -33,7 +33,7 @@ const PASS_OPTIONS: PassOption[] = [
   {
     id: "double",
     name: "Double Pass",
-    price: "$38",
+    price: "$58",
     classes: "2 spots",
     validity: "One class",
     description: "Bring a friend to the same class. Two spots for the price of one deal.",
@@ -41,28 +41,28 @@ const PASS_OPTIONS: PassOption[] = [
   {
     id: "intro",
     name: "Intro Pass",
-    price: "$39",
+    price: "$59",
     classes: "3 classes",
-    validity: "3 months",
-    description: "Perfect for new dancers. Try 3 classes at a special rate.",
+    validity: "2 months",
+    description: "Perfect for new students. Try 3 classes at a special rate.",
     newOnly: true,
   },
   {
     id: "five",
     name: "5-Class Pass",
-    price: "$100",
+    price: "$145",
     classes: "5 classes",
     validity: "6 months",
-    description: "$20 per class. Use across any Friday sessions.",
+    description: "$29 per class. Use across any weekly session.",
     highlight: true,
   },
   {
     id: "ten",
     name: "10-Class Pass",
-    price: "$200",
+    price: "$265",
     classes: "10 classes",
     validity: "1 year",
-    description: "$20 per class. Best value.",
+    description: "$26.50 per class. Best value.",
   },
 ];
 

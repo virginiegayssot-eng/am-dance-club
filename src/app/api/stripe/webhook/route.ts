@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", merchStudentId).single();
 
       if (profile?.email && product) {
-        const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+        const firstName = (profile.full_name ?? "there").split(" ")[0];
         await resend.emails.send({
           from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
           to: profile.email,
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
         emailBody += ` They are booked in for <strong>${cls.title}</strong> on ${classDate}.`;
 
         if (profile?.email && (passTypeId === "casual" || passTypeId === "double")) {
-          const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+          const firstName = (profile.full_name ?? "there").split(" ")[0];
           const guestCount = isDoublePass === "true" ? 1 : 0;
           await resend.emails.send({
             from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,

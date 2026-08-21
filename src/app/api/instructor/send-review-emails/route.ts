@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const email = profile?.email;
     if (!email) continue;
 
-    const firstName = (profile?.full_name ?? "dancer").split(" ")[0];
+    const firstName = (profile?.full_name ?? "there").split(" ")[0];
 
     const { error } = await resend.emails.send({
       from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,

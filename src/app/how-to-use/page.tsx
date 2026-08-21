@@ -49,7 +49,7 @@ export default function HowToUsePage() {
           <section>
             <h2 className="font-heading text-lg text-[#221f1c] mb-3">5. Videos & playlists</h2>
             <p>
-              Check out <Link href="/videos" className="text-[#221f1c] underline">Videos</Link> for class recordings, and Playlists for the music we dance to — great for practicing at home.
+              Check out <Link href="/videos" className="text-[#221f1c] underline">Videos</Link> for class recordings, and Playlists for the music from class — great for practicing at home.
             </p>
           </section>
 

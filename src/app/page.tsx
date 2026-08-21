@@ -59,9 +59,10 @@ export default function HomePage() {
             {[
               { title: "Stronger Body", desc: "Wake up your body with movement that builds stamina, tones muscles, and gets your heart pumping." },
               { title: "Feel-Good Sessions", desc: "Music and movement that lift your mood and leave you feeling great for the rest of your day." },
-              { title: "Confidence Boost", desc: "No mirrors, no judgment. Every step, every beat — confidence grows with practice!" },
-              { title: "Improved Coordination", desc: "Master choreography designed to challenge and grow your rhythm skills." },
+              { title: "Confidence Boost", desc: "No mirrors, no judgment. Confidence grows with every session, at your own pace." },
+              { title: "Improved Coordination", desc: "Structured sessions that challenge your body and sharpen your coordination over time." },
               { title: "Feel-Good Community", desc: "Be part of a fun, inclusive, and empowering community." },
+              { title: "Expert Instructors", desc: "Learn from experienced instructors who bring energy, encouragement, and real expertise to every class." },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl p-6">
                 <h3 className="font-heading text-lg text-[#221f1c] mb-2">{f.title}</h3>
@@ -85,11 +86,11 @@ export default function HomePage() {
             <div>
               <h2 className="font-heading text-2xl uppercase tracking-wide mb-6 text-[#f4efe6]">Class Prices</h2>
               <div className="space-y-3 font-body">
-                <p><strong>Casual Drop-In:</strong> $24 per class</p>
-                <p><strong>Double Pass:</strong> $38, two spots in the same class</p>
-                <p><strong>Intro Offer:</strong> $39 for 3 classes, first-timers only</p>
-                <p><strong>5-Class Pass:</strong> $100, valid 6 months</p>
-                <p><strong>10-Class Pass:</strong> $200, valid 1 year</p>
+                <p><strong>Casual Drop-In:</strong> $32 per class</p>
+                <p><strong>Double Pass:</strong> $58, two spots in the same class</p>
+                <p><strong>Intro Offer:</strong> $59 for 3 classes, first-timers only</p>
+                <p><strong>5-Class Pass:</strong> $145, valid 6 months</p>
+                <p><strong>10-Class Pass:</strong> $265, valid 1 year</p>
               </div>
               <Link href="/passes" className="mt-6 inline-block bg-white text-[#221f1c] font-heading text-sm px-6 py-3 rounded-full hover:bg-[#f4efe6] transition-colors">
                 Buy a Pass
@@ -102,7 +103,7 @@ export default function HomePage() {
       {/* CTA */}
       <section className="bg-[#f4efe6] py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="font-heading text-4xl md:text-5xl mb-4 text-black">Ready to dance?</h2>
+          <h2 className="font-heading text-4xl md:text-5xl mb-4 text-black">Ready to get started?</h2>
           <p className="font-body text-black/60 mb-8 max-w-md mx-auto">
             Join Sable Studio and book your first session today.
           </p>

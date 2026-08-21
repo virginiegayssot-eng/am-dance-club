@@ -13,11 +13,11 @@ create table public.pass_types (
 );
 
 insert into public.pass_types values
-  ('casual',    'Casual Class',   'Drop-in, one class',                         1,   2400, null, 0, false),
-  ('double',    'Double Pass',    'Two spots in the same class',                 1,   3800, null, 1, false),
-  ('intro',     'Intro Pass',     '3 classes for new students — valid 3 months', 3,   3900, 90,  0, true),
-  ('five',      '5-Class Pass',   'Valid for 6 months',                          5,  10000, 180, 0, false),
-  ('ten',       '10-Class Pass',  'Valid for 1 year',                            10, 20000, 365, 0, false);
+  ('casual',    'Casual Class',   'Drop-in, one class',                         1,   3200, null, 0, false),
+  ('double',    'Double Pass',    'Two spots in the same class',                 1,   5800, null, 1, false),
+  ('intro',     'Intro Pass',     '3 classes for new students — valid 2 months', 3,   5900, 60,  0, true),
+  ('five',      '5-Class Pass',   'Valid for 6 months',                          5,  14500, 180, 0, false),
+  ('ten',       '10-Class Pass',  'Valid for 1 year',                            10, 26500, 365, 0, false);
 
 alter table public.pass_types enable row level security;
 create policy "Pass types viewable by authenticated users" on public.pass_types

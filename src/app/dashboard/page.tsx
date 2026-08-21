@@ -176,7 +176,7 @@ export default function DashboardPage() {
         <div className="mb-10">
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#221f1c] mb-2">Your account</p>
           <h1 className="section-title">
-            Hey, {profile?.full_name?.split(" ")[0] ?? "dancer"}
+            Hey, {profile?.full_name?.split(" ")[0] ?? "there"}
           </h1>
         </div>
 

@@ -13,14 +13,14 @@ export function buildReviewEmailHtml(firstName: string) {
             So happy you joined us for your first class at Sable Studio!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you enjoyed it, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other dancers find me!
+            If you enjoyed it, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other students find me!
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.GOOGLE_REVIEW_URL}" style="background:#221f1c;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
               Leave a Review
             </a>
           </div>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you next Friday!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">— The Sable Studio Team</p>
         </div>
         <div style="background:#f4efe6;padding:20px;text-align:center;">
@@ -47,14 +47,14 @@ export function buildGenericReviewEmailHtml(firstName: string) {
             I love having you as part of Sable Studio family!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you've been enjoying our Friday classes, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other dancers find me!
+            If you've been enjoying our classes, I'd love it if you could take 30 seconds to leave me a Google review. It means the world to me and helps other students find me!
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.GOOGLE_REVIEW_URL}" style="background:#221f1c;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
               Leave a Review
             </a>
           </div>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you next Friday!</p>
+          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">See you soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">— The Sable Studio Team</p>
         </div>
         <div style="background:#f4efe6;padding:20px;text-align:center;">

@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
 
   // Confirm booking to the student
   if (profile?.email) {
-    const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+    const firstName = (profile.full_name ?? "there").split(" ")[0];
     await resend.emails.send({
       from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,

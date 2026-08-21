@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
   const classDate = new Date(reg.classes.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   if (profile?.email) {
-    const firstName = (profile.full_name ?? "dancer").split(" ")[0];
+    const firstName = (profile.full_name ?? "there").split(" ")[0];
     const { error } = await resend.emails.send({
       from: `Sable Studio <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,

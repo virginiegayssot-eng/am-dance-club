@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const { classId, generic } = await req.json();
 
   if (generic) {
-    return NextResponse.json({ candidates: [], previewHtml: buildGenericReviewEmailHtml("Dancer") });
+    return NextResponse.json({ candidates: [], previewHtml: buildGenericReviewEmailHtml("there") });
   }
 
   if (!classId) return NextResponse.json({ error: "Missing classId" }, { status: 400 });
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     .eq("attended", true);
 
   if (!attended || attended.length === 0) {
-    return NextResponse.json({ candidates: [], previewHtml: buildReviewEmailHtml("Dancer") });
+    return NextResponse.json({ candidates: [], previewHtml: buildReviewEmailHtml("there") });
   }
 
   const candidates: { id: string; full_name: string | null; email: string }[] = [];
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     candidates.push({ id: studentId, full_name: profile.full_name ?? null, email: profile.email });
   }
 
-  const previewName = candidates[0] ? (candidates[0].full_name ?? "Dancer").split(" ")[0] : "Dancer";
+  const previewName = candidates[0] ? (candidates[0].full_name ?? "there").split(" ")[0] : "there";
 
   return NextResponse.json({ candidates, previewHtml: buildReviewEmailHtml(previewName) });
 }

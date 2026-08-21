@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       to: student.email,
       subject: "Class recorded",
       html: buildPassDebitEmailHtml({
-        firstName: student.full_name?.split(" ")[0] ?? "dancer",
+        firstName: student.full_name?.split(" ")[0] ?? "there",
         passName: passType?.name ?? "pass",
         classesRemaining: newRemaining,
       }),
