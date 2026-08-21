@@ -27,7 +27,7 @@ export default function SignupPage() {
 
     if (!/^\+?[\d\s\-]{8,15}$/.test(form.phone.trim())) { setError("Please enter a valid phone number."); return; }
     if (!form.birthMonth || !form.birthDay) { setError("Birthday is required."); return; }
-    if (!filmingPolicyAccepted) { setError("Please confirm you've read the Filming & Photography Policy."); return; }
+    if (!filmingPolicyAccepted) { setError("Please confirm you agree to the Terms & Conditions."); return; }
 
     setLoading(true);
 
@@ -130,9 +130,9 @@ export default function SignupPage() {
                 required
               />
               <span>
-                I've read the{" "}
-                <Link href="/filming-policy" target="_blank" className="text-[#2041d8] underline">
-                  Filming &amp; Photography Policy
+                I agree to the{" "}
+                <Link href="/terms-and-conditions" target="_blank" className="text-[#2041d8] underline">
+                  Terms &amp; Conditions
                 </Link>
               </span>
             </label>

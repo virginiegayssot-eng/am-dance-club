@@ -174,18 +174,18 @@ export default function DashboardPage() {
       {showFilmingPolicyPrompt && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6">
-            <h2 className="font-heading text-lg mb-3">Filming &amp; Photography Policy</h2>
+            <h2 className="font-heading text-lg mb-3">Terms &amp; Conditions</h2>
             <p className="font-body text-sm text-gray-600 leading-relaxed mb-4">
-              Our classes may be filmed or photographed for social media and/or marketing purposes. By attending a class, you acknowledge that filming or photography may take place during the session — if you'd rather not appear, just let the instructor know before filming begins.
+              We've updated our Terms & Conditions, covering our cancellation, privacy, filming &amp; photography, and safety policies. By continuing to use your account, you agree to all of them — including that classes may be filmed or photographed for social media and/or marketing purposes; if you'd rather not appear, just let the instructor know before filming begins.
             </p>
             <p className="font-body text-sm mb-6">
-              <Link href="/filming-policy" target="_blank" className="text-[#2041d8] underline">Read the full policy</Link>
+              <Link href="/terms-and-conditions" target="_blank" className="text-[#2041d8] underline">Read the full Terms & Conditions</Link>
             </p>
             {filmingPolicyError && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl mb-4">{filmingPolicyError}</div>
             )}
             <button onClick={acceptFilmingPolicy} className="btn-primary w-full justify-center" disabled={acceptingFilmingPolicy}>
-              {acceptingFilmingPolicy ? "Saving…" : "I understand"}
+              {acceptingFilmingPolicy ? "Saving…" : "I Agree"}
             </button>
             {filmingPolicyError && (
               <button onClick={() => setShowFilmingPolicyPrompt(false)} className="font-body text-xs text-gray-400 hover:text-gray-600 underline mt-3 block mx-auto">

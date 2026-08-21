@@ -166,7 +166,7 @@ export default function HowToUsePage() {
             <p>
               Cancel at least <strong>24 hours</strong> before class and your credit is returned automatically, or a refund is arranged if you paid casually.
               Cancel later than that, or don't show up, and the credit or payment isn't refunded or rescheduled.
-              Full details on the <Chip href="/cancellation-policy">Cancellation Policy</Chip> page.
+              Full details on the <Chip href="/terms-and-conditions#cancellation">Cancellation Policy</Chip> page.
             </p>
           </StepCard>
 

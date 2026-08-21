@@ -63,17 +63,8 @@ export default function Footer() {
             © {new Date().getFullYear()} THE A.M Dance Club. All rights reserved.
           </p>
           <div className="flex gap-4">
-            <Link href="/cancellation-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
-              Cancellation Policy
-            </Link>
-            <Link href="/privacy-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/filming-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
-              Filming Policy
-            </Link>
-            <Link href="/safety-policy" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
-              Safety Policy
+            <Link href="/terms-and-conditions" className="font-body text-xs text-white/40 hover:text-white/60 transition-colors">
+              Terms &amp; Conditions
             </Link>
           </div>
         </div>
