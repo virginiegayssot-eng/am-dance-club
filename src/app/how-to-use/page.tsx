@@ -42,7 +42,7 @@ export default function HowToUsePage() {
             <h2 className="font-heading text-lg text-[#221f1c] mb-3">4. Manage or cancel a booking</h2>
             <p>
               Your upcoming bookings live on your dashboard. You can cancel directly from there — cancelling 24+ hours before class returns your credit automatically.
-              See our <Link href="/cancellation-policy" className="text-[#221f1c] underline">Cancellation Policy</Link> for full details.
+              See our <Link href="/terms-and-conditions#cancellation" className="text-[#221f1c] underline">Cancellation Policy</Link> for full details.
             </p>
           </section>
 
