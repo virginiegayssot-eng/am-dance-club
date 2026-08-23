@@ -3290,7 +3290,7 @@ export default function InstructorPage() {
               )}
               {(() => {
                 const assignableInstructors = (isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2))
-                  .filter(i => i.show_on_instructors_page || i.id === assignInstructor1 || i.id === assignInstructor2);
+                  .filter(i => i.show_on_instructors_page || i.id === assignInstructor1 || i.id === assignInstructor2 || i.id === profile?.id);
                 return (
                   <>
                     <div>
