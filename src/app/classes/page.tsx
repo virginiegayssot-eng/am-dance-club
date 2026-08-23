@@ -252,12 +252,13 @@ export default function ClassesPage() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="mb-3">
                       <h3 className="font-heading text-lg leading-snug">{cls.title}</h3>
-                      {[cls.instructor_name, cls.instructor2_name].filter(Boolean).length > 0 && (
+                      {[cls.instructor_name, cls.instructor2_name, cls.guest_instructor_name].filter(Boolean).length > 0 && (
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="flex -space-x-1.5">
                             {[
                               { name: cls.instructor_name, avatar: cls.instructor_avatar },
                               { name: cls.instructor2_name, avatar: cls.instructor2_avatar },
+                              { name: cls.guest_instructor_name, avatar: null as string | null },
                             ].filter(i => i.name).map((i, idx) => (
                               <div key={idx} className="w-5 h-5 rounded-full overflow-hidden bg-[#e2d0fb]/60 border border-white flex items-center justify-center text-[9px] font-heading shrink-0">
                                 {i.avatar ? (
@@ -270,7 +271,7 @@ export default function ClassesPage() {
                             ))}
                           </div>
                           <p className="font-body text-xs text-gray-500">
-                            w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
+                            w/ {[[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & "), cls.guest_instructor_name].filter(Boolean).join(" x ")}
                           </p>
                         </div>
                       )}

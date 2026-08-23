@@ -67,6 +67,7 @@ export default function InstructorPage() {
   const [assignInstructorTarget, setAssignInstructorTarget] = useState<ClassWithCount | null>(null);
   const [assignInstructor1, setAssignInstructor1] = useState("");
   const [assignInstructor2, setAssignInstructor2] = useState("");
+  const [assignGuestInstructor, setAssignGuestInstructor] = useState("");
   const [assignInstructorLoading, setAssignInstructorLoading] = useState(false);
   const [assignInstructorError, setAssignInstructorError] = useState("");
   const [editBioTarget, setEditBioTarget] = useState<Profile | null>(null);
@@ -1282,6 +1283,7 @@ export default function InstructorPage() {
     setAssignInstructorTarget(cls);
     setAssignInstructor1(cls.instructor_id ?? "");
     setAssignInstructor2(cls.instructor_id_2 ?? "");
+    setAssignGuestInstructor(cls.guest_instructor_name ?? "");
     setAssignInstructorError("");
   }
 
@@ -1301,6 +1303,7 @@ export default function InstructorPage() {
       .update({
         instructor_id: assignInstructor1 || null,
         instructor_id_2: assignInstructor2 || null,
+        guest_instructor_name: assignGuestInstructor.trim() || null,
       })
       .eq("id", assignInstructorTarget.id);
 
@@ -3322,6 +3325,19 @@ export default function InstructorPage() {
                   </>
                 );
               })()}
+              <div>
+                <label className="label">Guest instructor (optional)</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. Brenda"
+                  value={assignGuestInstructor}
+                  onChange={e => setAssignGuestInstructor(e.target.value)}
+                />
+                <p className="font-body text-xs text-gray-400 mt-1">
+                  For a guest teacher without a VIA account. Shown to clients as &ldquo;w/ {assignInstructor1 ? (instructors.find(i => i.id === assignInstructor1)?.full_name ?? "Instructor") : "Instructor"} x {assignGuestInstructor.trim() || "Guest Name"}&rdquo;.
+                </p>
+              </div>
               {assignInstructorError && (
                 <p className="font-body text-sm text-red-500">{assignInstructorError}</p>
               )}
@@ -3629,11 +3645,12 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   past?: boolean;
   isToday?: boolean;
 }) {
-  const instructorNames = [cls.instructor_id, cls.instructor_id_2]
+  const registeredInstructorNames = [cls.instructor_id, cls.instructor_id_2]
     .map(id => instructors.find(i => i.id === id))
     .filter((i): i is Profile => !!i && i.show_on_instructors_page)
     .map(i => i.full_name)
     .join(" & ");
+  const instructorNames = [registeredInstructorNames, cls.guest_instructor_name].filter(Boolean).join(" x ");
 
   return (
     <div className={`card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${cls.is_cancelled ? "opacity-60" : ""} ${isToday ? "ring-2 ring-[#000000]" : ""}`}>
