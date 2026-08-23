@@ -149,7 +149,14 @@ export default function ClassesPage() {
             <h1 className="section-title mb-1">Upcoming Classes</h1>
             <p className="font-body text-gray-500">[Schedule] · [Studio Location]</p>
           </div>
-          <Link href="/passes" className="btn-pink self-start sm:self-auto">View Passes & Pricing</Link>
+          <div className="flex flex-wrap gap-3 self-start sm:self-auto">
+            {process.env.NEXT_PUBLIC_CLASSPASS_URL && (
+              <a href={process.env.NEXT_PUBLIC_CLASSPASS_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                Also on ClassPass
+              </a>
+            )}
+            <Link href="/passes" className="btn-pink">View Passes & Pricing</Link>
+          </div>
         </div>
 
         <div className="flex gap-3 mb-8">

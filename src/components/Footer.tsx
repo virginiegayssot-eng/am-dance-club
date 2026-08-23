@@ -37,6 +37,11 @@ export default function Footer() {
                   {label}
                 </Link>
               ))}
+              {process.env.NEXT_PUBLIC_CLASSPASS_URL && (
+                <a href={process.env.NEXT_PUBLIC_CLASSPASS_URL} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
+                  Also on ClassPass
+                </a>
+              )}
               <a href="[Website URL]" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-white/70 hover:text-[#e2e8f0] transition-colors">
                 Website
               </a>
