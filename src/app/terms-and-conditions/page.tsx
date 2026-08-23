@@ -19,6 +19,7 @@ export default function TermsAndConditionsPage() {
           <a href="#cancellation" className="font-body text-sm text-[#000000] underline">Cancellation Policy</a>
           <a href="#privacy" className="font-body text-sm text-[#000000] underline">Privacy Policy</a>
           <a href="#filming" className="font-body text-sm text-[#000000] underline">Filming & Photography Policy</a>
+          <a href="#safety" className="font-body text-sm text-[#000000] underline">Injury & Safety</a>
         </nav>
 
         <div className="space-y-16 font-body text-gray-700 leading-relaxed">
@@ -180,6 +181,31 @@ export default function TermsAndConditionsPage() {
                 <h3 className="font-heading text-lg text-[#000000] mb-3">Questions or concerns</h3>
                 <p>
                   If you have any concerns about filming or photography, please speak with the instructor before the class begins so we can do our best to accommodate you.
+                </p>
+              </section>
+
+            </div>
+          </div>
+
+          <div id="safety">
+            <h2 className="font-heading text-2xl text-[#000000] mb-6">Injury & Safety</h2>
+            <div className="space-y-8">
+
+              <section>
+                <p>
+                  Students participate in classes at their own risk and are responsible for informing the instructor of any injury, medical condition or physical limitation that may affect their participation.
+                </p>
+              </section>
+
+              <section>
+                <p>
+                  Our instructors are dance professionals, not medical or physiotherapy experts, and cannot provide medical advice. Where possible, alternative or modified movements may be offered, but students are responsible for choosing movements appropriate to their individual circumstances and should stop if they experience pain or discomfort.
+                </p>
+              </section>
+
+              <section>
+                <p>
+                  To the extent permitted by law, we limit our liability for injuries or aggravation of existing injuries arising from participation in our classes.
                 </p>
               </section>
 
