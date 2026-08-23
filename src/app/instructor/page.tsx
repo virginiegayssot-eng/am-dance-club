@@ -3288,32 +3288,40 @@ export default function InstructorPage() {
               {!isAdmin && (
                 <p className="font-body text-xs text-gray-400">You can only assign yourself to a class.</p>
               )}
-              <div>
-                <label className="label">Instructor</label>
-                <select
-                  className="input"
-                  value={assignInstructor1}
-                  onChange={e => setAssignInstructor1(e.target.value)}
-                >
-                  <option value="">— None —</option>
-                  {(isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2)).map(i => (
-                    <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="label">Second instructor (optional)</label>
-                <select
-                  className="input"
-                  value={assignInstructor2}
-                  onChange={e => setAssignInstructor2(e.target.value)}
-                >
-                  <option value="">— None —</option>
-                  {(isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2)).map(i => (
-                    <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
-                  ))}
-                </select>
-              </div>
+              {(() => {
+                const assignableInstructors = (isAdmin ? instructors : instructors.filter(i => i.id === profile?.id || i.id === assignInstructor1 || i.id === assignInstructor2))
+                  .filter(i => i.show_on_instructors_page || i.id === assignInstructor1 || i.id === assignInstructor2);
+                return (
+                  <>
+                    <div>
+                      <label className="label">Instructor</label>
+                      <select
+                        className="input"
+                        value={assignInstructor1}
+                        onChange={e => setAssignInstructor1(e.target.value)}
+                      >
+                        <option value="">— None —</option>
+                        {assignableInstructors.map(i => (
+                          <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label">Second instructor (optional)</label>
+                      <select
+                        className="input"
+                        value={assignInstructor2}
+                        onChange={e => setAssignInstructor2(e.target.value)}
+                      >
+                        <option value="">— None —</option>
+                        {assignableInstructors.map(i => (
+                          <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                );
+              })()}
               {assignInstructorError && (
                 <p className="font-body text-sm text-red-500">{assignInstructorError}</p>
               )}
