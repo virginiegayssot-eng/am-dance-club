@@ -176,7 +176,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6">
             <h2 className="font-heading text-lg mb-3">Terms &amp; Conditions</h2>
             <p className="font-body text-sm text-gray-600 leading-relaxed mb-4">
-              We've updated our Terms & Conditions, covering our cancellation, privacy, and filming &amp; photography policies. By continuing to use your account, you agree to all of them — including that classes may be filmed or photographed for social media and/or marketing purposes; if you'd rather not appear, just let the instructor know before filming begins.
+              We've updated our Terms & Conditions, covering our cancellation, privacy, filming &amp; photography, and safety policies. By continuing to use your account, you agree to all of them — including that classes may be filmed or photographed for social media and/or marketing purposes; if you'd rather not appear, just let the instructor know before filming begins.
             </p>
             <p className="font-body text-sm mb-6">
               <Link href="/terms-and-conditions" target="_blank" className="text-[#221f1c] underline">Read the full Terms & Conditions</Link>

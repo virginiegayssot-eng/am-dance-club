@@ -19,6 +19,7 @@ export default function TermsAndConditionsPage() {
           <a href="#cancellation" className="font-body text-sm text-[#221f1c] underline">Cancellation Policy</a>
           <a href="#privacy" className="font-body text-sm text-[#221f1c] underline">Privacy Policy</a>
           <a href="#filming" className="font-body text-sm text-[#221f1c] underline">Filming & Photography Policy</a>
+          <a href="#safety" className="font-body text-sm text-[#221f1c] underline">Injury & Safety</a>
         </nav>
 
         <div className="space-y-16 font-body text-gray-700 leading-relaxed">
@@ -173,6 +174,31 @@ export default function TermsAndConditionsPage() {
                 <h3 className="font-heading text-lg text-[#221f1c] mb-3">Questions or concerns</h3>
                 <p>
                   If you have any concerns about filming or photography, please speak with the instructor before the class begins so we can do our best to accommodate you.
+                </p>
+              </section>
+
+            </div>
+          </div>
+
+          <div id="safety">
+            <h2 className="font-heading text-2xl text-[#221f1c] mb-6">Injury & Safety</h2>
+            <div className="space-y-8">
+
+              <section>
+                <p>
+                  You take part in our classes at your own risk. Please let your instructor know beforehand if you have an injury, medical condition, or any physical limitation that might affect how you move.
+                </p>
+              </section>
+
+              <section>
+                <p>
+                  Our instructors are trained in dance, not medicine — they can't offer medical advice. We'll suggest modifications where we can, but it's up to you to choose movements that suit your body, and to stop straight away if something hurts.
+                </p>
+              </section>
+
+              <section>
+                <p>
+                  To the extent the law allows, our liability for injury — or for making an existing injury worse — during class is limited.
                 </p>
               </section>
 
