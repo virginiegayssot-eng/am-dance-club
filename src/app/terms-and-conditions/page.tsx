@@ -193,25 +193,19 @@ export default function TermsAndConditionsPage() {
 
               <section>
                 <p>
-                  Your safety and wellbeing are important to us. Please let your instructor know if you have an injury, medical condition or any movement limitations before class so we can help you participate safely.
+                  You take part in our classes at your own risk. Please let your instructor know beforehand if you have an injury, medical condition, or any physical limitation that might affect how you move.
                 </p>
               </section>
 
               <section>
                 <p>
-                  If you become injured or feel unwell during class, please stop and let the instructor know straight away. We will check in with you and provide reasonable assistance where possible.
+                  Our instructors are trained in dance, not medicine — they can't offer medical advice. We'll suggest modifications where we can, but it's up to you to choose movements that suit your body, and to stop straight away if something hurts.
                 </p>
               </section>
 
               <section>
                 <p>
-                  We want our classes to be welcoming and inclusive. If you have accessibility needs or require a modification to a movement, please let us know. We will do our best to accommodate you where reasonably possible.
-                </p>
-              </section>
-
-              <section>
-                <p>
-                  Please always listen to your body and participate at a level that feels safe and comfortable for you.
+                  To the extent the law allows, our liability for injury — or for making an existing injury worse — during class is limited.
                 </p>
               </section>
 
