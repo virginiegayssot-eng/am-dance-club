@@ -46,13 +46,16 @@ export default function ReportsPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [activeTab, setActiveTab] = useState<"revenue" | "attendance" | "students" | "birthdays">("revenue");
+  const [activeTab, setActiveTab] = useState<"revenue" | "attendance" | "students" | "birthdays" | "settings">("revenue");
   const [students, setStudents] = useState<StudentReport[]>([]);
   const [classes, setClasses] = useState<ClassReport[]>([]);
   const [revenue, setRevenue] = useState<RevenueRow[]>([]);
   const [passesSold, setPassesSold] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<"3m" | "6m" | "12m">("3m");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [reminderSettings, setReminderSettings] = useState<{ booking_reminders_enabled: boolean; winback_reminders_enabled: boolean } | null>(null);
+  const [savingReminderSetting, setSavingReminderSetting] = useState<"booking" | "winback" | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -65,9 +68,25 @@ export default function ReportsPage() {
   async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
-    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    const { data: prof } = await supabase.from("profiles").select("role, is_admin").eq("id", user.id).single();
     if (prof?.role !== "instructor") { router.push("/dashboard"); return; }
+    setIsAdmin(!!prof?.is_admin);
+    if (prof?.is_admin) loadReminderSettings();
     await loadData();
+  }
+
+  async function loadReminderSettings() {
+    const { data } = await supabase.from("reminder_settings").select("booking_reminders_enabled, winback_reminders_enabled").eq("id", 1).single();
+    if (data) setReminderSettings(data);
+  }
+
+  async function toggleReminderSetting(key: "booking_reminders_enabled" | "winback_reminders_enabled") {
+    if (!reminderSettings) return;
+    const next = !reminderSettings[key];
+    setSavingReminderSetting(key === "booking_reminders_enabled" ? "booking" : "winback");
+    const { error } = await supabase.from("reminder_settings").update({ [key]: next, updated_at: new Date().toISOString() }).eq("id", 1);
+    setSavingReminderSetting(null);
+    if (!error) setReminderSettings(s => s ? { ...s, [key]: next } : s);
   }
 
   async function loadData() {
@@ -224,6 +243,7 @@ export default function ReportsPage() {
     { key: "attendance", label: "Attendance" },
     { key: "students", label: "Members" },
     { key: "birthdays", label: "Birthdays" },
+    ...(isAdmin ? [{ key: "settings", label: "Settings" }] as const : []),
   ] as const;
 
   if (loading) return (
@@ -260,20 +280,22 @@ export default function ReportsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 border-b border-gray-200">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? "border-[#334155] text-[#334155]"
-                  : "border-transparent text-gray-500 hover:text-black"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="overflow-x-auto mb-8 border-b border-gray-200">
+          <div className="flex gap-1 w-max">
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? "border-[#334155] text-[#334155]"
+                    : "border-transparent text-gray-500 hover:text-black"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* REVENUE TAB */}
@@ -598,6 +620,49 @@ export default function ReportsPage() {
                   );
                 })}
               </div>
+            )}
+          </div>
+        )}
+
+        {/* SETTINGS TAB */}
+        {activeTab === "settings" && (
+          <div className="max-w-xl space-y-4">
+            <p className="font-body text-sm text-gray-500 mb-2">
+              Automatic reminder emails (and push notifications, where enabled) sent to members. Turning one off pauses it immediately — no need to touch the schedule.
+            </p>
+
+            {reminderSettings === null ? (
+              <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
+            ) : (
+              <>
+                <div className="card p-5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-heading text-sm">Booking reminders</p>
+                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent ~12 hours before a class to everyone booked in.</p>
+                  </div>
+                  <button
+                    onClick={() => toggleReminderSetting("booking_reminders_enabled")}
+                    disabled={savingReminderSetting === "booking"}
+                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.booking_reminders_enabled ? "bg-[#334155]" : "bg-gray-300"} disabled:opacity-50`}
+                  >
+                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.booking_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+
+                <div className="card p-5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-heading text-sm">Win-back emails</p>
+                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent daily to members who haven't attended in 3+ weeks.</p>
+                  </div>
+                  <button
+                    onClick={() => toggleReminderSetting("winback_reminders_enabled")}
+                    disabled={savingReminderSetting === "winback"}
+                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.winback_reminders_enabled ? "bg-[#334155]" : "bg-gray-300"} disabled:opacity-50`}
+                  >
+                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.winback_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
