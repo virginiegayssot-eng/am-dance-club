@@ -479,30 +479,42 @@ export default function InstructorPage() {
     setClassFormLoading(true);
     setClassFormError("");
 
-    const { error } = await supabase.from("classes").insert({
-      title: classForm.title,
-      description: classForm.description || null,
-      class_date: classForm.class_date,
-      class_time: classForm.class_time,
-      price_cents: Math.round(parseFloat(classForm.price_cents) * 100),
-      capacity: parseInt(classForm.capacity),
-      duration_minutes: parseInt(classForm.durationMinutes),
-      instructor_id: profile!.id,
-      alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
-      alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
-      ...(classForm.location ? { location: classForm.location } : {}),
-      is_special: classForm.isSpecial,
-      special_label: classForm.isSpecial ? (classForm.specialLabel || "Special Class") : null,
-    });
+    try {
+      if (!profile) throw new Error("Your session isn't fully loaded yet — refresh the page and try again.");
 
-    if (!error) {
+      const price = parseFloat(classForm.price_cents);
+      const capacity = parseInt(classForm.capacity);
+      const duration = parseInt(classForm.durationMinutes);
+      if (!Number.isFinite(price) || !Number.isFinite(capacity) || !Number.isFinite(duration)) {
+        throw new Error("Price, capacity, and duration all need to be numbers.");
+      }
+
+      const { error } = await supabase.from("classes").insert({
+        title: classForm.title,
+        description: classForm.description || null,
+        class_date: classForm.class_date,
+        class_time: classForm.class_time,
+        price_cents: Math.round(price * 100),
+        capacity,
+        duration_minutes: duration,
+        instructor_id: profile.id,
+        alt_duration_minutes: classForm.altDurationMinutes ? parseInt(classForm.altDurationMinutes) : null,
+        alt_price_cents: classForm.altPriceCents ? Math.round(parseFloat(classForm.altPriceCents) * 100) : null,
+        ...(classForm.location ? { location: classForm.location } : {}),
+        is_special: classForm.isSpecial,
+        special_label: classForm.isSpecial ? (classForm.specialLabel || "Special Class") : null,
+      });
+
+      if (error) throw new Error(error.message);
+
       setShowClassForm(false);
       setClassForm({ title: "", description: "", class_date: "", class_time: "07:00", price_cents: "20", capacity: "20", durationMinutes: "45", altDurationMinutes: "", altPriceCents: "", location: "", isSpecial: false, specialLabel: "" });
       loadData();
-    } else {
-      setClassFormError(error.message);
+    } catch (err: any) {
+      setClassFormError(err?.message ?? "Something went wrong creating the class — please try again.");
+    } finally {
+      setClassFormLoading(false);
     }
-    setClassFormLoading(false);
   }
 
   async function bulkCreateFridays(e: React.FormEvent) {
