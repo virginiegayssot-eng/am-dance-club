@@ -222,7 +222,7 @@ export default function ClassesPage() {
                               { name: cls.instructor_name, avatar: cls.instructor_avatar },
                               { name: cls.instructor2_name, avatar: cls.instructor2_avatar },
                             ].filter(i => i.name).map((i, idx) => (
-                              <div key={idx} className="w-10 h-10 rounded-full overflow-hidden bg-[#e4c3cc]/60 border-2 border-white flex items-center justify-center text-sm font-heading shrink-0">
+                              <div key={idx} className="w-14 h-14 rounded-full overflow-hidden bg-[#e4c3cc]/60 border-2 border-white flex items-center justify-center text-lg font-heading shrink-0">
                                 {i.avatar ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={i.avatar} alt="" className="object-cover w-full h-full" />
