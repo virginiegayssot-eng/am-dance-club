@@ -643,9 +643,9 @@ export default function ReportsPage() {
                   <button
                     onClick={() => toggleReminderSetting("booking_reminders_enabled")}
                     disabled={savingReminderSetting === "booking"}
-                    className={`relative w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.booking_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
+                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.booking_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
                   >
-                    <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.booking_reminders_enabled ? "translate-x-6" : "translate-x-1"}`} />
+                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.booking_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
                   </button>
                 </div>
 
@@ -657,9 +657,9 @@ export default function ReportsPage() {
                   <button
                     onClick={() => toggleReminderSetting("winback_reminders_enabled")}
                     disabled={savingReminderSetting === "winback"}
-                    className={`relative w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.winback_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
+                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.winback_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
                   >
-                    <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.winback_reminders_enabled ? "translate-x-6" : "translate-x-1"}`} />
+                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.winback_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
                   </button>
                 </div>
               </>
