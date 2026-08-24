@@ -8,6 +8,9 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import Link from "next/link";
 import ReviewRequestPanel from "@/components/ReviewRequestPanel";
+import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
+import MerchPanel from "@/components/MerchPanel";
+import DiscountsPanel from "@/components/DiscountsPanel";
 import { Cake, PartyPopper, Calendar } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
@@ -17,7 +20,7 @@ export default function MarketingPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [activeTab, setActiveTab] = useState<"reviews" | "birthdays" | "broadcast" | "reminders">("reviews");
+  const [activeTab, setActiveTab] = useState<"reviews" | "carousel" | "merch" | "discounts" | "birthdays" | "broadcast" | "reminders">("reviews");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -153,6 +156,9 @@ export default function MarketingPage() {
 
   const tabs = [
     { key: "reviews", label: "Review Requests" },
+    { key: "carousel", label: "Reviews" },
+    { key: "merch", label: "Merch" },
+    { key: "discounts", label: "Discounts" },
     { key: "birthdays", label: "Birthdays" },
     { key: "broadcast", label: "Message a Segment" },
     ...(isAdmin ? [{ key: "reminders", label: "Reminders" }] as const : []),
@@ -203,6 +209,15 @@ export default function MarketingPage() {
           </div>
         )}
 
+        {/* REVIEWS CAROUSEL TAB */}
+        {activeTab === "carousel" && <ReviewsCarouselPanel />}
+
+        {/* MERCH TAB */}
+        {activeTab === "merch" && <MerchPanel />}
+
+        {/* DISCOUNTS TAB */}
+        {activeTab === "discounts" && <DiscountsPanel />}
+
         {/* BIRTHDAYS TAB */}
         {activeTab === "birthdays" && (
           <div>
@@ -221,21 +236,55 @@ export default function MarketingPage() {
                   const isThisWeek = s.daysUntil <= 7;
                   const isToday = s.daysUntil === 0;
                   return (
-                    <div key={s.id} className={`card p-5 ${isToday ? "ring-2 ring-[#2041d8] bg-[#a3bdfe]/10" : isThisWeek ? "bg-[#e4c3cc]/10" : ""}`}>
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <p className="font-heading text-sm">{s.full_name ?? s.email}</p>
-                          {s.phone && <p className="font-body text-xs text-gray-400 mt-0.5">{s.phone}</p>}
+                    <div
+                      key={s.id}
+                      className={`card p-5 ${
+                        isToday
+                          ? "bg-[#2041d8]"
+                          : isThisWeek
+                          ? "bg-white ring-1 ring-[#2041d8]/25"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3 gap-3">
+                        <div className="min-w-0">
+                          <p className={`font-heading text-sm truncate ${isToday ? "text-white" : ""}`}>{s.full_name ?? s.email}</p>
+                          {s.phone && <p className={`font-body text-xs mt-0.5 truncate ${isToday ? "text-white/70" : "text-gray-400"}`}>{s.phone}</p>}
                         </div>
-                        {isToday ? <PartyPopper className="w-6 h-6 text-[#2041d8]" strokeWidth={1.5} /> : isThisWeek ? <Cake className="w-6 h-6 text-[#2041d8]" strokeWidth={1.5} /> : <Calendar className="w-6 h-6 text-gray-300" strokeWidth={1.5} />}
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                          isToday ? "bg-white/15" : isThisWeek ? "bg-[#2041d8]/10" : ""
+                        }`}>
+                          {isToday ? (
+                            <PartyPopper className="w-5 h-5 text-white" strokeWidth={1.75} />
+                          ) : isThisWeek ? (
+                            <Cake className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+                          ) : (
+                            <Calendar className="w-5 h-5 text-gray-300" strokeWidth={1.5} />
+                          )}
+                        </div>
                       </div>
-                      <p className="font-body text-xs text-gray-500">
+                      <p className={`font-body text-xs ${isToday ? "text-white/80" : "text-gray-500"}`}>
                         {new Date(s.birth_date!).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}
                       </p>
-                      <p className={`font-heading text-sm mt-1 ${isToday ? "text-[#2041d8]" : isThisWeek ? "text-[#e4c3cc]" : "text-gray-400"}`}>
-                        {isToday ? "Today!" : `In ${s.daysUntil} day${s.daysUntil !== 1 ? "s" : ""}`}
-                      </p>
-                      <Link href={`/chat?dm=${s.id}`} className="mt-3 font-body text-xs text-[#2041d8] hover:underline block">
+                      <div className="mt-2">
+                        {isToday ? (
+                          <span className="inline-flex items-center bg-white text-[#2041d8] font-heading text-xs px-2.5 py-1 rounded-full">
+                            🎂 Today!
+                          </span>
+                        ) : isThisWeek ? (
+                          <span className="inline-flex items-center bg-[#2041d8] text-white font-heading text-xs px-2.5 py-1 rounded-full">
+                            In {s.daysUntil} day{s.daysUntil !== 1 ? "s" : ""}
+                          </span>
+                        ) : (
+                          <span className="font-heading text-sm text-gray-400">
+                            In {s.daysUntil} days
+                          </span>
+                        )}
+                      </div>
+                      <Link
+                        href={`/chat?dm=${s.id}`}
+                        className={`mt-3 font-body text-xs hover:underline block ${isToday ? "text-white" : "text-[#2041d8]"}`}
+                      >
                         Send birthday message →
                       </Link>
                     </div>
