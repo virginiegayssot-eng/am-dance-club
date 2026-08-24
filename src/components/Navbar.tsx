@@ -122,7 +122,10 @@ export default function Navbar() {
                     {isInstructor ? "Dashboard" : "My Classes"}
                   </Link>
                   {isInstructor && (
-                    <Link href="/reports" className={`font-body text-sm transition-colors ${isActive("/reports")}`}>Reports</Link>
+                    <>
+                      <Link href="/reports" className={`font-body text-sm transition-colors ${isActive("/reports")}`}>Reports</Link>
+                      <Link href="/marketing" className={`font-body text-sm transition-colors ${isActive("/marketing")}`}>Marketing</Link>
+                    </>
                   )}
                 </>
               )}
@@ -183,7 +186,7 @@ export default function Navbar() {
 
             {profile && [
               { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
-              ...(isInstructor ? [{ href: "/reports", label: "Reports" }] : []),
+              ...(isInstructor ? [{ href: "/reports", label: "Reports" }, { href: "/marketing", label: "Marketing" }] : []),
               { href: "/profile", label: "My Profile" },
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="block font-body text-sm text-black py-2.5 px-1 hover:text-[#2041d8]" onClick={() => setMenuOpen(false)}>
