@@ -9,6 +9,23 @@ alter table public.registrations
 alter table public.profiles
   add column if not exists last_winback_sent_at timestamptz;
 
+-- Single-row switch so an admin can pause either reminder type from the
+-- Reports > Settings tab without touching the cron schedule or code.
+create table if not exists public.reminder_settings (
+  id int primary key default 1,
+  booking_reminders_enabled boolean not null default true,
+  winback_reminders_enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  constraint reminder_settings_singleton check (id = 1)
+);
+insert into public.reminder_settings (id) values (1) on conflict (id) do nothing;
+
+alter table public.reminder_settings enable row level security;
+create policy "Instructors can view reminder settings" on public.reminder_settings
+  for select using (auth.uid() in (select id from public.profiles where role = 'instructor'));
+create policy "Admins can update reminder settings" on public.reminder_settings
+  for update using (auth.uid() in (select id from public.profiles where role = 'instructor' and is_admin = true));
+
 create extension if not exists pg_cron with schema extensions;
 create extension if not exists pg_net with schema extensions;
 

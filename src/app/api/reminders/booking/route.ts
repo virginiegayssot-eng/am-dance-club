@@ -22,8 +22,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
   const admin = adminClient();
+
+  const { data: settings } = await admin
+    .from("reminder_settings")
+    .select("booking_reminders_enabled")
+    .eq("id", 1)
+    .single();
+  if (settings && !settings.booking_reminders_enabled) {
+    return NextResponse.json({ sent: 0, skipped: "disabled" });
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   // A coarse date-range prefilter (classes!inner makes the joined column
   // filterable) — the precise 12-hour window check happens below in JS,

@@ -21,8 +21,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
   const admin = adminClient();
+
+  const { data: settings } = await admin
+    .from("reminder_settings")
+    .select("winback_reminders_enabled")
+    .eq("id", 1)
+    .single();
+  if (settings && !settings.winback_reminders_enabled) {
+    return NextResponse.json({ sent: 0, skipped: "disabled" });
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const cutoff = new Date(Date.now() - INACTIVE_DAYS * 24 * 3_600_000).toISOString();
 
   const { data: lastAttendance } = await admin
