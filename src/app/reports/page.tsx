@@ -280,20 +280,22 @@ export default function ReportsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 border-b border-gray-200">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? "border-[#2041d8] text-[#2041d8]"
-                  : "border-transparent text-gray-500 hover:text-black"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="overflow-x-auto mb-8 border-b border-gray-200">
+          <div className="flex gap-1 w-max">
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? "border-[#2041d8] text-[#2041d8]"
+                    : "border-transparent text-gray-500 hover:text-black"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* REVENUE TAB */}
