@@ -9,22 +9,12 @@ export function pushAdminClient() {
   );
 }
 
-export async function sendPushToAll(
-  payload: { title: string; body: string; url: string },
-  excludeStudentId?: string
-) {
+async function sendPushToSubs(admin: ReturnType<typeof pushAdminClient>, subs: { id: string; endpoint: string; p256dh: string; auth: string }[], payload: { title: string; body: string; url: string }) {
   webpush.setVapidDetails(
     "mailto:theamdance@gmail.com",
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!
   );
-
-  const admin = pushAdminClient();
-  let query = admin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
-  if (excludeStudentId) query = query.neq("student_id", excludeStudentId);
-  const { data: subs, error: queryError } = await query;
-  if (queryError) { console.error("push_subscriptions query failed:", queryError.message); return; }
-  if (!subs || subs.length === 0) { console.log("sendPushToAll: no subscriptions to notify"); return; }
 
   const json = JSON.stringify(payload);
   await Promise.all(
@@ -47,4 +37,34 @@ export async function sendPushToAll(
       }
     })
   );
+}
+
+export async function sendPushToAll(
+  payload: { title: string; body: string; url: string },
+  excludeStudentId?: string
+) {
+  const admin = pushAdminClient();
+  let query = admin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
+  if (excludeStudentId) query = query.neq("student_id", excludeStudentId);
+  const { data: subs, error: queryError } = await query;
+  if (queryError) { console.error("push_subscriptions query failed:", queryError.message); return; }
+  if (!subs || subs.length === 0) { console.log("sendPushToAll: no subscriptions to notify"); return; }
+  await sendPushToSubs(admin, subs, payload);
+}
+
+// Sends only to the given students' subscriptions — for reminders and other
+// per-recipient notifications where sendPushToAll's broadcast would be wrong.
+export async function sendPushToStudents(
+  studentIds: string[],
+  payload: { title: string; body: string; url: string }
+) {
+  if (studentIds.length === 0) return;
+  const admin = pushAdminClient();
+  const { data: subs, error: queryError } = await admin
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth")
+    .in("student_id", studentIds);
+  if (queryError) { console.error("push_subscriptions query failed:", queryError.message); return; }
+  if (!subs || subs.length === 0) return;
+  await sendPushToSubs(admin, subs, payload);
 }

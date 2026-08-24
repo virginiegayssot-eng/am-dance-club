@@ -11,3 +11,20 @@ export function toLocalDateStr(d: Date): string {
 export function todayLocal(): string {
   return toLocalDateStr(new Date());
 }
+
+// class_date/class_time store Sydney wall-clock time with no timezone
+// offset. The server runs in UTC, so parsing that string directly (e.g.
+// `new Date(`${date}T${time}`)`) silently misreads it as UTC — a 7pm Sydney
+// class becomes 7pm UTC, 10-11 hours later than reality. This converts the
+// Sydney wall-clock time to the correct UTC instant, using Sydney's actual
+// offset for that specific date (handles DST).
+function getTimezoneOffsetMs(date: Date, timeZone: string): number {
+  const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+export function sydneyDateTimeToUTC(dateStr: string, timeStr: string): Date {
+  const guess = new Date(`${dateStr}T${timeStr}Z`);
+  const offsetMs = getTimezoneOffsetMs(guess, "Australia/Sydney");
+  return new Date(guess.getTime() - offsetMs);
+}
