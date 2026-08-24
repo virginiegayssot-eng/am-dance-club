@@ -216,13 +216,13 @@ export default function ClassesPage() {
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
                       {[cls.instructor_name, cls.instructor2_name].filter(Boolean).length > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="flex -space-x-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-2">
                             {[
                               { name: cls.instructor_name, avatar: cls.instructor_avatar },
                               { name: cls.instructor2_name, avatar: cls.instructor2_avatar },
                             ].filter(i => i.name).map((i, idx) => (
-                              <div key={idx} className="w-5 h-5 rounded-full overflow-hidden bg-[#e4c3cc]/60 border border-white flex items-center justify-center text-[9px] font-heading shrink-0">
+                              <div key={idx} className="w-10 h-10 rounded-full overflow-hidden bg-[#e4c3cc]/60 border-2 border-white flex items-center justify-center text-sm font-heading shrink-0">
                                 {i.avatar ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={i.avatar} alt="" className="object-cover w-full h-full" />
@@ -232,7 +232,7 @@ export default function ClassesPage() {
                               </div>
                             ))}
                           </div>
-                          <p className="font-body text-xs text-gray-500">
+                          <p className="font-body text-sm text-gray-500">
                             w/ {[cls.instructor_name, cls.instructor2_name].filter(Boolean).join(" & ")}
                           </p>
                         </div>
