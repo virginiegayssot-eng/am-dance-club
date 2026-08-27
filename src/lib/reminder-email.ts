@@ -61,16 +61,20 @@ export function buildBookingReminderEmailHtml(opts: {
             <p style="color:#444;font-size:15px;margin:0;">${classDateLabel} · ${classTimeLabel}</p>
             <p style="color:#444;font-size:15px;margin:4px 0 0;">${location}</p>
           </div>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            Need to change your plans? You can manage your booking anytime from the app.
-          </p>
-          <div style="text-align:center;margin:32px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
-              Manage My Booking
-            </a>
-          </div>
           <p style="color:#444;font-size:16px;margin:0;">See you there!</p>
           <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
+        </div>
+        <div style="background:#e4c3cc;padding:18px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="color:#2041d8;font-size:14px;font-weight:bold;" valign="middle">Need to change your plans?</td>
+              <td align="right" valign="middle">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:50px;font-size:13px;font-weight:bold;white-space:nowrap;display:inline-block;">
+                  Manage My Booking
+                </a>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
     </body>
