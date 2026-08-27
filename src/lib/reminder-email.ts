@@ -19,6 +19,15 @@ export function buildBirthdayEmailHtml(firstName: string) {
           <p style="color:#444;font-size:16px;margin:0;">See you on the dance floor soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
         </div>
+        <div style="background:#e4c3cc;padding:28px 32px;text-align:center;">
+          <p style="color:#2041d8;font-size:14px;font-weight:bold;margin:0 0 14px;">Treat yourself to a class this week?</p>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/classes" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:bold;display:inline-block;">
+            Book a Class
+          </a>
+          <p style="color:#2041d8;font-size:12px;margin:18px 0 0;">
+            Follow us on Instagram <a href="https://www.instagram.com/theamdance" style="color:#2041d8;text-decoration:underline;">@theamdance</a>
+          </p>
+        </div>
       </div>
     </body>
     </html>
@@ -53,11 +62,11 @@ export function buildBookingReminderEmailHtml(opts: {
             <p style="color:#444;font-size:15px;margin:4px 0 0;">${location}</p>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            Can't make it anymore? Cancel from your dashboard so we can offer your spot to someone else.
+            Need to change your plans? You can manage your booking anytime from the app.
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#2041d8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
-              View Booking
+              Manage My Booking
             </a>
           </div>
           <p style="color:#444;font-size:16px;margin:0;">See you there!</p>
