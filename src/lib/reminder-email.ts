@@ -19,9 +19,6 @@ export function buildBirthdayEmailHtml(firstName: string) {
           <p style="color:#444;font-size:16px;margin:0;">See you on the dance floor soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
         </div>
-        <div style="background:#e4c3cc;padding:20px;text-align:center;">
-          <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
-        </div>
       </div>
     </body>
     </html>
@@ -65,9 +62,6 @@ export function buildBookingReminderEmailHtml(opts: {
           </div>
           <p style="color:#444;font-size:16px;margin:0;">See you there!</p>
           <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
-        </div>
-        <div style="background:#e4c3cc;padding:20px;text-align:center;">
-          <p style="color:#2041d8;font-size:12px;margin:0;">Every Friday · 7:00 AM · North Steyne Surf Club, Manly NSW</p>
         </div>
       </div>
     </body>
