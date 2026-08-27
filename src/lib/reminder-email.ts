@@ -14,7 +14,7 @@ export function buildBirthdayEmailHtml(firstName: string) {
             Happy birthday! 🎉 We hope you have a wonderful day.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            Thank you for being part of THE A.M Dance Club — we love having you in class.
+            Thank you for being part of THE A.M Dance Club. We love having you in class.
           </p>
           <p style="color:#444;font-size:16px;margin:0;">See you on the dance floor soon!</p>
           <p style="color:#444;font-size:16px;margin:0;">Ginny</p>
