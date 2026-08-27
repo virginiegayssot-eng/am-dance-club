@@ -88,7 +88,7 @@ export function buildWinbackEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#2041d8;font-size:22px;margin:0 0 16px;">We miss you, ${firstName}!</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            It's been a few weeks since your last class — hope life's just been busy! Your spot on the dance floor is still there whenever you're ready.
+            It's been a few weeks since your last class. Hope life's just been busy! Your spot on the dance floor is still there whenever you're ready.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
             Come back for a Friday morning class and shake off the week with us.
