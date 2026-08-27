@@ -146,9 +146,14 @@ export default function MarketingPage() {
     .map(s => {
       const bd = new Date(s.birth_date!);
       const now = new Date();
+      // Compare at midnight, not the current moment — otherwise anyone
+      // whose birthday is today gets treated as "already passed" the
+      // instant it's past midnight, rolling them all the way to next
+      // year instead of showing daysUntil = 0.
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const thisYear = new Date(now.getFullYear(), bd.getMonth(), bd.getDate());
-      const next = thisYear < now ? new Date(now.getFullYear() + 1, bd.getMonth(), bd.getDate()) : thisYear;
-      const daysUntil = Math.ceil((next.getTime() - now.getTime()) / 86400000);
+      const next = thisYear < today ? new Date(now.getFullYear() + 1, bd.getMonth(), bd.getDate()) : thisYear;
+      const daysUntil = Math.round((next.getTime() - today.getTime()) / 86400000);
       return { ...s, daysUntil };
     })
     .sort((a, b) => a.daysUntil - b.daysUntil)
