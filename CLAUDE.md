@@ -1,5 +1,17 @@
 # Conventions
 
+## `demo` always tracks the latest version
+
+`demo` is the branch shown to prospective new clients — it needs to reflect the current state of the app at all times, not a snapshot from whenever it was last touched. **Whenever you ship a change to THE A.M (`main`) — a bug fix, a visual/UX modernization, a new feature — port the applicable parts to `demo` too, in the same session, without waiting to be asked.** This applies even when the user's request only names `main` or another specific client.
+
+What "applicable parts" means in practice:
+- **Visual/UX/styling changes** (tab bars, card layouts, toggle polish, color/spacing tweaks) — port as-is, swapping in `demo`'s own accent color (`#221f1c`) wherever THE A.M's `#2041d8` appears. These are exactly what a prospect judges the product on, so don't skip them.
+- **Bug fixes** — port if the same bug exists on `demo` (check first; don't assume). Stale-copy/wording bugs in particular tend to exist on every branch that forked before the fix.
+- **Features gated behind real client data or infra that `demo` doesn't have** (the four automatic reminder emails and their cron jobs, anything requiring a live Stripe/Resend/push setup) — use judgement: a prospect exploring the UI benefits from seeing the feature's settings/UI even without live cron jobs actually running, but don't wire up real scheduled sends or spend a client's `CRON_SECRET`-equivalent on a demo environment. If unsure whether a feature is demo-appropriate, ask rather than silently skipping it.
+- Features still mid-build or explicitly deferred by the user for a specific client (see the Porting checklist below) don't need to jump to `demo` ahead of that client — port to `demo` once the feature is actually finished and shipped somewhere real.
+
+Build-verify-commit-push on `demo` the same way as any other branch — don't skip the build check just because it's not a "real" client.
+
 ## Wide content on mobile
 
 Never wrap a `<table>` (or any content that can exceed the viewport width — wide flex rows, long unbroken text) in a container that only has `overflow-hidden`. That clips anything past the edge with no way to scroll to it — the content silently becomes inaccessible on mobile instead of erroring.
