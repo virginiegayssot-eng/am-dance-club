@@ -12,7 +12,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
 import { notifyPush } from "@/lib/push";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -1081,14 +1081,14 @@ export default function InstructorPage() {
   }
 
   const tabs = [
-    { key: "classes", label: "Classes" },
-    { key: "attendance", label: "Attendance" },
-    { key: "videos", label: "Videos" },
-    { key: "passes", label: "Passes" },
-    { key: "students", label: "Members" },
-    { key: "playlists", label: "Playlists" },
-    { key: "news", label: "Club News" },
-    { key: "instructors", label: "Instructors" },
+    { key: "classes", label: "Classes", icon: Calendar },
+    { key: "attendance", label: "Attendance", icon: CheckSquare },
+    { key: "videos", label: "Videos", icon: Video },
+    { key: "passes", label: "Passes", icon: Ticket },
+    { key: "students", label: "Members", icon: Users },
+    { key: "playlists", label: "Playlists", icon: ListMusic },
+    { key: "news", label: "Club News", icon: Newspaper },
+    { key: "instructors", label: "Instructors", icon: UserCog },
   ] as const;
 
   if (loading) {
@@ -1205,20 +1205,25 @@ export default function InstructorPage() {
         </div>
 
         {/* Tabs */}
-        <div ref={tabsRef} className="flex gap-1 mb-8 border-b border-gray-200 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === tab.key
-                  ? "border-[#2041d8] text-[#2041d8]"
-                  : "border-transparent text-gray-500 hover:text-black"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div ref={tabsRef} className="overflow-x-auto mb-8 -mx-1 px-1 border-b border-gray-100">
+          <div className="inline-flex items-center gap-1 w-max pb-3">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+                    active ? "bg-[#2041d8] text-white" : "text-gray-500 hover:text-black hover:bg-black/5"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* CLASSES TAB */}

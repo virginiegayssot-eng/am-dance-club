@@ -201,8 +201,8 @@ export default function MarketingPage() {
         </div>
 
         {/* Tabs */}
-        <div className="overflow-x-auto mb-10 -mx-1 px-1">
-          <div className="inline-flex items-center gap-1 w-max">
+        <div className="overflow-x-auto mb-10 -mx-1 px-1 border-b border-gray-100">
+          <div className="inline-flex items-center gap-1 w-max pb-3">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const active = activeTab === tab.key;
