@@ -144,3 +144,43 @@ Reminder settings started out on Reports > Settings but that's the wrong home �
 Seven tabs (THE A.M; `template` still has the original four — Merch/Discounts/Reviews-carousel move hasn't been ported there yet): **Review Requests** (the existing first-timers/any-member review-email tool, pulled out into `src/components/ReviewRequestPanel.tsx` so it can be used both here and from its original spot on the instructor dashboard's quick-action button after marking attendance — deliberately left as two separate mounts of the same component rather than threading it through the dashboard's much larger page state), **Reviews** (homepage testimonial-carousel management — approve/add/delete — in `src/components/ReviewsCarouselPanel.tsx`; distinct from Review Requests, which only sends request emails), **Merch** (`src/components/MerchPanel.tsx`) and **Discounts** (`src/components/DiscountsPanel.tsx`), **Birthdays** (moved off Reports, same upcoming-birthdays calc), **Message a Segment** (new: pick a filter — no active pass / inactive 3+ weeks / all members — then send a one-off email via `/api/instructor/broadcast-email`; this is the manual, one-time counterpart to win-back's automatic recurring nudge, no new DB table needed since it doesn't dedupe or reschedule), and **Reminders** (the toggle pair, admin-only).
 
 Merch, Discounts, and the Reviews carousel used to be tabs on the instructor Dashboard (`instructor/page.tsx`) — moved out because they're marketing actions, not day-to-day class-running ones. Each was extracted into its own self-contained panel component (own `useEffect` fetch, own state, own `<Modal>`/`<ConfirmDialog>`) rather than refactored in place, same reasoning as `ReviewRequestPanel`: `instructor/page.tsx` is large, live, and hard to browser-test, so a clean lift-and-shift into an isolated component is lower risk than threading three more features through its shared state. `src/components/Modal.tsx` is a shared copy of the modal shell used by these three panels — `instructor/page.tsx` keeps its own local `Modal` function for its remaining forms untouched, so don't try to consolidate the two into one without checking every remaining caller in that file. The Dashboard got a "Marketing" entry-point card (links to `/marketing`) where those tabs used to be, and the "Send Review Emails" quick-action button stayed on the Dashboard as-is.
+
+## Porting checklist — what's outstanding
+
+State as of 27 Aug. Cross-reference the detailed sections above for how each piece actually works before porting it — this is just the "did we get it all" list for when BYLA and Manea get the full treatment.
+
+### BYLA
+- [x] `is_admin` tier — already existed here first, nothing to do.
+- [x] Stuck-signup confirmation bug fix + "Resend confirmation email" on login — fixed 27 Aug.
+- [ ] Marketing section (`/marketing` page + Navbar link) — not built.
+- [ ] Merch/Discounts/Reviews-carousel moved off the Dashboard into Marketing — not done; still three Dashboard tabs there.
+- [ ] Instructor visibility toggle UI (on/off switch in the Instructors tab) — the underlying `show_on_instructors_page` column and the assign-instructor picker's filter on it already exist (BYLA is where that filter pattern came from), but there's no switch in the UI yet — SQL-only right now.
+- [ ] Automatic reminders — none of the four exist here yet (booking, win-back, birthday, review-request).
+- [ ] Email copy for all four reminder templates — needs BYLA's own voice/sign-off/Instagram handle, not a copy-paste from THE A.M.
+- [ ] Review-request email specifically needs the in-app-review version (`/api/reviews/submit`), not a Google review link — BYLA's review flow isn't Google-based.
+- [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
+
+### Manea
+- [x] `is_admin` tier — migration run, Manea (the owner) is admin.
+- [x] Stuck-signup confirmation bug fix + "Resend confirmation email" on login — fixed earlier this week.
+- [x] Instructor visibility toggle UI + assign-instructor picker filter — built and working.
+- [x] Security Advisor errors (`pass_types` RLS, `unread_dm_counts`) — fixed.
+- [ ] Marketing section (`/marketing` page + Navbar link) — not built.
+- [ ] Merch/Discounts/Reviews-carousel moved off the Dashboard into Marketing — not done.
+- [ ] Automatic reminders — none of the four exist here yet.
+- [ ] Email copy for all four reminder templates — needs Manea's own voice/sign-off/Instagram handle.
+- [ ] Review-request email uses a Google review link (same pattern as THE A.M) — confirm `GOOGLE_REVIEW_URL` is set once this is built.
+- [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
+- Push notification infra already exists (`push_subscriptions`, `push-admin.ts`) — reminders' push half can use it directly once built, no new infra needed there.
+
+### `template` (lower priority — not a live client)
+- [ ] Marketing section still has the old 4-tab layout — Merch/Discounts/Reviews-carousel move not ported.
+- [ ] Reminders: booking + win-back only — birthday and review-request not built.
+- [ ] `is_admin` tier not built.
+- [ ] Push notification infra doesn't exist at all — reminders here will be email-only until it's added.
+- [ ] `add-reminders.sql` is written but has never been run against a real Supabase project (no live deployment in active use).
+- [ ] The stuck-signup confirmation bug is worth sweeping into `template` too, so future clients built from it don't inherit the same gap.
+
+### Shared, whichever client you're doing
+- Give each client's cron jobs (all four reminder types) their own `CRON_SECRET`, set in that client's own Netlify env vars — never reuse THE A.M's.
+- Make every migration idempotent (`drop policy if exists` right before every `create policy`) from the first draft — assume a partial run and a retry, not a clean one-shot.
