@@ -16,6 +16,13 @@ import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell,
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
 
+function initials(name: string | null, email: string) {
+  const base = (name ?? email).trim();
+  const parts = base.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return base.slice(0, 2).toUpperCase();
+}
+
 function SectionHeader({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
   return (
     <div className="flex items-start gap-3 mb-6">
@@ -230,7 +237,9 @@ export default function MarketingPage() {
               title="Review Requests"
               description="Ask members to leave a review — first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
             />
-            <ReviewRequestPanel />
+            <div className="card p-6">
+              <ReviewRequestPanel />
+            </div>
           </div>
         )}
 
@@ -292,7 +301,7 @@ export default function MarketingPage() {
                   return (
                     <div
                       key={s.id}
-                      className={`card p-5 ${
+                      className={`card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md ${
                         isToday
                           ? "bg-[#2041d8]"
                           : isThisWeek
@@ -351,85 +360,104 @@ export default function MarketingPage() {
 
         {/* MESSAGE A SEGMENT TAB */}
         {activeTab === "broadcast" && (
-          <div className="max-w-xl space-y-5">
+          <div className="max-w-xl">
             <SectionHeader
               icon={Send}
               title="Message a Segment"
               description="Send a one-off email to a filtered group — a promo, a new-class announcement, a check-in. For automatic recurring nudges, see the Reminders tab instead."
             />
 
-            <div>
-              <label className="label">Who</label>
-              <select
-                className="input"
-                value={segmentFilter}
-                onChange={e => { setSegmentFilter(e.target.value as SegmentKey); setBroadcastSent(null); setBroadcastErrors([]); setSelectedBroadcastIds(new Set(segments[e.target.value as SegmentKey].map(s => s.id))); }}
-              >
-                {(Object.keys(segmentLabels) as SegmentKey[]).map(key => (
-                  <option key={key} value={key}>{segmentLabels[key]} ({segments[key].length})</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="label mb-0">Recipients ({selectedBroadcastIds.size} selected)</label>
-                <button type="button" onClick={selectAllInSegment} className="font-body text-xs text-[#2041d8] hover:underline">Select all</button>
-              </div>
-              {currentSegment.length === 0 ? (
-                <p className="font-body text-sm text-gray-400">No members match this filter.</p>
-              ) : (
-                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3">
-                  {currentSegment.map(s => (
-                    <label key={s.id} className="flex items-center gap-2 font-body text-sm">
-                      <input type="checkbox" checked={selectedBroadcastIds.has(s.id)} onChange={() => toggleBroadcastRecipient(s.id)} />
-                      <span>{s.full_name ?? s.email}</span>
-                      <span className="text-xs text-gray-400">{s.email}</span>
-                    </label>
-                  ))}
+            <div className="card p-6 sm:p-8 space-y-6">
+              <div>
+                <label className="label">Who</label>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(segmentLabels) as SegmentKey[]).map(key => {
+                    const active = segmentFilter === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => { setSegmentFilter(key); setBroadcastSent(null); setBroadcastErrors([]); setSelectedBroadcastIds(new Set(segments[key].map(s => s.id))); }}
+                        className={`font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+                          active ? "bg-[#2041d8] text-white" : "bg-white text-gray-500 border border-gray-200 hover:text-black"
+                        }`}
+                      >
+                        {segmentLabels[key]} · {segments[key].length}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <div>
-              <label className="label">Subject</label>
-              <input
-                className="input"
-                placeholder="e.g. New classes just added!"
-                value={broadcastSubject}
-                onChange={e => setBroadcastSubject(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label">Message</label>
-              <textarea
-                className="input resize-none"
-                rows={5}
-                placeholder="What do you want to tell them?"
-                value={broadcastMessage}
-                onChange={e => setBroadcastMessage(e.target.value)}
-              />
-            </div>
-
-            {broadcastSent !== null && (
-              <div className="space-y-1">
-                <p className="font-body text-sm text-green-600">
-                  {broadcastSent === 0 ? "No emails sent." : `${broadcastSent} email${broadcastSent !== 1 ? "s" : ""} sent successfully.`}
-                </p>
-                {broadcastErrors.length > 0 && (
-                  <p className="font-body text-sm text-red-500">{broadcastErrors.length} failed: {broadcastErrors.join("; ")}</p>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="label mb-0">Recipients ({selectedBroadcastIds.size} selected)</label>
+                  <button type="button" onClick={selectAllInSegment} className="font-body text-xs text-[#2041d8] hover:underline">Select all</button>
+                </div>
+                {currentSegment.length === 0 ? (
+                  <p className="font-body text-sm text-gray-400">No members match this filter.</p>
+                ) : (
+                  <div className="space-y-1 max-h-44 overflow-y-auto bg-white border border-gray-100 rounded-xl p-2">
+                    {currentSegment.map(s => {
+                      const checked = selectedBroadcastIds.has(s.id);
+                      return (
+                        <label
+                          key={s.id}
+                          className={`flex items-center gap-3 font-body text-sm px-2 py-1.5 rounded-lg cursor-pointer transition-colors ${checked ? "bg-[#2041d8]/5" : "hover:bg-gray-50"}`}
+                        >
+                          <input type="checkbox" className="shrink-0" checked={checked} onChange={() => toggleBroadcastRecipient(s.id)} />
+                          <span className="w-7 h-7 rounded-full bg-[#2041d8]/10 text-[#2041d8] font-heading text-[11px] flex items-center justify-center shrink-0">
+                            {initials(s.full_name, s.email)}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate">{s.full_name ?? s.email}</span>
+                          <span className="text-xs text-gray-400 truncate shrink-0 max-w-[40%]">{s.email}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
-            )}
 
-            <button
-              type="button"
-              onClick={sendBroadcast}
-              disabled={sendingBroadcast || selectedBroadcastIds.size === 0 || !broadcastSubject.trim() || !broadcastMessage.trim()}
-              className="btn-primary w-full justify-center"
-            >
-              {sendingBroadcast ? "Sending…" : `Send to ${selectedBroadcastIds.size}`}
-            </button>
+              <div>
+                <label className="label">Subject</label>
+                <input
+                  className="input"
+                  placeholder="e.g. New classes just added!"
+                  value={broadcastSubject}
+                  onChange={e => setBroadcastSubject(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="label">Message</label>
+                <textarea
+                  className="input resize-none"
+                  rows={5}
+                  placeholder="What do you want to tell them?"
+                  value={broadcastMessage}
+                  onChange={e => setBroadcastMessage(e.target.value)}
+                />
+              </div>
+
+              {broadcastSent !== null && (
+                <div className="space-y-1">
+                  <p className="font-body text-sm text-green-600">
+                    {broadcastSent === 0 ? "No emails sent." : `${broadcastSent} email${broadcastSent !== 1 ? "s" : ""} sent successfully.`}
+                  </p>
+                  {broadcastErrors.length > 0 && (
+                    <p className="font-body text-sm text-red-500">{broadcastErrors.length} failed: {broadcastErrors.join("; ")}</p>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={sendBroadcast}
+                disabled={sendingBroadcast || selectedBroadcastIds.size === 0 || !broadcastSubject.trim() || !broadcastMessage.trim()}
+                className="btn-primary w-full justify-center"
+              >
+                {sendingBroadcast ? "Sending…" : `Send to ${selectedBroadcastIds.size}`}
+              </button>
+            </div>
           </div>
         )}
 
@@ -446,73 +474,32 @@ export default function MarketingPage() {
               <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
             ) : (
               <div className="space-y-3">
-                <div className="card p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
-                    <Clock className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-heading text-sm">Booking reminders</p>
-                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent ~12 hours before a class to everyone booked in.</p>
-                  </div>
-                  <button
-                    onClick={() => toggleReminderSetting("booking_reminders_enabled")}
-                    disabled={savingReminderSetting === "booking"}
-                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.booking_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
-                  >
-                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.booking_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
-                  </button>
-                </div>
-
-                <div className="card p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
-                    <Heart className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-heading text-sm">Win-back emails</p>
-                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent daily to members who haven't attended in 3+ weeks.</p>
-                  </div>
-                  <button
-                    onClick={() => toggleReminderSetting("winback_reminders_enabled")}
-                    disabled={savingReminderSetting === "winback"}
-                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.winback_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
-                  >
-                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.winback_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
-                  </button>
-                </div>
-
-                <div className="card p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
-                    <Cake className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-heading text-sm">Birthday emails</p>
-                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically to a member on their birthday.</p>
-                  </div>
-                  <button
-                    onClick={() => toggleReminderSetting("birthday_reminders_enabled")}
-                    disabled={savingReminderSetting === "birthday"}
-                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.birthday_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
-                  >
-                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.birthday_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
-                  </button>
-                </div>
-
-                <div className="card p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
-                    <Star className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-heading text-sm">First-timer review requests</p>
-                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically the morning after someone's first class. "First-timers by class" and "Any members" in Review Requests still work manually too.</p>
-                  </div>
-                  <button
-                    onClick={() => toggleReminderSetting("review_request_reminders_enabled")}
-                    disabled={savingReminderSetting === "review"}
-                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.review_request_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
-                  >
-                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.review_request_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
-                  </button>
-                </div>
+                {([
+                  { key: "booking_reminders_enabled", saving: "booking", icon: Clock, title: "Booking reminders", desc: "Sent ~12 hours before a class to everyone booked in." },
+                  { key: "winback_reminders_enabled", saving: "winback", icon: Heart, title: "Win-back emails", desc: "Sent daily to members who haven't attended in 3+ weeks." },
+                  { key: "birthday_reminders_enabled", saving: "birthday", icon: Cake, title: "Birthday emails", desc: "Sent automatically to a member on their birthday." },
+                  { key: "review_request_reminders_enabled", saving: "review", icon: Star, title: "First-timer review requests", desc: "Sent automatically the morning after someone's first class. \"First-timers by class\" and \"Any members\" in Review Requests still work manually too." },
+                ] as const).map(({ key, saving, icon: Icon, title, desc }) => {
+                  const on = reminderSettings[key];
+                  return (
+                    <div key={key} className={`card p-5 flex items-center gap-4 transition-all ${on ? "ring-1 ring-[#2041d8]/20" : ""}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${on ? "bg-[#2041d8]/10" : "bg-gray-100"}`}>
+                        <Icon className={`w-5 h-5 ${on ? "text-[#2041d8]" : "text-gray-400"}`} strokeWidth={1.75} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-heading text-sm">{title}</p>
+                        <p className="font-body text-xs text-gray-500 mt-0.5">{desc}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleReminderSetting(key)}
+                        disabled={savingReminderSetting === saving}
+                        className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${on ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
+                      >
+                        <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${on ? "translate-x-5" : "translate-x-0"}`} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
