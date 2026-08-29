@@ -202,7 +202,7 @@ export default function MarketingPage() {
 
         {/* Tabs */}
         <div className="overflow-x-auto mb-10 -mx-1 px-1">
-          <div className="inline-flex items-center gap-1 bg-white rounded-full p-1.5 border border-gray-100 shadow-sm w-max">
+          <div className="inline-flex items-center gap-1 w-max">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const active = activeTab === tab.key;
@@ -211,7 +211,7 @@ export default function MarketingPage() {
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex items-center gap-1.5 font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
-                    active ? "bg-[#2041d8] text-white" : "text-gray-500 hover:text-black hover:bg-gray-50"
+                    active ? "bg-[#2041d8] text-white" : "text-gray-500 hover:text-black hover:bg-black/5"
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" strokeWidth={2} />
