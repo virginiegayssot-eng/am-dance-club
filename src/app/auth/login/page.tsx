@@ -15,10 +15,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setResent(false);
     setLoading(true);
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -37,6 +40,19 @@ export default function LoginPage() {
 
     router.push(profile?.role === "instructor" ? "/instructor" : "/dashboard");
     router.refresh();
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResending(true);
+    setResent(false);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${location.origin}/auth/callback?next=/dashboard` },
+    });
+    setResending(false);
+    if (!error) setResent(true);
   };
 
   return (
@@ -81,8 +97,22 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl space-y-2">
+                <p>{error}</p>
+                {error === "Email not confirmed" && (
+                  resent ? (
+                    <p className="text-green-600">Confirmation email sent — check your inbox.</p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendConfirmation}
+                      disabled={resending}
+                      className="text-[#000000] underline"
+                    >
+                      {resending ? "Sending…" : "Resend confirmation email"}
+                    </button>
+                  )
+                )}
               </div>
             )}
 
