@@ -14,9 +14,16 @@ alter table public.attendance
 alter table public.reminder_settings
   add column if not exists review_request_reminders_enabled boolean not null default true;
 
+-- Unlike the other three reminders, this one needs to land the SAME DAY as
+-- the class (the email text says "this morning") — not the next morning.
+-- THE A.M's only class is Friday 7am, so this fires Friday 8am Sydney, an
+-- hour after class starts (Thursday 22:00 UTC = Friday 8am AEST — during
+-- AEDT this drifts to 9am, same DST caveat as the other jobs). A future
+-- client with a different class day/time needs its own hour + day-of-week
+-- here, not a copy-paste of THE A.M's.
 select cron.schedule(
   'send-review-request-emails',
-  '0 20 * * *', -- 8pm UTC = 6/7am Sydney, depending on DST — same time as win-back/birthday
+  '0 22 * * 4',
   $$
   select net.http_post(
     url := 'https://YOUR_APP_URL/api/reminders/review-request',
