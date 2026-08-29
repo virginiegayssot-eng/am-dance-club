@@ -11,10 +11,24 @@ import ReviewRequestPanel from "@/components/ReviewRequestPanel";
 import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
 import MerchPanel from "@/components/MerchPanel";
 import DiscountsPanel from "@/components/DiscountsPanel";
-import { Cake, PartyPopper, Calendar } from "lucide-react";
+import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, type LucideIcon } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
+
+function SectionHeader({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
+  return (
+    <div className="flex items-start gap-3 mb-6">
+      <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+      </div>
+      <div>
+        <h2 className="font-heading text-lg mb-0.5">{title}</h2>
+        <p className="font-body text-sm text-gray-500 max-w-xl">{description}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function MarketingPage() {
   const router = useRouter();
@@ -160,13 +174,13 @@ export default function MarketingPage() {
     .slice(0, 20);
 
   const tabs = [
-    { key: "reviews", label: "Review Requests" },
-    { key: "carousel", label: "Reviews" },
-    { key: "merch", label: "Merch" },
-    { key: "discounts", label: "Discounts" },
-    { key: "birthdays", label: "Birthdays" },
-    { key: "broadcast", label: "Message a Segment" },
-    ...(isAdmin ? [{ key: "reminders", label: "Reminders" }] as const : []),
+    { key: "reviews", label: "Review Requests", icon: Star },
+    { key: "carousel", label: "Reviews", icon: Quote },
+    { key: "merch", label: "Merch", icon: ShoppingBag },
+    { key: "discounts", label: "Discounts", icon: Tag },
+    { key: "birthdays", label: "Birthdays", icon: Cake },
+    { key: "broadcast", label: "Message a Segment", icon: Send },
+    ...(isAdmin ? [{ key: "reminders", label: "Reminders", icon: Bell }] as const : []),
   ] as const;
 
   if (loading) return (
@@ -183,52 +197,87 @@ export default function MarketingPage() {
         <div className="mb-10">
           <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Instructor</p>
           <h1 className="section-title">Marketing</h1>
+          <p className="font-body text-sm text-gray-500 mt-2 max-w-xl">Everything for reaching, reviewing, and re-engaging your members lives here.</p>
         </div>
 
         {/* Tabs */}
-        <div className="overflow-x-auto mb-8 border-b border-gray-200">
-          <div className="flex gap-1 w-max">
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.key
-                    ? "border-[#2041d8] text-[#2041d8]"
-                    : "border-transparent text-gray-500 hover:text-black"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        <div className="overflow-x-auto mb-10 -mx-1 px-1">
+          <div className="inline-flex items-center gap-1 bg-white rounded-full p-1.5 border border-gray-100 shadow-sm w-max">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+                    active ? "bg-[#2041d8] text-white" : "text-gray-500 hover:text-black hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* REVIEW REQUESTS TAB */}
         {activeTab === "reviews" && (
           <div className="max-w-xl">
-            <p className="font-body text-sm text-gray-500 mb-4">
-              Ask members to leave a review — first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment.
-            </p>
+            <SectionHeader
+              icon={Star}
+              title="Review Requests"
+              description="Ask members to leave a review — first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
+            />
             <ReviewRequestPanel />
           </div>
         )}
 
         {/* REVIEWS CAROUSEL TAB */}
-        {activeTab === "carousel" && <ReviewsCarouselPanel />}
+        {activeTab === "carousel" && (
+          <div>
+            <SectionHeader
+              icon={Quote}
+              title="Reviews"
+              description="Approve, add, or remove the testimonials shown in the carousel on your homepage."
+            />
+            <ReviewsCarouselPanel />
+          </div>
+        )}
 
         {/* MERCH TAB */}
-        {activeTab === "merch" && <MerchPanel />}
+        {activeTab === "merch" && (
+          <div>
+            <SectionHeader
+              icon={ShoppingBag}
+              title="Merch"
+              description="Manage the products members can buy from your shop."
+            />
+            <MerchPanel />
+          </div>
+        )}
 
         {/* DISCOUNTS TAB */}
-        {activeTab === "discounts" && <DiscountsPanel />}
+        {activeTab === "discounts" && (
+          <div>
+            <SectionHeader
+              icon={Tag}
+              title="Discounts"
+              description="Create and manage promo codes for classes and passes."
+            />
+            <DiscountsPanel />
+          </div>
+        )}
 
         {/* BIRTHDAYS TAB */}
         {activeTab === "birthdays" && (
           <div>
-            <p className="font-body text-sm text-gray-500 mb-6">
-              {upcomingBirthdays.length} member{upcomingBirthdays.length !== 1 ? "s" : ""} with birthdays on record
-            </p>
+            <SectionHeader
+              icon={Cake}
+              title="Birthdays"
+              description={`${upcomingBirthdays.length} member${upcomingBirthdays.length !== 1 ? "s" : ""} with birthdays on record.`}
+            />
 
             {upcomingBirthdays.length === 0 ? (
               <div className="card p-10 text-center">
@@ -303,9 +352,11 @@ export default function MarketingPage() {
         {/* MESSAGE A SEGMENT TAB */}
         {activeTab === "broadcast" && (
           <div className="max-w-xl space-y-5">
-            <p className="font-body text-sm text-gray-500">
-              Send a one-off email to a filtered group — a promo, a new-class announcement, a check-in. For automatic recurring nudges, see the Reminders tab instead.
-            </p>
+            <SectionHeader
+              icon={Send}
+              title="Message a Segment"
+              description="Send a one-off email to a filtered group — a promo, a new-class announcement, a check-in. For automatic recurring nudges, see the Reminders tab instead."
+            />
 
             <div>
               <label className="label">Who</label>
@@ -384,17 +435,22 @@ export default function MarketingPage() {
 
         {/* REMINDERS TAB */}
         {activeTab === "reminders" && (
-          <div className="max-w-xl space-y-4">
-            <p className="font-body text-sm text-gray-500 mb-2">
-              Automatic reminder emails (and push notifications, where enabled) sent to members. Turning one off pauses it immediately — no need to touch the schedule.
-            </p>
+          <div className="max-w-xl">
+            <SectionHeader
+              icon={Bell}
+              title="Reminders"
+              description="Automatic reminder emails (and push notifications, where enabled) sent to members. Turning one off pauses it immediately — no need to touch the schedule."
+            />
 
             {reminderSettings === null ? (
               <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
             ) : (
-              <>
-                <div className="card p-5 flex items-center justify-between gap-4">
-                  <div>
+              <div className="space-y-3">
+                <div className="card p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+                    <Clock className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-heading text-sm">Booking reminders</p>
                     <p className="font-body text-xs text-gray-500 mt-0.5">Sent ~12 hours before a class to everyone booked in.</p>
                   </div>
@@ -407,8 +463,11 @@ export default function MarketingPage() {
                   </button>
                 </div>
 
-                <div className="card p-5 flex items-center justify-between gap-4">
-                  <div>
+                <div className="card p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+                    <Heart className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-heading text-sm">Win-back emails</p>
                     <p className="font-body text-xs text-gray-500 mt-0.5">Sent daily to members who haven't attended in 3+ weeks.</p>
                   </div>
@@ -421,8 +480,11 @@ export default function MarketingPage() {
                   </button>
                 </div>
 
-                <div className="card p-5 flex items-center justify-between gap-4">
-                  <div>
+                <div className="card p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+                    <Cake className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-heading text-sm">Birthday emails</p>
                     <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically to a member on their birthday.</p>
                   </div>
@@ -435,8 +497,11 @@ export default function MarketingPage() {
                   </button>
                 </div>
 
-                <div className="card p-5 flex items-center justify-between gap-4">
-                  <div>
+                <div className="card p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+                    <Star className="w-5 h-5 text-[#2041d8]" strokeWidth={1.75} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-heading text-sm">First-timer review requests</p>
                     <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically the morning after someone's first class. "First-timers by class" and "Any members" in Review Requests still work manually too.</p>
                   </div>
@@ -448,7 +513,7 @@ export default function MarketingPage() {
                     <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.review_request_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
