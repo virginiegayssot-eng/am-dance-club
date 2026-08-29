@@ -1511,9 +1511,9 @@ export default function InstructorPage() {
                         {s.filming_policy_accepted_at && (
                           <span
                             className="badge-confirmed mt-1 inline-block"
-                            title={`Accepted the Filming & Photography Policy on ${new Date(s.filming_policy_accepted_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}`}
+                            title={`Accepted the Terms & Conditions on ${new Date(s.filming_policy_accepted_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}`}
                           >
-                            Filming policy accepted
+                            Terms & Conditions accepted
                           </span>
                         )}
                       </div>
