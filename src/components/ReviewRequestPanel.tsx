@@ -30,9 +30,15 @@ export default function ReviewRequestPanel() {
 
   useEffect(() => {
     (async () => {
+      // lte("class_date", today) first, so the 60-row cap is spent on the
+      // 60 most recent PAST classes — without it, bulk-created recurring
+      // classes scheduled months into the future dominate an
+      // order-by-desc-then-limit query, starving out (or entirely
+      // replacing) the classes this tool actually needs to show.
       const { data: classData } = await supabase
         .from("classes")
         .select("id, title, class_date, is_cancelled")
+        .lte("class_date", todayLocal())
         .order("class_date", { ascending: false })
         .limit(60);
       setClasses(classData ?? []);

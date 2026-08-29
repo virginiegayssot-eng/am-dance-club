@@ -1128,23 +1128,11 @@ export default function InstructorPage() {
             <button onClick={() => setShowBulkForm(true)} className="btn-secondary py-2 px-4 text-sm">
               + Bulk Fridays
             </button>
-            <button onClick={() => openReviewModal()} className="btn-secondary py-2 px-4 text-sm">
-              Send Review Emails
-            </button>
             <button onClick={() => setShowClassForm(true)} className="btn-primary py-2 px-4 text-sm">
               + New Class
             </button>
           </div>
         </div>
-
-        {/* Marketing section entry point */}
-        <Link href="/marketing" className="card p-5 mb-8 flex items-center justify-between gap-4 hover:bg-[#fff8f3] transition-colors">
-          <div>
-            <p className="font-heading text-sm">Marketing</p>
-            <p className="font-body text-xs text-gray-500 mt-0.5">Merch, discounts, reviews, birthdays & promo emails live here</p>
-          </div>
-          <span className="font-body text-sm text-[#2041d8] shrink-0">Open →</span>
-        </Link>
 
         {/* Today's class banner */}
         {todaysClass && (
