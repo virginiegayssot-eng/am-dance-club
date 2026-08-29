@@ -144,16 +144,59 @@ Reminder settings started out on Reports > Settings but that's the wrong home �
 
 Seven tabs (THE A.M; `template` still has the original four — Merch/Discounts/Reviews-carousel move hasn't been ported there yet): **Review Requests** (the existing first-timers/any-member review-email tool, pulled out into `src/components/ReviewRequestPanel.tsx` so it can be used both here and from its original spot on the instructor dashboard's quick-action button after marking attendance — deliberately left as two separate mounts of the same component rather than threading it through the dashboard's much larger page state), **Reviews** (homepage testimonial-carousel management — approve/add/delete — in `src/components/ReviewsCarouselPanel.tsx`; distinct from Review Requests, which only sends request emails), **Merch** (`src/components/MerchPanel.tsx`) and **Discounts** (`src/components/DiscountsPanel.tsx`), **Birthdays** (moved off Reports, same upcoming-birthdays calc), **Message a Segment** (new: pick a filter — no active pass / inactive 3+ weeks / all members — then send a one-off email via `/api/instructor/broadcast-email`; this is the manual, one-time counterpart to win-back's automatic recurring nudge, no new DB table needed since it doesn't dedupe or reschedule), and **Reminders** (the toggle pair, admin-only).
 
-Merch, Discounts, and the Reviews carousel used to be tabs on the instructor Dashboard (`instructor/page.tsx`) — moved out because they're marketing actions, not day-to-day class-running ones. Each was extracted into its own self-contained panel component (own `useEffect` fetch, own state, own `<Modal>`/`<ConfirmDialog>`) rather than refactored in place, same reasoning as `ReviewRequestPanel`: `instructor/page.tsx` is large, live, and hard to browser-test, so a clean lift-and-shift into an isolated component is lower risk than threading three more features through its shared state. `src/components/Modal.tsx` is a shared copy of the modal shell used by these three panels — `instructor/page.tsx` keeps its own local `Modal` function for its remaining forms untouched, so don't try to consolidate the two into one without checking every remaining caller in that file. The Dashboard got a "Marketing" entry-point card (links to `/marketing`) where those tabs used to be, and the "Send Review Emails" quick-action button stayed on the Dashboard as-is.
+Merch, Discounts, and the Reviews carousel used to be tabs on the instructor Dashboard (`instructor/page.tsx`) — moved out because they're marketing actions, not day-to-day class-running ones. Each was extracted into its own self-contained panel component (own `useEffect` fetch, own state, own `<Modal>`/`<ConfirmDialog>`) rather than refactored in place, same reasoning as `ReviewRequestPanel`: `instructor/page.tsx` is large, live, and hard to browser-test, so a clean lift-and-shift into an isolated component is lower risk than threading three more features through its shared state. `src/components/Modal.tsx` is a shared copy of the modal shell used by these three panels — `instructor/page.tsx` keeps its own local `Modal` function for its remaining forms untouched, so don't try to consolidate the two into one without checking every remaining caller in that file.
+
+**Note (29 Aug):** the Dashboard's old "Marketing" entry-point card and the header's generic "Send Review Emails" button were later removed as redundant — Marketing is already reachable from the Navbar, and the per-class "Send Review Emails" button that appears on the Dashboard right after marking attendance is the one worth keeping (it's the convenient, in-the-moment version; the Navbar link covers the rest).
+
+### Tab bar & panel styling (29 Aug modernization pass)
+
+Both `/marketing` and the instructor Dashboard's tab row moved from plain underlined tabs to a shared pill style:
+
+```tsx
+<div className="overflow-x-auto mb-8 -mx-1 px-1 border-b border-gray-100">
+  <div className="inline-flex items-center gap-1 w-max pb-3">
+    {tabs.map(tab => {
+      const Icon = tab.icon;
+      const active = activeTab === tab.key;
+      return (
+        <button
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key)}
+          className={`flex items-center gap-1.5 font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+            active ? "bg-[#2041d8] text-white" : "text-gray-500 hover:text-black hover:bg-black/5"
+          }`}
+        >
+          <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+          {tab.label}
+        </button>
+      );
+    })}
+  </div>
+</div>
+```
+
+Every tab needs an `icon: LucideIcon` field alongside `key`/`label`. Two things people got wrong building the first version, worth not repeating:
+- **No background/border/shadow on the outer wrapper.** An early draft put `bg-white rounded-full border shadow-sm` on the pill row's container — looked like a floating white card, since every page's `<body>` background is the brand's accent color (`#e4c3cc` pink on THE A.M), not white. Pills sit directly on that background; only the *active* pill gets a solid fill.
+- **Keep the thin `border-b border-gray-100` under the row.** Without it the pill row and the content below it blur together — the old underline-tab design had this separation for free (each tab's own bottom border), the pill design needs it added back explicitly as one border on the wrapper.
+
+`/marketing`'s tab content also picked up a `SectionHeader` (icon chip + title + one-line description) at the top of every tab, and panels that used to sit bare on the page background (Review Requests, Message a Segment) now sit inside a `.card` (the existing cream/pink-bordered surface — see `.card` in `globals.css`) for visual weight consistent with how Reports/Instructor already group content. Panels that already render their own grid of `.card` items (Merch, Discounts, Reviews carousel) were deliberately **not** wrapped in an extra outer card — that would nest the same cream/pink-border treatment inside itself and look muddy, not modern.
+
+This same pill-tab treatment (with each client's own accent color swapped in for `#2041d8`) was rolled out to BYLA and `demo`'s Dashboard tab bars too. `demo` doesn't have `/marketing` yet (still on the old 4-tabs-on-Dashboard layout, like `template`), so only its Dashboard tab bar got the pill treatment — nothing to modernize on a Marketing section that doesn't exist there yet. Apply the same pill-bar treatment when `/marketing` eventually gets built on BYLA/Manea/`template`.
+
+### Bug pattern: stale wording after the Terms & Conditions merge (found 29 Aug)
+
+The standalone Filming Policy page got merged into one combined `/terms-and-conditions` page a while back (see the `#filming` section within it) — signup's checkbox and the Dashboard's re-consent prompt were updated to say "Terms & Conditions" at the time, but the instructor Dashboard's Members list badge (`s.filming_policy_accepted_at && ...`) was missed and still read "Filming policy accepted" with a "Accepted the Filming & Photography Policy on ..." tooltip. Found on THE A.M, and the exact same stale copy was sitting on BYLA, Manea, and `demo` too — fixed on all four to "Terms & Conditions accepted" / "Accepted the Terms & Conditions on ...". The underlying column/state name (`filming_policy_accepted_at`) is intentionally left as-is; this was a display-label-only fix, not a rename. If a new client is forked from any of these branches, check that badge's wording matches whatever `/terms-and-conditions` actually says there before shipping.
 
 ## Porting checklist — what's outstanding
 
-State as of 27 Aug. Cross-reference the detailed sections above for how each piece actually works before porting it — this is just the "did we get it all" list for when BYLA and Manea get the full treatment.
+State as of 29 Aug. Cross-reference the detailed sections above for how each piece actually works before porting it — this is just the "did we get it all" list for when BYLA and Manea get the full treatment.
 
 ### BYLA
 - [x] `is_admin` tier — already existed here first, nothing to do.
 - [x] Stuck-signup confirmation bug fix + "Resend confirmation email" on login — fixed 27 Aug.
-- [ ] Marketing section (`/marketing` page + Navbar link) — not built.
+- [x] Dashboard tab bar modernized to the pill style (own `#000000` accent) — 29 Aug.
+- [x] Stale "Filming policy accepted" Members badge fixed to "Terms & Conditions accepted" — 29 Aug.
+- [ ] Marketing section (`/marketing` page + Navbar link) — not built. When it is, build it with the pill-tab/`SectionHeader`/card-panel styling from the start (see "Tab bar & panel styling" above), not the older plain-underline look THE A.M briefly shipped with.
 - [ ] Merch/Discounts/Reviews-carousel moved off the Dashboard into Marketing — not done; still three Dashboard tabs there.
 - [ ] Instructor visibility toggle UI (on/off switch in the Instructors tab) — the underlying `show_on_instructors_page` column and the assign-instructor picker's filter on it already exist (BYLA is where that filter pattern came from), but there's no switch in the UI yet — SQL-only right now.
 - [ ] Automatic reminders — none of the four exist here yet (booking, win-back, birthday, review-request).
@@ -166,7 +209,9 @@ State as of 27 Aug. Cross-reference the detailed sections above for how each pie
 - [x] Stuck-signup confirmation bug fix + "Resend confirmation email" on login — fixed earlier this week.
 - [x] Instructor visibility toggle UI + assign-instructor picker filter — built and working.
 - [x] Security Advisor errors (`pass_types` RLS, `unread_dm_counts`) — fixed.
-- [ ] Marketing section (`/marketing` page + Navbar link) — not built.
+- [x] Stale "Filming policy accepted" Members badge fixed to "Terms & Conditions accepted" — 29 Aug.
+- [ ] Marketing section (`/marketing` page + Navbar link) — not built. Same note as BYLA: build it with the pill-tab styling from the start.
+- [ ] Dashboard tab bar not yet modernized to the pill style (only main/BYLA/demo have this so far) — quick to port, see "Tab bar & panel styling" above.
 - [ ] Merch/Discounts/Reviews-carousel moved off the Dashboard into Marketing — not done.
 - [ ] Automatic reminders — none of the four exist here yet.
 - [ ] Email copy for all four reminder templates — needs Manea's own voice/sign-off/Instagram handle.
@@ -176,12 +221,20 @@ State as of 27 Aug. Cross-reference the detailed sections above for how each pie
 
 ### `template` (lower priority — not a live client)
 - [ ] Marketing section still has the old 4-tab layout — Merch/Discounts/Reviews-carousel move not ported.
+- [ ] Dashboard tab bar not yet modernized to the pill style.
 - [ ] Reminders: booking + win-back only — birthday and review-request not built.
 - [ ] `is_admin` tier not built.
 - [ ] Push notification infra doesn't exist at all — reminders here will be email-only until it's added.
 - [ ] `add-reminders.sql` is written but has never been run against a real Supabase project (no live deployment in active use).
 - [ ] The stuck-signup confirmation bug is worth sweeping into `template` too, so future clients built from it don't inherit the same gap.
+- [ ] Same stale "Filming policy accepted" Members badge likely present here too (not yet checked/fixed on `template`) — same fix as the other four branches once confirmed.
+
+### `demo` (sales/preview branch — not a live client either)
+- [x] Dashboard tab bar modernized to the pill style (own `#221f1c` accent) — 29 Aug.
+- [x] Stale "Filming policy accepted" Members badge fixed to "Terms & Conditions accepted" — 29 Aug.
+- [ ] Still has the old 4-tabs-on-Dashboard layout (Merch/Discounts/Reviews not moved into a `/marketing` page) — same state as `template`, no Marketing section exists here to modernize yet.
 
 ### Shared, whichever client you're doing
 - Give each client's cron jobs (all four reminder types) their own `CRON_SECRET`, set in that client's own Netlify env vars — never reuse THE A.M's.
 - Make every migration idempotent (`drop policy if exists` right before every `create policy`) from the first draft — assume a partial run and a retry, not a clean one-shot.
+- When porting the pill-tab bar to a new branch, swap in that client's own accent color for the active-pill fill (THE A.M `#2041d8`, BYLA/`demo` `#000000`/`#221f1c`) — don't copy THE A.M's blue across verbatim.
