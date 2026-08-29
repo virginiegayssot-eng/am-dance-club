@@ -28,8 +28,8 @@ export default function MarketingPage() {
   const [activePassStudentIds, setActivePassStudentIds] = useState<Set<string>>(new Set());
   const [lastBookingByStudent, setLastBookingByStudent] = useState<Map<string, string>>(new Map());
 
-  const [reminderSettings, setReminderSettings] = useState<{ booking_reminders_enabled: boolean; winback_reminders_enabled: boolean; birthday_reminders_enabled: boolean } | null>(null);
-  const [savingReminderSetting, setSavingReminderSetting] = useState<"booking" | "winback" | "birthday" | null>(null);
+  const [reminderSettings, setReminderSettings] = useState<{ booking_reminders_enabled: boolean; winback_reminders_enabled: boolean; birthday_reminders_enabled: boolean; review_request_reminders_enabled: boolean } | null>(null);
+  const [savingReminderSetting, setSavingReminderSetting] = useState<"booking" | "winback" | "birthday" | "review" | null>(null);
 
   const [segmentFilter, setSegmentFilter] = useState<SegmentKey>("no_pass");
   const [selectedBroadcastIds, setSelectedBroadcastIds] = useState<Set<string>>(new Set());
@@ -52,14 +52,14 @@ export default function MarketingPage() {
   }
 
   async function loadReminderSettings() {
-    const { data } = await supabase.from("reminder_settings").select("booking_reminders_enabled, winback_reminders_enabled, birthday_reminders_enabled").eq("id", 1).single();
+    const { data } = await supabase.from("reminder_settings").select("booking_reminders_enabled, winback_reminders_enabled, birthday_reminders_enabled, review_request_reminders_enabled").eq("id", 1).single();
     if (data) setReminderSettings(data);
   }
 
-  async function toggleReminderSetting(key: "booking_reminders_enabled" | "winback_reminders_enabled" | "birthday_reminders_enabled") {
+  async function toggleReminderSetting(key: "booking_reminders_enabled" | "winback_reminders_enabled" | "birthday_reminders_enabled" | "review_request_reminders_enabled") {
     if (!reminderSettings) return;
     const next = !reminderSettings[key];
-    setSavingReminderSetting(key === "booking_reminders_enabled" ? "booking" : key === "winback_reminders_enabled" ? "winback" : "birthday");
+    setSavingReminderSetting(key === "booking_reminders_enabled" ? "booking" : key === "winback_reminders_enabled" ? "winback" : key === "birthday_reminders_enabled" ? "birthday" : "review");
     const { error } = await supabase.from("reminder_settings").update({ [key]: next, updated_at: new Date().toISOString() }).eq("id", 1);
     setSavingReminderSetting(null);
     if (!error) setReminderSettings(s => s ? { ...s, [key]: next } : s);
@@ -432,6 +432,20 @@ export default function MarketingPage() {
                     className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.birthday_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
                   >
                     <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.birthday_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+
+                <div className="card p-5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-heading text-sm">First-timer review requests</p>
+                    <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically the morning after someone's first class. "First-timers by class" and "Any members" in Review Requests still work manually too.</p>
+                  </div>
+                  <button
+                    onClick={() => toggleReminderSetting("review_request_reminders_enabled")}
+                    disabled={savingReminderSetting === "review"}
+                    className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.review_request_reminders_enabled ? "bg-[#2041d8]" : "bg-gray-300"} disabled:opacity-50`}
+                  >
+                    <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.review_request_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
                   </button>
                 </div>
               </>
