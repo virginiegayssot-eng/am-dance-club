@@ -12,7 +12,7 @@ import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Review, Vi
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video, Ticket, Users, ListMusic, Tag, Star, Newspaper, ShoppingBag, UserCog, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Tag, Star, Newspaper, ShoppingBag, UserCog, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -115,7 +115,10 @@ export default function InstructorPage() {
   // Merch products
   const [products, setProducts] = useState<MerchProduct[]>([]);
   const [showProductForm, setShowProductForm] = useState(false);
-  const [productForm, setProductForm] = useState({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+  const [productForm, setProductForm] = useState({ title: "", description: "", price_cents: "", sizes: "" });
+  const [productImage, setProductImage] = useState<string | null>(null);
+  const [productImageError, setProductImageError] = useState("");
+  const productImageInputRef = useRef<HTMLInputElement>(null);
   const [productFormLoading, setProductFormLoading] = useState(false);
 
   // Add student form
@@ -715,9 +718,32 @@ export default function InstructorPage() {
     }
   }
 
+  async function uploadMerchImage(base64: string): Promise<string | null> {
+    const res = await fetch("/api/instructor/upload-merch-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base64 }),
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    return result.url;
+  }
+
   async function addProduct(e: React.FormEvent) {
     e.preventDefault();
     setProductFormLoading(true);
+    setProductImageError("");
+
+    let imageUrl: string | null = null;
+    if (productImage) {
+      try {
+        imageUrl = await uploadMerchImage(productImage);
+      } catch (err: any) {
+        setProductImageError(err.message ?? "Image upload failed");
+        setProductFormLoading(false);
+        return;
+      }
+    }
 
     const sizes = productForm.sizes.trim()
       ? productForm.sizes.split(",").map(s => s.trim()).filter(Boolean)
@@ -727,12 +753,13 @@ export default function InstructorPage() {
       title: productForm.title,
       description: productForm.description || null,
       price_cents: Math.round(parseFloat(productForm.price_cents) * 100),
-      image_url: productForm.image_url || null,
+      image_url: imageUrl,
       sizes,
     });
 
     setShowProductForm(false);
-    setProductForm({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+    setProductForm({ title: "", description: "", price_cents: "", sizes: "" });
+    setProductImage(null);
     loadData();
     setProductFormLoading(false);
   }
@@ -1187,7 +1214,7 @@ export default function InstructorPage() {
   const tabs = [
     { key: "classes", label: "Classes", icon: Calendar },
     { key: "attendance", label: "Attendance", icon: CheckSquare },
-    { key: "videos", label: "Videos", icon: Video },
+    { key: "videos", label: "Videos", icon: VideoIcon },
     { key: "passes", label: "Passes", icon: Ticket },
     { key: "students", label: "Members", icon: Users },
     { key: "playlists", label: "Playlists", icon: ListMusic },
@@ -2457,7 +2484,7 @@ export default function InstructorPage() {
         )}
 
         {showProductForm && (
-          <Modal title="Add Product" onClose={() => setShowProductForm(false)}>
+          <Modal title="Add Product" onClose={() => { setShowProductForm(false); setProductImage(null); setProductImageError(""); }}>
             <form onSubmit={addProduct} className="space-y-4">
               <div>
                 <label className="label">Title</label>
@@ -2492,13 +2519,32 @@ export default function InstructorPage() {
                 />
               </div>
               <div>
-                <label className="label">Image URL (optional)</label>
+                <label className="label">Image (optional)</label>
                 <input
-                  className="input"
-                  placeholder="https://..."
-                  value={productForm.image_url}
-                  onChange={e => setProductForm(f => ({ ...f, image_url: e.target.value }))}
+                  ref={productImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) readImageAsBase64(file, setProductImageError, setProductImage);
+                  }}
                 />
+                {productImage ? (
+                  <div className="relative inline-block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={productImage} alt="" className="h-24 w-24 object-cover rounded-xl" />
+                    <button type="button" onClick={() => setProductImage(null)} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5">
+                      <X className="w-3 h-3" strokeWidth={2} />
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => productImageInputRef.current?.click()} className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" strokeWidth={1.75} /> Add image
+                  </button>
+                )}
+                {productImageError && <p className="font-body text-xs text-red-500 mt-1">{productImageError}</p>}
               </div>
               <div>
                 <label className="label">Sizes (optional, comma-separated)</label>
@@ -2510,7 +2556,7 @@ export default function InstructorPage() {
                 />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowProductForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="button" onClick={() => { setShowProductForm(false); setProductImage(null); setProductImageError(""); }} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={productFormLoading}>
                   {productFormLoading ? "Adding…" : "Add Product"}
                 </button>
