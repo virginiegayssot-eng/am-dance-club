@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import type { MerchProduct } from "@/lib/supabase";
 import Modal from "@/components/Modal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { Image as ImageIcon, X } from "lucide-react";
 
 // Self-contained, matching the pattern used by ReviewRequestPanel: fetches
 // its own products and owns all of its state so it can live on the
@@ -16,7 +17,10 @@ export default function MerchPanel() {
   const [products, setProducts] = useState<MerchProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProductForm, setShowProductForm] = useState(false);
-  const [productForm, setProductForm] = useState({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+  const [productForm, setProductForm] = useState({ title: "", description: "", price_cents: "", sizes: "" });
+  const [productImage, setProductImage] = useState<string | null>(null);
+  const [productImageError, setProductImageError] = useState("");
+  const productImageInputRef = useRef<HTMLInputElement>(null);
   const [productFormLoading, setProductFormLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string; action: () => void } | null>(null);
 
@@ -28,9 +32,40 @@ export default function MerchPanel() {
     setLoading(false);
   }
 
+  function readImageAsBase64(file: File, onError: (msg: string) => void, onLoad: (base64: string) => void) {
+    if (file.size > 5 * 1024 * 1024) { onError("Image must be under 5MB."); return; }
+    onError("");
+    const reader = new FileReader();
+    reader.onload = () => onLoad(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadMerchImage(base64: string): Promise<string | null> {
+    const res = await fetch("/api/instructor/upload-merch-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base64 }),
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    return result.url;
+  }
+
   async function addProduct(e: React.FormEvent) {
     e.preventDefault();
     setProductFormLoading(true);
+    setProductImageError("");
+
+    let imageUrl: string | null = null;
+    if (productImage) {
+      try {
+        imageUrl = await uploadMerchImage(productImage);
+      } catch (err: any) {
+        setProductImageError(err.message ?? "Image upload failed");
+        setProductFormLoading(false);
+        return;
+      }
+    }
 
     const sizes = productForm.sizes.trim()
       ? productForm.sizes.split(",").map(s => s.trim()).filter(Boolean)
@@ -40,12 +75,13 @@ export default function MerchPanel() {
       title: productForm.title,
       description: productForm.description || null,
       price_cents: Math.round(parseFloat(productForm.price_cents) * 100),
-      image_url: productForm.image_url || null,
+      image_url: imageUrl,
       sizes,
     });
 
     setShowProductForm(false);
-    setProductForm({ title: "", description: "", price_cents: "", image_url: "", sizes: "" });
+    setProductForm({ title: "", description: "", price_cents: "", sizes: "" });
+    setProductImage(null);
     loadProducts();
     setProductFormLoading(false);
   }
@@ -113,7 +149,7 @@ export default function MerchPanel() {
       )}
 
       {showProductForm && (
-        <Modal title="Add Product" onClose={() => setShowProductForm(false)}>
+        <Modal title="Add Product" onClose={() => { setShowProductForm(false); setProductImage(null); setProductImageError(""); }}>
           <form onSubmit={addProduct} className="space-y-4">
             <div>
               <label className="label">Title</label>
@@ -148,13 +184,32 @@ export default function MerchPanel() {
               />
             </div>
             <div>
-              <label className="label">Image URL (optional)</label>
+              <label className="label">Image (optional)</label>
               <input
-                className="input"
-                placeholder="https://..."
-                value={productForm.image_url}
-                onChange={e => setProductForm(f => ({ ...f, image_url: e.target.value }))}
+                ref={productImageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) readImageAsBase64(file, setProductImageError, setProductImage);
+                }}
               />
+              {productImage ? (
+                <div className="relative inline-block">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={productImage} alt="" className="h-24 w-24 object-cover rounded-xl" />
+                  <button type="button" onClick={() => setProductImage(null)} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5">
+                    <X className="w-3 h-3" strokeWidth={2} />
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => productImageInputRef.current?.click()} className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" strokeWidth={1.75} /> Add image
+                </button>
+              )}
+              {productImageError && <p className="font-body text-xs text-red-500 mt-1">{productImageError}</p>}
             </div>
             <div>
               <label className="label">Sizes (optional, comma-separated)</label>
@@ -166,7 +221,7 @@ export default function MerchPanel() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowProductForm(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+              <button type="button" onClick={() => { setShowProductForm(false); setProductImage(null); setProductImageError(""); }} className="btn-secondary flex-1 justify-center">Cancel</button>
               <button type="submit" className="btn-primary flex-1 justify-center" disabled={productFormLoading}>
                 {productFormLoading ? "Adding…" : "Add Product"}
               </button>
