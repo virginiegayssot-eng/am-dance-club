@@ -12,7 +12,7 @@ import type { Class, MerchProduct, Pass, PassType, Playlist, Profile, Review, Vi
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Tag, Star, Newspaper, ShoppingBag, UserCog, type LucideIcon } from "lucide-react";
 import { MERCH_ENABLED } from "@/lib/feature-flags";
 import { notifyPush } from "@/lib/push";
 
@@ -1321,17 +1321,17 @@ export default function InstructorPage() {
   const isAdmin = !!profile?.is_admin;
 
   const tabs = [
-    { key: "classes", label: "Classes" },
-    { key: "attendance", label: "Attendance" },
-    { key: "videos", label: "Videos" },
-    { key: "passes", label: "Passes" },
-    { key: "students", label: "Members" },
-    { key: "playlists", label: "Playlists" },
-    ...(isAdmin ? [{ key: "discounts", label: "Discounts" }] as const : []),
-    { key: "news", label: "BYLA News" },
-    ...(isAdmin && MERCH_ENABLED ? [{ key: "merch", label: "Merch" }] as const : []),
-    ...(isAdmin ? [{ key: "reviews", label: "Reviews" }] as const : []),
-    { key: "instructors", label: "Instructors" },
+    { key: "classes", label: "Classes", icon: Calendar },
+    { key: "attendance", label: "Attendance", icon: CheckSquare },
+    { key: "videos", label: "Videos", icon: VideoIcon },
+    { key: "passes", label: "Passes", icon: Ticket },
+    { key: "students", label: "Members", icon: Users },
+    { key: "playlists", label: "Playlists", icon: ListMusic },
+    ...(isAdmin ? [{ key: "discounts", label: "Discounts", icon: Tag }] as const : []),
+    { key: "news", label: "BYLA News", icon: Newspaper },
+    ...(isAdmin && MERCH_ENABLED ? [{ key: "merch", label: "Merch", icon: ShoppingBag }] as const : []),
+    ...(isAdmin ? [{ key: "reviews", label: "Reviews", icon: Star }] as const : []),
+    { key: "instructors", label: "Instructors", icon: UserCog },
   ];
 
   function openEditBio(inst: Profile) {
@@ -1490,20 +1490,25 @@ export default function InstructorPage() {
         </div>
 
         {/* Tabs */}
-        <div ref={tabsRef} className="flex gap-1 mb-8 border-b border-gray-200 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as typeof activeTab)}
-              className={`font-body text-sm px-4 py-2.5 -mb-px border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === tab.key
-                  ? "border-[#000000] text-[#000000]"
-                  : "border-transparent text-gray-500 hover:text-black"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div ref={tabsRef} className="overflow-x-auto mb-8 -mx-1 px-1 border-b border-gray-100">
+          <div className="inline-flex items-center gap-1 w-max pb-3">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                  className={`flex items-center gap-1.5 font-body text-sm px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+                    active ? "bg-[#000000] text-white" : "text-gray-500 hover:text-black hover:bg-black/5"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* CLASSES TAB */}
