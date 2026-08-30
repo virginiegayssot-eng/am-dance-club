@@ -12,7 +12,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
 import { notifyPush } from "@/lib/push";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -1083,7 +1083,7 @@ export default function InstructorPage() {
   const tabs = [
     { key: "classes", label: "Classes", icon: Calendar },
     { key: "attendance", label: "Attendance", icon: CheckSquare },
-    { key: "videos", label: "Videos", icon: Video },
+    { key: "videos", label: "Videos", icon: VideoIcon },
     { key: "passes", label: "Passes", icon: Ticket },
     { key: "students", label: "Members", icon: Users },
     { key: "playlists", label: "Playlists", icon: ListMusic },
