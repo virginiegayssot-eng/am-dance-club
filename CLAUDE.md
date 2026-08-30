@@ -187,13 +187,18 @@ Both `/marketing` and the instructor Dashboard's tab row moved from plain underl
 </div>
 ```
 
-Every tab needs an `icon: LucideIcon` field alongside `key`/`label`. Two things people got wrong building the first version, worth not repeating:
+Every tab needs an `icon: LucideIcon` field alongside `key`/`label`. Three things people got wrong building the first version, worth not repeating:
 - **No background/border/shadow on the outer wrapper.** An early draft put `bg-white rounded-full border shadow-sm` on the pill row's container — looked like a floating white card, since every page's `<body>` background is the brand's accent color (`#e4c3cc` pink on THE A.M), not white. Pills sit directly on that background; only the *active* pill gets a solid fill.
 - **Keep the thin `border-b border-gray-100` under the row.** Without it the pill row and the content below it blur together — the old underline-tab design had this separation for free (each tab's own bottom border), the pill design needs it added back explicitly as one border on the wrapper.
+- **`instructor/page.tsx` already imports a `Video` type from `@/lib/supabase`.** Importing the lucide-react `Video` icon for the Videos tab under the same bare name is a duplicate-identifier error (TS2300) — Next's production build doesn't type-check so this ships silently. Alias the icon import: `Video as VideoIcon`. Bit `main` and `demo` both on the first pass (caught by running `npx tsc --noEmit` before push, not by `npm run build`); fix it the same way whenever this tab bar gets ported to Manea/`template`.
 
 `/marketing`'s tab content also picked up a `SectionHeader` (icon chip + title + one-line description) at the top of every tab, and panels that used to sit bare on the page background (Review Requests, Message a Segment) now sit inside a `.card` (the existing cream/pink-bordered surface — see `.card` in `globals.css`) for visual weight consistent with how Reports/Instructor already group content. Panels that already render their own grid of `.card` items (Merch, Discounts, Reviews carousel) were deliberately **not** wrapped in an extra outer card — that would nest the same cream/pink-border treatment inside itself and look muddy, not modern.
 
 This same pill-tab treatment (with each client's own accent color swapped in for `#2041d8`) was rolled out to BYLA and `demo`'s Dashboard tab bars too. `demo` doesn't have `/marketing` yet (still on the old 4-tabs-on-Dashboard layout, like `template`), so only its Dashboard tab bar got the pill treatment — nothing to modernize on a Marketing section that doesn't exist there yet. Apply the same pill-bar treatment when `/marketing` eventually gets built on BYLA/Manea/`template`.
+
+### Merch image upload (29 Aug)
+
+Product images in Merch (Marketing > Merch on `main`; still an inline Dashboard tab on `byla`/`demo`/`template`) can now be uploaded straight from the instructor's phone/photo library instead of typing an image URL — same base64 → `/api/instructor/upload-<thing>-image` → Supabase Storage bucket pattern already used for news post images. New route `src/app/api/instructor/upload-merch-image/route.ts`, new public bucket `merch-images` created (idempotently) by `supabase/add-merch-image-upload.sql` — run that once per Supabase project before using this. Shipped on `main` (in `MerchPanel.tsx`) and `demo` (inline in `instructor/page.tsx`, since `demo` hasn't had Merch extracted into a panel component yet). Not yet ported to BYLA, Manea, or `template` — when it is, copy the file-input + `uploadMerchImage()`/`readImageAsBase64()` pattern from whichever branch is structurally closer: `demo`'s inline version if the target also hasn't extracted Merch into its own component yet, `main`'s `MerchPanel.tsx` otherwise.
 
 ### Bug pattern: stale wording after the Terms & Conditions merge (found 29 Aug)
 
@@ -215,6 +220,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [ ] Email copy for all four reminder templates — needs BYLA's own voice/sign-off/Instagram handle, not a copy-paste from THE A.M.
 - [ ] Review-request email specifically needs the in-app-review version (`/api/reviews/submit`), not a Google review link — BYLA's review flow isn't Google-based.
 - [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
+- [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
 
 ### Manea
 - [x] `is_admin` tier — migration run, Manea (the owner) is admin.
@@ -229,6 +235,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [ ] Email copy for all four reminder templates — needs Manea's own voice/sign-off/Instagram handle.
 - [ ] Review-request email uses a Google review link (same pattern as THE A.M) — confirm `GOOGLE_REVIEW_URL` is set once this is built.
 - [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
+- [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
 - Push notification infra already exists (`push_subscriptions`, `push-admin.ts`) — reminders' push half can use it directly once built, no new infra needed there.
 
 ### `template` (lower priority — not a live client)
@@ -240,6 +247,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [ ] `add-reminders.sql` is written but has never been run against a real Supabase project (no live deployment in active use).
 - [ ] The stuck-signup confirmation bug is worth sweeping into `template` too, so future clients built from it don't inherit the same gap.
 - [ ] Same stale "Filming policy accepted" Members badge likely present here too (not yet checked/fixed on `template`) — same fix as the other four branches once confirmed.
+- [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
 
 ### `demo` (sales/preview branch — not a live client either)
 - [x] Dashboard tab bar modernized to the pill style (own `#221f1c` accent) — 29 Aug.
