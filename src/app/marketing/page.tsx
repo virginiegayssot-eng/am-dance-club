@@ -187,7 +187,7 @@ export default function MarketingPage() {
         </div>
 
         {/* Tabs */}
-        <div className="overflow-x-auto mb-10 -mx-1 px-1 border-b border-gray-100">
+        <div className="overflow-x-auto mb-10 -mx-1 px-1 border-b border-[#221f1c]/20">
           <div className="inline-flex items-center gap-1 w-max pb-3">
             {tabs.map(tab => {
               const Icon = tab.icon;

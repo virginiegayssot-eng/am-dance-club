@@ -1181,7 +1181,7 @@ export default function InstructorPage() {
         </div>
 
         {/* Tabs */}
-        <div ref={tabsRef} className="overflow-x-auto mb-8 -mx-1 px-1 border-b border-gray-100">
+        <div ref={tabsRef} className="overflow-x-auto mb-8 -mx-1 px-1 border-b border-[#221f1c]/20">
           <div className="inline-flex items-center gap-1 w-max pb-3">
             {tabs.map((tab) => {
               const Icon = tab.icon;
