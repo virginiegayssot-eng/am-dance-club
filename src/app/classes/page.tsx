@@ -56,7 +56,8 @@ export default function ClassesPage() {
     const { data: classData } = await supabase
       .from("classes").select("*")
       .eq("is_cancelled", false).gte("class_date", today)
-      .order("class_date", { ascending: true });
+      .order("class_date", { ascending: true })
+      .order("class_time", { ascending: true });
 
     if (!classData) { setLoading(false); return; }
 
