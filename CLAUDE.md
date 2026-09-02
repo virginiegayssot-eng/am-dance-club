@@ -85,6 +85,10 @@ function studioDateTimeToUTC(dateStr: string, timeStr: string): Date {
 
 This also handles daylight saving correctly, since it looks up the real offset for that specific date rather than hardcoding +10 or +11. Every VIA studio so far is Sydney/Melbourne (same offset) — swap the timezone string if a future client is elsewhere.
 
+## Same-day classes need a secondary sort by time
+
+Both the public `/classes` page and the Dashboard's own class list query `classes` ordered only by `class_date` — with no `class_time` tiebreaker, multiple classes on the same day come back in whatever order Postgres happens to return them (usually insertion order), not chronological order. Found on Manea: a 7:15pm Heels class was listed before a 6:00pm Sensual Sessions class on the same Thursday. The same missing tiebreaker existed on THE A.M, BYLA, and `demo` too — fixed on all four by adding `.order("class_time", { ascending: true })` right after the `class_date` order call. `template` hasn't been checked yet — same fix if it has the same gap.
+
 ## Toggle switches (on/off pills)
 
 A toggle built as a `<button>` track with an absolutely-positioned `<span>` knob needs an *explicit* base position — `left-1` plus `translate-x-N` for the "on" delta — never just `top-1` (or nothing) plus a bare `translate-x-N` off an implicit `left: auto`. Relying on the browser's static-position resolution for an absolutely positioned lone child renders inconsistently — a real bug: THE A.M's Reports > Settings reminder toggles rendered as a stray floating circle next to the pill instead of a clean sliding knob. Also add `appearance-none border-0 p-0` to the `<button>` itself — an unstyled `<button>` can pick up native OS chrome that fights the custom fill. Working recipe:
@@ -271,6 +275,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [ ] The stuck-signup confirmation bug is worth sweeping into `template` too, so future clients built from it don't inherit the same gap.
 - [ ] Same stale "Filming policy accepted" Members badge likely present here too (not yet checked/fixed on `template`) — same fix as the other four branches once confirmed.
 - [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
+- [ ] Same-day classes likely not sorted by time either (not yet checked) — see "Same-day classes need a secondary sort by time" above.
 
 ### `demo` (sales/preview branch — not a live client either)
 - [x] Dashboard tab bar modernized to the pill style (own `#221f1c` accent) — 29 Aug.
