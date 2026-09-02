@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
 import Link from "next/link";
-import { Cake, PartyPopper, Calendar, CreditCard, Banknote, Gift } from "lucide-react";
+import { Cake, CreditCard, Banknote, Gift } from "lucide-react";
 
 type StudentReport = {
   id: string;
@@ -46,7 +46,7 @@ export default function ReportsPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [activeTab, setActiveTab] = useState<"revenue" | "attendance" | "students" | "birthdays">("revenue");
+  const [activeTab, setActiveTab] = useState<"revenue" | "attendance" | "students">("revenue");
   const [students, setStudents] = useState<StudentReport[]>([]);
   const [classes, setClasses] = useState<ClassReport[]>([]);
   const [revenue, setRevenue] = useState<RevenueRow[]>([]);
@@ -190,21 +190,6 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   }
 
-  const upcomingBirthdays = students
-    .filter(s => s.birth_date)
-    .map(s => {
-      const bd = new Date(s.birth_date!);
-      const now = new Date();
-      const thisYear = new Date(now.getFullYear(), bd.getMonth(), bd.getDate());
-      const next = thisYear < now
-        ? new Date(now.getFullYear() + 1, bd.getMonth(), bd.getDate())
-        : thisYear;
-      const daysUntil = Math.ceil((next.getTime() - now.getTime()) / 86400000);
-      return { ...s, daysUntil, nextBirthday: next };
-    })
-    .sort((a, b) => a.daysUntil - b.daysUntil)
-    .slice(0, 20);
-
   const totalRevenue = passesSold
     .filter(p => p.source !== "complimentary")
     .reduce((s, p) => s + (p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0), 0);
@@ -223,7 +208,6 @@ export default function ReportsPage() {
     { key: "revenue", label: "Revenue" },
     { key: "attendance", label: "Attendance" },
     { key: "students", label: "Members" },
-    { key: "birthdays", label: "Birthdays" },
   ] as const;
 
   if (loading) return (
@@ -544,63 +528,6 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {/* BIRTHDAYS TAB */}
-        {activeTab === "birthdays" && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <p className="font-body text-sm text-gray-500">
-                {upcomingBirthdays.length} member{upcomingBirthdays.length !== 1 ? "s" : ""} with birthdays on record
-              </p>
-              <button onClick={() => downloadCSV(
-                upcomingBirthdays.map(s => ({
-                  name: s.full_name ?? "",
-                  email: s.email,
-                  phone: s.phone ?? "",
-                  birth_date: s.birth_date ?? "",
-                  days_until: s.daysUntil,
-                })),
-                "birthdays.csv"
-              )} className="btn-secondary py-2 px-4 text-xs">Export CSV</button>
-            </div>
-
-            {upcomingBirthdays.length === 0 ? (
-              <div className="card p-10 text-center">
-                <Cake className="w-10 h-10 mx-auto mb-3 text-[#221f1c]" strokeWidth={1.5} />
-                <p className="font-body text-gray-400">No birthdays on record yet. Encourage members to add their birth date in their profile.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {upcomingBirthdays.map(s => {
-                  const isThisWeek = s.daysUntil <= 7;
-                  const isToday = s.daysUntil === 0;
-                  return (
-                    <div key={s.id} className={`card p-5 ${isToday ? "ring-2 ring-[#221f1c] bg-[#6b6259]/10" : isThisWeek ? "bg-[#f4efe6]/10" : ""}`}>
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <p className="font-heading text-sm">{s.full_name ?? s.email}</p>
-                          {s.phone && <p className="font-body text-xs text-gray-400 mt-0.5">{s.phone}</p>}
-                        </div>
-                        {isToday ? <PartyPopper className="w-6 h-6 text-[#221f1c]" strokeWidth={1.5} /> : isThisWeek ? <Cake className="w-6 h-6 text-[#221f1c]" strokeWidth={1.5} /> : <Calendar className="w-6 h-6 text-gray-300" strokeWidth={1.5} />}
-                      </div>
-                      <p className="font-body text-xs text-gray-500">
-                        {new Date(s.birth_date!).toLocaleDateString("en-AU", { day: "numeric", month: "long" })}
-                      </p>
-                      <p className={`font-heading text-sm mt-1 ${isToday ? "text-[#221f1c]" : isThisWeek ? "text-[#f4efe6]" : "text-gray-400"}`}>
-                        {isToday ? "Today!" : `In ${s.daysUntil} day${s.daysUntil !== 1 ? "s" : ""}`}
-                      </p>
-                      <Link
-                        href={`/chat?dm=${s.id}`}
-                        className="mt-3 font-body text-xs text-[#221f1c] hover:underline block"
-                      >
-                        Send birthday message →
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </main>
       <Footer />
     </div>
