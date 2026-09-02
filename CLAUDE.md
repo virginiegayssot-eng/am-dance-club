@@ -144,6 +144,12 @@ Every place that names who's teaching a class needs to join all three, not just 
 
 When a client has the `show_on_instructors_page` toggle (see BYLA/Manea's instructor-visibility feature), the assign-instructor dropdowns filter toggled-off instructors out for *new* picks but still allow someone already assigned to stay selected — never silently unassign a real teacher from a class they're already down to teach.
 
+## Edit Class (Dashboard)
+
+Only BYLA has this — THE A.M and Manea's "New Class" modal only ever inserts; once a class exists, the only options are Cancel or Delete, so fixing a typo'd price or a wrong time meant deleting and recreating (losing bookings). BYLA's Dashboard adds an "Edit" button to each `ClassRow` that reopens the same modal pre-filled (`openEditClass(cls)`), with a single `saveClass()` that inserts or updates depending on whether an `editingClassId` is set (`openNewClass()` clears it back to create-mode). Ported to Manea 29 Aug (its category/alt-duration/special-class fields carried straight through into the edit form too, since it already had them on create — no need to strip anything down to match BYLA's leaner field set). THE A.M doesn't have this yet — same gap, not yet ported.
+
+Don't confuse this with the "Assign Instructor" flow above — that's a separate modal/button (the clickable "w/ ..." link) for instructor_id/instructor_id_2/guest_instructor_name specifically, and already existed identically across all three clients before this feature existed. A user comparing Manea's Dashboard to BYLA's and calling it "built completely differently" was pointing at the missing Edit button, not the (already-matching) instructor-assignment link.
+
 ## Automatic reminders feature
 
 Built first on THE A.M (`main`), then on `template`: booking reminders (email + push, ~12h before a confirmed class, to registered students only), win-back emails (members inactive 3+ weeks), birthday emails (added 27 Aug, `main` only so far — sent same-day, matched on `birth_date`'s month/day in Sydney time since the year on that column is just a signup placeholder), and automatic first-timer review-request emails (added 27 Aug, `main` only — sent same-day, matched on a same-day/right-hour cron per client rather than the next-morning pattern the other three use, since the email text says "this morning"/"tonight"; asks a student for a Google review after their *first ever* attended class — "first-timer" for a given `attendance` row means the student has no other `attended = true` row, mirroring the existing manual review-candidates check exactly, just run on a schedule instead of on-demand). All four run behind a Supabase `pg_cron` schedule hitting `/api/reminders/booking`, `/api/reminders/winback`, `/api/reminders/birthday`, and `/api/reminders/review-request`, each gated by a `CRON_SECRET` header check, and a `reminder_settings` singleton row toggleable per-type from Marketing > Reminders (admin-only, so needs the `is_admin` column above first — see "Marketing section" below, this used to live on Reports > Settings but moved). Not yet on BYLA or Manea — planned next. When porting:
@@ -248,11 +254,11 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [x] Bug found in transit: Reports' Birthdays tab compared a birthday against the current moment instead of midnight-normalized "today" — same same-day date-math bug documented above, would silently roll today's birthdays to next year. Fixed in the new Marketing > Birthdays tab (Reports' own copy was deleted, not fixed in place, since it moved).
 - [x] `/marketing` pill tab bar's separator line was invisible against Manea's cream background (`border-gray-100` too close in lightness to `#FCF4E9`) — fixed to `border-primary/20`, see "Tab bar & panel styling" above.
 - [x] Second instructor / guest teacher now actually shows up on the public Classes page — `instructor_id_2` already existed (Dashboard's Assign Instructor modal already had the second dropdown) but the public classes query only ever fetched the primary instructor's profile, so assigning a co-teacher had no visible effect for members. Added `guest_instructor_name` too (matching BYLA) for a teacher without a Manea account. See "Second instructor / guest teacher on a class" above.
+- [x] Edit Class capability added, matching BYLA — 29 Aug, see "Edit Class (Dashboard)" above. THE A.M still doesn't have this either.
 - [ ] Automatic reminders — none of the four exist here yet.
 - [ ] Email copy for all four reminder templates — needs Manea's own voice/sign-off/Instagram handle.
 - [ ] Review-request email uses a Google review link (same pattern as THE A.M) — confirm `GOOGLE_REVIEW_URL` is set once this is built.
 - [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
-- [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
 - Push notification infra already exists (`push_subscriptions`, `push-admin.ts`) — reminders' push half can use it directly once built, no new infra needed there.
 
 ### `template` (lower priority — not a live client)
