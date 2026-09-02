@@ -222,7 +222,7 @@ export default function MarketingPage() {
             <SectionHeader
               icon={Star}
               title="Review Requests"
-              description="Ask members to leave a review — first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
+              description="Ask members to leave a review: first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
             />
             <div className="card p-6">
               <ReviewRequestPanel />
