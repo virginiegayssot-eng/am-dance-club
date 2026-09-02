@@ -122,6 +122,9 @@ export default function Navbar() {
                   <Link href={isInstructor ? "/instructor" : "/dashboard"} className={`font-body text-sm transition-colors ${isActive(isInstructor ? "/instructor" : "/dashboard")}`}>
                     {isInstructor ? "Dashboard" : "My Classes"}
                   </Link>
+                  {isInstructor && (
+                    <Link href="/marketing" className={`font-body text-sm transition-colors ${isActive("/marketing")}`}>Marketing</Link>
+                  )}
                   {isAdmin && (
                     <Link href="/reports" className={`font-body text-sm transition-colors ${isActive("/reports")}`}>Reports</Link>
                   )}
@@ -183,6 +186,7 @@ export default function Navbar() {
 
             {profile && [
               { href: isInstructor ? "/instructor" : "/dashboard", label: isInstructor ? "Dashboard" : "My Classes" },
+              ...(isInstructor ? [{ href: "/marketing", label: "Marketing" }] : []),
               ...(isAdmin ? [{ href: "/reports", label: "Reports" }] : []),
               { href: "/profile", label: "My Profile" },
             ].map(({ href, label }) => (
