@@ -172,7 +172,8 @@ export default function InstructorPage() {
     const { data: classData } = await supabase
       .from("classes")
       .select("*")
-      .order("class_date", { ascending: true });
+      .order("class_date", { ascending: true })
+      .order("class_time", { ascending: true });
 
     const { data: regCounts } = await supabase.from("class_registration_counts").select("*");
 
