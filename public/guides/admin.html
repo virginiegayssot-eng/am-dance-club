@@ -413,7 +413,7 @@
   </div>
   <p class="eyebrow">BYLA Dance Club — Admin Guide</p>
   <h1 class="display">Everything, plus the keys</h1>
-  <p class="lede">This covers the same day-to-day tools as the instructor guide, plus the admin-only tools underneath: reports, discount codes, the homepage review carousel, and full control over classes and instructor profiles.</p>
+  <p class="lede">This covers the same day-to-day tools as the instructor guide, plus the admin-only tools underneath: reports, and Marketing's discount codes, review carousel and birthdays.</p>
 </header>
 
 <div class="quicknav-wrap">
@@ -430,10 +430,12 @@
     <a href="#assign">10. Assign instructors</a>
     <a href="#news">11. BYLA News</a>
     <a href="#member">12. Add a member</a>
-    <a href="#reports" class="divider">13. Reports</a>
-    <a href="#discounts" class="divider">14. Discounts</a>
-    <a href="#google-reviews" class="divider">15. Review carousel</a>
-    <a href="#install">16. Home screen</a>
+    <a href="#marketing">13. Marketing</a>
+    <a href="#reports" class="divider">14. Reports</a>
+    <a href="#discounts" class="divider">15. Discounts</a>
+    <a href="#google-reviews" class="divider">16. Review carousel</a>
+    <a href="#birthdays" class="divider">17. Birthdays</a>
+    <a href="#install">18. Home screen</a>
   </nav>
 </div>
 
@@ -515,7 +517,7 @@
         <h2>Send review emails</h2>
       </div>
     </div>
-    <p class="intro">On the <span class="tab-label">Classes</span> tab, tap <span class="tap">Send Review Emails</span>.</p>
+    <p class="intro">On the <span class="tab-label">Classes</span> tab, tap <span class="tap">Send Review Emails</span>. Want to send to a wider group, or catch up later? Use <span class="tab-label">Marketing &gt; Review Requests</span> instead — see section 13.</p>
     <ol class="steps">
       <li data-n="1">Pick the class you want to send from.</li>
       <li data-n="2">Select which members to include — everyone's ticked by default.</li>
@@ -628,7 +630,7 @@
       <li data-n="2">As admin, both dropdowns list every instructor — pick anyone, for either the main slot or an optional second (co-teaching) slot.</li>
       <li data-n="3">Tap <span class="tap">Save</span>. The class now shows <span class="tap">w/ Name</span> on your dashboard and the public Classes page.</li>
     </ol>
-    <div class="note">Regular instructors only see their own name in these dropdowns — they can put themselves on a class, but can't assign each other. You're the one who sets up co-teaching pairs.</div>
+    <div class="note">Regular instructors only see their own name in these dropdowns — they can put themselves on a class, but can't assign each other. You're the one who sets up co-teaching pairs. There's also a <strong>Guest instructor</strong> text field for a teacher without a BYLA account at all — the class then shows to members as "w/ Instructor x Guest Name".</div>
   </section>
 
   <section class="step" id="news">
@@ -666,13 +668,28 @@
     <div class="note">Members who've ticked the Filming &amp; Photography Policy checkbox at signup show a "Filming policy accepted" badge under their name — hover it to see the exact date. No Supabase access needed to check this.</div>
   </section>
 
+  <section class="step" id="marketing">
+    <div class="step-head">
+      <div class="step-num">13</div>
+      <div class="step-titles">
+        <p class="who">Reaching out to members</p>
+        <h2>Marketing</h2>
+      </div>
+    </div>
+    <p class="intro">Open <span class="tab-label">Marketing</span> from the main menu. Every instructor sees these two tabs; as admin you also see three more — covered below.</p>
+    <ol class="steps">
+      <li data-n="1"><strong>Review Requests</strong> — the same first-timers/any-member review-email tool from section 4, in one place for every class.</li>
+      <li data-n="2"><strong>Message a Segment</strong> — pick a group (no active pass, inactive 3+ weeks, or all members) and send them a one-off email.</li>
+    </ol>
+  </section>
+
   <div class="group-divider">
     <p class="eyebrow">Admin-only tools</p>
   </div>
 
   <section class="step admin-only" id="reports">
     <div class="step-head">
-      <div class="step-num">13</div>
+      <div class="step-num">14</div>
       <div class="step-titles">
         <p class="who">The numbers</p>
         <h2>Reports <span class="admin-chip">Admin</span></h2>
@@ -683,19 +700,19 @@
       <li data-n="1"><strong>Revenue</strong> tab: total income by month, switchable between 3, 6 and 12 months.</li>
       <li data-n="2"><strong>Attendance</strong> tab: how full each upcoming class is.</li>
       <li data-n="3"><strong>Students</strong> tab: every member, their pass status, and how much they've spent — exportable to CSV.</li>
-      <li data-n="4"><strong>Birthdays</strong> tab: who's got one coming up, so you can send a message.</li>
     </ol>
+    <div class="note">Looking for birthdays? That moved to <span class="tab-label">Marketing &gt; Birthdays</span> (section 17) alongside the other outreach tools.</div>
   </section>
 
   <section class="step admin-only" id="discounts">
     <div class="step-head">
-      <div class="step-num">14</div>
+      <div class="step-num">15</div>
       <div class="step-titles">
-        <p class="who">Promo &amp; friend codes</p>
+        <p class="who">Promo &amp; friend codes — Marketing &gt; Discounts</p>
         <h2>Discount codes <span class="admin-chip">Admin</span></h2>
       </div>
     </div>
-    <p class="intro">Open the <span class="tab-label">Discounts</span> tab and tap <span class="tap">+ New Code</span>.</p>
+    <p class="intro">On Marketing's <span class="tab-label">Discounts</span> tab, tap <span class="tap">+ New Code</span>.</p>
     <ol class="steps">
       <li data-n="1">Name the code (e.g. <em>BYLABESTIE</em>) and set it as a percentage or fixed-dollar discount.</li>
       <li data-n="2">Leave <strong>Max uses</strong> blank for a code you'll hand out repeatedly (e.g. every time someone brings a friend); set it to <strong>1</strong> only for a genuine one-time-ever code — a max-uses code stops working for everyone, including future friends, the moment it's used once.</li>
@@ -708,25 +725,38 @@
 
   <section class="step admin-only" id="google-reviews">
     <div class="step-head">
-      <div class="step-num">15</div>
+      <div class="step-num">16</div>
       <div class="step-titles">
-        <p class="who">Social proof on the homepage</p>
-        <h2>Google review carousel <span class="admin-chip">Admin</span></h2>
+        <p class="who">Social proof on the homepage — Marketing &gt; Reviews</p>
+        <h2>Review carousel <span class="admin-chip">Admin</span></h2>
       </div>
     </div>
-    <p class="intro">Open the <span class="tab-label">Reviews</span> tab and tap <span class="tap">+ New Review</span>.</p>
+    <p class="intro">On Marketing's <span class="tab-label">Reviews</span> tab, member-submitted reviews wait in an <strong>Awaiting approval</strong> section until you approve them.</p>
     <ol class="steps">
-      <li data-n="1">Find a review you'd like to feature on BYLA's Google Business listing.</li>
-      <li data-n="2">Copy the reviewer's name, star rating, and review text into the form.</li>
-      <li data-n="3">Tap <span class="tap">Add Review</span> — it appears straight away in the rotating carousel on the homepage, between the "About Majo" section and the "Ready to dance?" button.</li>
-      <li data-n="4">Add as many as you like. Use <span class="tap">Delete</span> on any review to remove it at any time.</li>
+      <li data-n="1">Tap <span class="tap">Approve</span> to publish a review to the homepage carousel, or <span class="tap">Delete</span> to remove it.</li>
+      <li data-n="2">Tap <span class="tap">+ New Review</span> to add one yourself — useful for seeding the carousel, or for featuring a review you'd rather copy in from BYLA's Google Business listing.</li>
     </ol>
-    <div class="note">This is a hand-picked selection, not a live feed from Google — nothing shows on the homepage until at least one review has been added here.</div>
+    <div class="note">Nothing shows on the homepage until at least one review is approved or added here.</div>
+  </section>
+
+  <section class="step admin-only" id="birthdays">
+    <div class="step-head">
+      <div class="step-num">17</div>
+      <div class="step-titles">
+        <p class="who">Marketing &gt; Birthdays</p>
+        <h2>Birthdays <span class="admin-chip">Admin</span></h2>
+      </div>
+    </div>
+    <p class="intro">On Marketing's <span class="tab-label">Birthdays</span> tab, see who's got one coming up.</p>
+    <ol class="steps">
+      <li data-n="1">Members with a birthday in the next 20 are listed soonest-first, with today's and this week's called out.</li>
+      <li data-n="2">Tap <span class="tap">Send birthday message</span> on a card to jump straight into a chat with that member.</li>
+    </ol>
   </section>
 
   <section class="step" id="install">
     <div class="step-head">
-      <div class="step-num">16</div>
+      <div class="step-num">18</div>
       <div class="step-titles">
         <p class="who">One-time setup, worth doing</p>
         <h2>Add BYLA to your home screen</h2>
