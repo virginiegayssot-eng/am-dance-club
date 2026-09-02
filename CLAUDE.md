@@ -222,7 +222,7 @@ This same pill-tab treatment (with each client's own accent color swapped in for
 
 ### Merch image upload (29 Aug)
 
-Product images in Merch (Marketing > Merch on `main`; still an inline Dashboard tab on `byla`/`demo`/`template`) can now be uploaded straight from the instructor's phone/photo library instead of typing an image URL — same base64 → `/api/instructor/upload-<thing>-image` → Supabase Storage bucket pattern already used for news post images. New route `src/app/api/instructor/upload-merch-image/route.ts`, new public bucket `merch-images` created (idempotently) by `supabase/add-merch-image-upload.sql` — run that once per Supabase project before using this. Shipped on `main` (in `MerchPanel.tsx`) and `demo` (inline in `instructor/page.tsx`, since `demo` hasn't had Merch extracted into a panel component yet). Not yet ported to BYLA, Manea, or `template` — when it is, copy the file-input + `uploadMerchImage()`/`readImageAsBase64()` pattern from whichever branch is structurally closer: `demo`'s inline version if the target also hasn't extracted Merch into its own component yet, `main`'s `MerchPanel.tsx` otherwise.
+Product images in Merch (Marketing > Merch on `main`/`demo`; still an inline Dashboard tab on `byla`/`template`) can now be uploaded straight from the instructor's phone/photo library instead of typing an image URL — same base64 → `/api/instructor/upload-<thing>-image` → Supabase Storage bucket pattern already used for news post images. New route `src/app/api/instructor/upload-merch-image/route.ts`, new public bucket `merch-images` created (idempotently) by `supabase/add-merch-image-upload.sql` — run that once per Supabase project before using this. Shipped on `main` and `demo` (both in `MerchPanel.tsx`, once `demo`'s Marketing section move carried its pre-existing inline version into the panel). Not yet ported to BYLA, Manea, or `template` — when it is, copy the file-input + `uploadMerchImage()`/`readImageAsBase64()` pattern from `MerchPanel.tsx` on `main` or `demo`, or from whichever branch still has it inline if the target also hasn't extracted Merch into its own component yet.
 
 ### Bug pattern: stale wording after the Terms & Conditions merge (found 29 Aug)
 
@@ -282,7 +282,8 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 ### `demo` (sales/preview branch — not a live client either)
 - [x] Dashboard tab bar modernized to the pill style (own `#221f1c` accent) — 29 Aug.
 - [x] Stale "Filming policy accepted" Members badge fixed to "Terms & Conditions accepted" — 29 Aug.
-- [ ] Still has the old 4-tabs-on-Dashboard layout (Merch/Discounts/Reviews not moved into a `/marketing` page) — same state as `template`, no Marketing section exists here to modernize yet.
+- [x] Marketing section (`/marketing` page + Navbar link) — built, Merch/Discounts/Reviews-carousel moved off the Dashboard, Birthdays moved off Reports (fixing the same-day date-math bug along the way), plus a new Message a Segment broadcast tool (`/api/instructor/broadcast-email`, Sable Studio's own voice/branding). No `is_admin` column and no automatic-reminders infra here, so — unlike THE A.M — none of the six tabs are admin-gated and there's no Reminders tab at all.
+- Merch image upload (photo library instead of URL) already existed here (inline in `instructor/page.tsx`, not yet in its own panel before this) — carried straight into `MerchPanel.tsx` during the move, nothing new to port.
 
 ### Shared, whichever client you're doing
 - Give each client's cron jobs (all four reminder types) their own `CRON_SECRET`, set in that client's own Netlify env vars — never reuse THE A.M's.
