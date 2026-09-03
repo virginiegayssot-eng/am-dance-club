@@ -10,7 +10,7 @@ export function buildBirthdayEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Happy Birthday, ${firstName}! 🎂</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            Happy birthday! 🎉 Hope you have an amazing day.
+            Hope you have an amazing day.
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
             Thank you for being part of BYLA. I love having you in class.
@@ -91,11 +91,8 @@ export function buildWinbackEmailHtml(firstName: string) {
         </div>
         <div style="padding:36px 32px;">
           <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">We miss you, ${firstName}!</h2>
-          <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            It's been a few weeks since your last class. Hope life's just been busy! Your spot on the dance floor is still there whenever you're ready.
-          </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            Come back for a Tuesday or Thursday session and dance it out with us.
+            It's been a few weeks since your last class. Hope life's just been busy! Your spot on the dance floor is still there whenever you're ready.
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/classes" style="background:#000000;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
