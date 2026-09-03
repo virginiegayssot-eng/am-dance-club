@@ -11,7 +11,7 @@ import ReviewRequestPanel from "@/components/ReviewRequestPanel";
 import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
 import MerchPanel from "@/components/MerchPanel";
 import DiscountsPanel from "@/components/DiscountsPanel";
-import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, type LucideIcon } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
@@ -41,7 +41,7 @@ export default function MarketingPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [activeTab, setActiveTab] = useState<"reviews" | "carousel" | "merch" | "discounts" | "birthdays" | "broadcast">("reviews");
+  const [activeTab, setActiveTab] = useState<"reviews" | "carousel" | "merch" | "discounts" | "birthdays" | "broadcast" | "reminders">("reviews");
   const [loading, setLoading] = useState(true);
 
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -56,6 +56,10 @@ export default function MarketingPage() {
   const [broadcastSent, setBroadcastSent] = useState<number | null>(null);
   const [broadcastErrors, setBroadcastErrors] = useState<string[]>([]);
 
+  const [reminderSettings, setReminderSettings] = useState<{ booking_reminders_enabled: boolean; winback_reminders_enabled: boolean; birthday_reminders_enabled: boolean; review_request_reminders_enabled: boolean } | null>(null);
+  const [reminderSettingsError, setReminderSettingsError] = useState(false);
+  const [savingReminderSetting, setSavingReminderSetting] = useState<"booking" | "winback" | "birthday" | "review" | null>(null);
+
   useEffect(() => { checkAuth(); }, []);
 
   async function checkAuth() {
@@ -63,7 +67,26 @@ export default function MarketingPage() {
     if (!user) { router.push("/auth/login"); return; }
     const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (prof?.role !== "instructor") { router.push("/dashboard"); return; }
+    loadReminderSettings();
     await loadData();
+  }
+
+  async function loadReminderSettings() {
+    // reminder_settings won't exist until supabase/add-reminders.sql has been
+    // run against this project — show a clear message instead of spinning on
+    // "Loading…" forever until then.
+    const { data, error } = await supabase.from("reminder_settings").select("booking_reminders_enabled, winback_reminders_enabled, birthday_reminders_enabled, review_request_reminders_enabled").eq("id", 1).single();
+    if (data) setReminderSettings(data);
+    else if (error) setReminderSettingsError(true);
+  }
+
+  async function toggleReminderSetting(key: "booking_reminders_enabled" | "winback_reminders_enabled" | "birthday_reminders_enabled" | "review_request_reminders_enabled") {
+    if (!reminderSettings) return;
+    const next = !reminderSettings[key];
+    setSavingReminderSetting(key === "booking_reminders_enabled" ? "booking" : key === "winback_reminders_enabled" ? "winback" : key === "birthday_reminders_enabled" ? "birthday" : "review");
+    const { error } = await supabase.from("reminder_settings").update({ [key]: next, updated_at: new Date().toISOString() }).eq("id", 1);
+    setSavingReminderSetting(null);
+    if (!error) setReminderSettings(s => s ? { ...s, [key]: next } : s);
   }
 
   async function loadData() {
@@ -167,6 +190,7 @@ export default function MarketingPage() {
     { key: "discounts", label: "Discounts", icon: Tag },
     { key: "birthdays", label: "Birthdays", icon: Cake },
     { key: "broadcast", label: "Message a Segment", icon: Send },
+    { key: "reminders", label: "Reminders", icon: Bell },
   ] as const;
 
   if (loading) return (
@@ -214,7 +238,7 @@ export default function MarketingPage() {
             <SectionHeader
               icon={Star}
               title="Review Requests"
-              description="Ask members to leave a review — first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
+              description="Ask members to leave a review — first-timers from a specific class, or anyone you pick. First-timers also get this automatically about an hour after their first class ends, if Reminders are turned on. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
             />
             <div className="card p-6">
               <ReviewRequestPanel />
@@ -437,6 +461,52 @@ export default function MarketingPage() {
                 {sendingBroadcast ? "Sending…" : `Send to ${selectedBroadcastIds.size}`}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* REMINDERS TAB */}
+        {activeTab === "reminders" && (
+          <div className="max-w-xl">
+            <SectionHeader
+              icon={Bell}
+              title="Reminders"
+              description="Automatic reminder emails sent to members. Turning one off pauses it immediately — no need to touch the schedule."
+            />
+
+            {reminderSettingsError ? (
+              <div className="card p-6 text-center font-body text-sm text-gray-400">Reminders aren't set up on this project yet — run <code>supabase/add-reminders.sql</code> in the Supabase SQL editor, then reload this page.</div>
+            ) : reminderSettings === null ? (
+              <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
+            ) : (
+              <div className="space-y-3">
+                {([
+                  { key: "booking_reminders_enabled", saving: "booking", icon: Clock, title: "Booking reminders", desc: "Sent ~12 hours before a class to everyone booked in." },
+                  { key: "winback_reminders_enabled", saving: "winback", icon: Heart, title: "Win-back emails", desc: "Sent daily to members who haven't attended in 3+ weeks." },
+                  { key: "birthday_reminders_enabled", saving: "birthday", icon: Cake, title: "Birthday emails", desc: "Sent automatically to a member on their birthday." },
+                  { key: "review_request_reminders_enabled", saving: "review", icon: Star, title: "First-timer review requests", desc: "Sent automatically about an hour after a member's first class ends. \"First-timers by class\" and \"Any members\" in Review Requests still work manually too." },
+                ] as const).map(({ key, saving, icon: Icon, title, desc }) => {
+                  const on = reminderSettings[key];
+                  return (
+                    <div key={key} className={`card p-5 flex items-center gap-4 transition-all ${on ? "ring-1 ring-[#221f1c]/20" : ""}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${on ? "bg-[#221f1c]/10" : "bg-gray-100"}`}>
+                        <Icon className={`w-5 h-5 ${on ? "text-[#221f1c]" : "text-gray-400"}`} strokeWidth={1.75} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-heading text-sm">{title}</p>
+                        <p className="font-body text-xs text-gray-500 mt-0.5">{desc}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleReminderSetting(key)}
+                        disabled={savingReminderSetting === saving}
+                        className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${on ? "bg-[#221f1c]" : "bg-gray-300"} disabled:opacity-50`}
+                      >
+                        <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${on ? "translate-x-5" : "translate-x-0"}`} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>

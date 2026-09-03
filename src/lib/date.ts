@@ -11,3 +11,19 @@ export function toLocalDateStr(d: Date): string {
 export function todayLocal(): string {
   return toLocalDateStr(new Date());
 }
+
+// class_date/class_time store the studio's local wall-clock time with no
+// timezone offset. The server runs in UTC, so parsing that string directly
+// (e.g. `new Date(`${date}T${time}`)`) silently misreads it as UTC. Hardcoded
+// to Australia/Sydney since every VIA studio so far is Sydney/Melbourne (same
+// offset); if a future client is in another timezone, change the string below.
+function getTimezoneOffsetMs(date: Date, timeZone: string): number {
+  const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+export function sydneyDateTimeToUTC(dateStr: string, timeStr: string): Date {
+  const guess = new Date(`${dateStr}T${timeStr}Z`);
+  const offsetMs = getTimezoneOffsetMs(guess, "Australia/Sydney");
+  return new Date(guess.getTime() - offsetMs);
+}
