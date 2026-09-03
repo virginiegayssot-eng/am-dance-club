@@ -326,14 +326,14 @@ export default function MarketingPage() {
                           {s.phone && <p className={`font-body text-xs mt-0.5 truncate ${isToday ? "text-white/70" : "text-gray-400"}`}>{s.phone}</p>}
                         </div>
                         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                          isToday ? "bg-white/15" : isThisWeek ? "bg-[#000000]/10" : ""
+                          isToday ? "bg-white/15" : "bg-[#e2d0fb]/70"
                         }`}>
                           {isToday ? (
                             <PartyPopper className="w-5 h-5 text-white" strokeWidth={1.75} />
                           ) : isThisWeek ? (
                             <Cake className="w-5 h-5 text-[#000000]" strokeWidth={1.75} />
                           ) : (
-                            <Calendar className="w-5 h-5 text-gray-300" strokeWidth={1.5} />
+                            <Calendar className="w-5 h-5 text-[#000000]" strokeWidth={1.5} />
                           )}
                         </div>
                       </div>
@@ -350,7 +350,7 @@ export default function MarketingPage() {
                             In {s.daysUntil} day{s.daysUntil !== 1 ? "s" : ""}
                           </span>
                         ) : (
-                          <span className="font-heading text-sm text-gray-400">
+                          <span className="inline-flex items-center bg-[#e2d0fb]/70 text-[#000000] font-heading text-xs px-2.5 py-1 rounded-full">
                             In {s.daysUntil} days
                           </span>
                         )}
@@ -417,7 +417,7 @@ export default function MarketingPage() {
                           className={`flex items-center gap-3 font-body text-sm px-2 py-1.5 rounded-lg cursor-pointer transition-colors ${checked ? "bg-[#000000]/5" : "hover:bg-gray-50"}`}
                         >
                           <input type="checkbox" className="shrink-0" checked={checked} onChange={() => toggleBroadcastRecipient(s.id)} />
-                          <span className="w-7 h-7 rounded-full bg-[#000000]/10 text-[#000000] font-heading text-[11px] flex items-center justify-center shrink-0">
+                          <span className="w-7 h-7 rounded-full bg-[#e2d0fb]/70 text-[#000000] font-heading text-[11px] flex items-center justify-center shrink-0">
                             {initials(s.full_name, s.email)}
                           </span>
                           <span className="min-w-0 flex-1 truncate">{s.full_name ?? s.email}</span>
@@ -496,7 +496,7 @@ export default function MarketingPage() {
                   const on = reminderSettings[key];
                   return (
                     <div key={key} className={`card p-5 flex items-center gap-4 transition-all ${on ? "ring-1 ring-[#000000]/20" : ""}`}>
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${on ? "bg-[#000000]/10" : "bg-gray-100"}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${on ? "bg-[#e2d0fb]/70" : "bg-gray-100"}`}>
                         <Icon className={`w-5 h-5 ${on ? "text-[#000000]" : "text-gray-400"}`} strokeWidth={1.75} />
                       </div>
                       <div className="flex-1 min-w-0">
