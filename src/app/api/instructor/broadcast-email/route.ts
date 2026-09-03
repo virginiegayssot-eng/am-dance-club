@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
           <div style="padding:36px 32px;">
             <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Hi ${firstName},</h2>
             ${bodyHtml}
-            <p style="color:#444;font-size:16px;margin:24px 0 0;">Majo</p>
+            <p style="color:#444;font-size:16px;margin:24px 0 0;">Majo x</p>
           </div>
           <div style="background:#e2d0fb;padding:20px;text-align:center;">
             <p style="color:#000000;font-size:12px;margin:0;">BYLA Alexandria &amp; BYLA Manly, Sydney</p>

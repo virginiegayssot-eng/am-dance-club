@@ -21,7 +21,7 @@ export function buildReviewEmailHtml(firstName: string) {
             </a>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Can't wait to see you at the next class!</p>
-          <p style="color:#444;font-size:16px;margin:0;">Majo</p>
+          <p style="color:#444;font-size:16px;margin:0;">Majo x</p>
         </div>
         <div style="background:#e2d0fb;padding:20px;text-align:center;">
           <p style="color:#000000;font-size:12px;margin:0;">BYLA Alexandria & BYLA Manly, Sydney</p>
@@ -55,7 +55,7 @@ export function buildGenericReviewEmailHtml(firstName: string) {
             </a>
           </div>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 8px;">Can't wait to see you at the next class!</p>
-          <p style="color:#444;font-size:16px;margin:0;">Majo</p>
+          <p style="color:#444;font-size:16px;margin:0;">Majo x</p>
         </div>
         <div style="background:#e2d0fb;padding:20px;text-align:center;">
           <p style="color:#000000;font-size:12px;margin:0;">BYLA Alexandria & BYLA Manly, Sydney</p>
