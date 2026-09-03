@@ -44,7 +44,7 @@ export function buildGenericReviewEmailHtml(firstName: string) {
         <div style="padding:36px 32px;">
           <h2 style="color:#000000;font-size:22px;margin:0 0 16px;">Hola ${firstName}!</h2>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">
-            I love having you as part of BYLA family!
+            I love having you at BYLA!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
             If you've been enjoying our classes, I'd love it if you could take 30 seconds to leave me a quick review from your dashboard. It means the world to me and helps other dancers find their way here!
