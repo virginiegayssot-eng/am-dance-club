@@ -430,13 +430,14 @@
     <a href="#assign">10. Assign instructors</a>
     <a href="#news">11. BYLA News</a>
     <a href="#member">12. Add a member</a>
-    <a href="#marketing">13. Marketing</a>
-    <a href="#reports" class="divider">14. Reports</a>
-    <a href="#discounts" class="divider">15. Discounts</a>
-    <a href="#google-reviews" class="divider">16. Review carousel</a>
-    <a href="#birthdays" class="divider">17. Birthdays</a>
-    <a href="#reminders" class="divider">18. Reminders</a>
-    <a href="#install">19. Home screen</a>
+    <a href="#passes">13. Manage passes</a>
+    <a href="#marketing">14. Marketing</a>
+    <a href="#reports" class="divider">15. Reports</a>
+    <a href="#discounts" class="divider">16. Discounts</a>
+    <a href="#google-reviews" class="divider">17. Review carousel</a>
+    <a href="#birthdays" class="divider">18. Birthdays</a>
+    <a href="#reminders" class="divider">19. Reminders</a>
+    <a href="#install">20. Home screen</a>
   </nav>
 </div>
 
@@ -518,7 +519,7 @@
         <h2>Send review emails</h2>
       </div>
     </div>
-    <p class="intro">On the <span class="tab-label">Classes</span> tab, tap <span class="tap">Send Review Emails</span>. Want to send to a wider group, or catch up later? Use <span class="tab-label">Marketing &gt; Review Requests</span> instead — see section 13.</p>
+    <p class="intro">On the <span class="tab-label">Classes</span> tab, tap <span class="tap">Send Review Emails</span>. Want to send to a wider group, or catch up later? Use <span class="tab-label">Marketing &gt; Review Requests</span> instead — see section 14.</p>
     <ol class="steps">
       <li data-n="1">Pick the class you want to send from.</li>
       <li data-n="2">Select which members to include — everyone's ticked by default.</li>
@@ -666,12 +667,29 @@
       <li data-n="2">Save — they'll get an email to set up their own login.</li>
       <li data-n="3">Adding several people at once? Use <span class="tap">Import CSV</span> instead.</li>
     </ol>
-    <div class="note">Members who've ticked the Filming &amp; Photography Policy checkbox at signup show a "Filming policy accepted" badge under their name — hover it to see the exact date. No Supabase access needed to check this.</div>
+    <div class="note">Members who've ticked the Terms &amp; Conditions checkbox at signup show a "Terms &amp; Conditions accepted" badge under their name — hover it to see the exact date. No Supabase access needed to check this.</div>
+  </section>
+
+  <section class="step" id="passes">
+    <div class="step-head">
+      <div class="step-num">13</div>
+      <div class="step-titles">
+        <p class="who">Class packs</p>
+        <h2>Manage passes</h2>
+      </div>
+    </div>
+    <p class="intro">The <span class="tab-label">Passes</span> tab lists every member's pass, split into Active and Used/Expired.</p>
+    <ol class="steps">
+      <li data-n="1">To assign a new pass, open the <span class="tab-label">Members</span> tab, find the member, and tap <span class="tap">Assign pass</span>.</li>
+      <li data-n="2">Need to manually deduct a class from someone's pass? Tap <span class="tap">Debit 1</span> next to their pass here.</li>
+      <li data-n="3">Refunded someone outside the app (e.g. directly in Stripe)? Tap <span class="tap">Delete</span> next to their pass here to remove it — refunding in Stripe doesn't automatically update the app, so this step doesn't happen on its own.</li>
+    </ol>
+    <div class="warn">Deleting a pass cannot be undone. If it's attached to an upcoming class booking, that booking is cancelled too so the spot opens up for someone else.</div>
   </section>
 
   <section class="step" id="marketing">
     <div class="step-head">
-      <div class="step-num">13</div>
+      <div class="step-num">14</div>
       <div class="step-titles">
         <p class="who">Reaching out to members</p>
         <h2>Marketing</h2>
@@ -682,7 +700,7 @@
       <li data-n="1"><strong>Review Requests</strong> — the same first-timers/any-member review-email tool from section 4, in one place for every class.</li>
       <li data-n="2"><strong>Message a Segment</strong> — pick a group (no active pass, inactive 3+ weeks, or all members) and send them a one-off email.</li>
     </ol>
-    <div class="note">First-timers also get a review-request email automatically, about an hour after their first class ends — no one has to remember to send it. It's the same email as the manual "First-timers by class" option, just on a timer. See <span class="tab-label">Marketing &gt; Reminders</span> (section 18) to pause it.</div>
+    <div class="note">First-timers also get a review-request email automatically, about an hour after their first class ends — no one has to remember to send it. It's the same email as the manual "First-timers by class" option, just on a timer. See <span class="tab-label">Marketing &gt; Reminders</span> (section 19) to pause it.</div>
   </section>
 
   <div class="group-divider">
@@ -691,7 +709,7 @@
 
   <section class="step admin-only" id="reports">
     <div class="step-head">
-      <div class="step-num">14</div>
+      <div class="step-num">15</div>
       <div class="step-titles">
         <p class="who">The numbers</p>
         <h2>Reports <span class="admin-chip">Admin</span></h2>
@@ -703,12 +721,12 @@
       <li data-n="2"><strong>Attendance</strong> tab: how full each upcoming class is.</li>
       <li data-n="3"><strong>Students</strong> tab: every member, their pass status, and how much they've spent — exportable to CSV.</li>
     </ol>
-    <div class="note">Looking for birthdays? That moved to <span class="tab-label">Marketing &gt; Birthdays</span> (section 17) alongside the other outreach tools.</div>
+    <div class="note">Looking for birthdays? That moved to <span class="tab-label">Marketing &gt; Birthdays</span> (section 18) alongside the other outreach tools.</div>
   </section>
 
   <section class="step admin-only" id="discounts">
     <div class="step-head">
-      <div class="step-num">15</div>
+      <div class="step-num">16</div>
       <div class="step-titles">
         <p class="who">Promo &amp; friend codes — Marketing &gt; Discounts</p>
         <h2>Discount codes <span class="admin-chip">Admin</span></h2>
@@ -727,7 +745,7 @@
 
   <section class="step admin-only" id="google-reviews">
     <div class="step-head">
-      <div class="step-num">16</div>
+      <div class="step-num">17</div>
       <div class="step-titles">
         <p class="who">Social proof on the homepage — Marketing &gt; Reviews</p>
         <h2>Review carousel <span class="admin-chip">Admin</span></h2>
@@ -743,7 +761,7 @@
 
   <section class="step admin-only" id="birthdays">
     <div class="step-head">
-      <div class="step-num">17</div>
+      <div class="step-num">18</div>
       <div class="step-titles">
         <p class="who">Marketing &gt; Birthdays</p>
         <h2>Birthdays <span class="admin-chip">Admin</span></h2>
@@ -758,7 +776,7 @@
 
   <section class="step admin-only" id="reminders">
     <div class="step-head">
-      <div class="step-num">18</div>
+      <div class="step-num">19</div>
       <div class="step-titles">
         <p class="who">Marketing &gt; Reminders</p>
         <h2>Reminders <span class="admin-chip">Admin</span></h2>
@@ -775,7 +793,7 @@
 
   <section class="step" id="install">
     <div class="step-head">
-      <div class="step-num">19</div>
+      <div class="step-num">20</div>
       <div class="step-titles">
         <p class="who">One-time setup, worth doing</p>
         <h2>Add BYLA to your home screen</h2>
