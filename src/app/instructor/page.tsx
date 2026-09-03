@@ -82,6 +82,7 @@ export default function InstructorPage() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const pastClassesRef = useRef<HTMLDivElement>(null);
 
   // Create/edit class form
   const [showClassForm, setShowClassForm] = useState(false);
@@ -1376,26 +1377,36 @@ export default function InstructorPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000]">Upcoming</h3>
-                  {isAdmin && (
-                    <div className="flex items-center flex-wrap gap-2">
-                      <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                        Remove All Upcoming Manly
+                  <div className="flex items-center flex-wrap gap-2">
+                    {pastClasses.length > 0 && (
+                      <button
+                        onClick={() => pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                        className="font-body text-xs text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-md px-3 py-1.5"
+                      >
+                        Past classes ↓
                       </button>
-                      <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                        Remove All Upcoming Alexandria
-                      </button>
-                      <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5">
-                        Remove All Upcoming
-                      </button>
-                    </div>
-                  )}
+                    )}
+                    {isAdmin && (
+                      <>
+                        <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
+                          Remove All Upcoming Manly
+                        </button>
+                        <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
+                          Remove All Upcoming Alexandria
+                        </button>
+                        <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5">
+                          Remove All Upcoming
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 {upcomingClasses.map((cls) => (
                   <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
-                    <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
+                    <h3 ref={pastClassesRef} className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8 scroll-mt-24">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
                       <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
                     ))}
