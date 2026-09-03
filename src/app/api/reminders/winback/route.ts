@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     if (!lastSeenByStudent.has(row.student_id)) lastSeenByStudent.set(row.student_id, row.marked_at);
   }
 
-  const lapsedIds = [...lastSeenByStudent.entries()]
+  const lapsedIds = Array.from(lastSeenByStudent.entries())
     .filter(([, lastSeen]) => lastSeen < cutoff)
     .map(([studentId]) => studentId);
 

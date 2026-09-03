@@ -55,6 +55,7 @@ export default function InstructorPage() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const pastClassesRef = useRef<HTMLDivElement>(null);
 
   // Create class form
   const [showClassForm, setShowClassForm] = useState(false);
@@ -1239,16 +1240,26 @@ export default function InstructorPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-heading text-sm uppercase tracking-widest text-[#2041d8]">Upcoming</h3>
-                  <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
-                    Remove All Upcoming
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {pastClasses.length > 0 && (
+                      <button
+                        onClick={() => pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                        className="font-body text-xs text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-md px-3 py-1.5"
+                      >
+                        Past classes ↓
+                      </button>
+                    )}
+                    <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
+                      Remove All Upcoming
+                    </button>
+                  </div>
                 </div>
                 {upcomingClasses.map((cls) => (
                   <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
-                    <h3 className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8">Past</h3>
+                    <h3 ref={pastClassesRef} className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8 scroll-mt-24">Past</h3>
                     {pastClasses.slice(0, 5).map((cls) => (
                       <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} past />
                     ))}
