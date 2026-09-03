@@ -12,7 +12,7 @@ import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
 import MerchPanel from "@/components/MerchPanel";
 import DiscountsPanel from "@/components/DiscountsPanel";
 import { MERCH_ENABLED } from "@/lib/feature-flags";
-import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, type LucideIcon } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
@@ -42,7 +42,7 @@ export default function MarketingPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [activeTab, setActiveTab] = useState<"reviews" | "carousel" | "merch" | "discounts" | "birthdays" | "broadcast">("reviews");
+  const [activeTab, setActiveTab] = useState<"reviews" | "carousel" | "merch" | "discounts" | "birthdays" | "broadcast" | "reminders">("reviews");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -58,6 +58,9 @@ export default function MarketingPage() {
   const [broadcastSent, setBroadcastSent] = useState<number | null>(null);
   const [broadcastErrors, setBroadcastErrors] = useState<string[]>([]);
 
+  const [reminderSettings, setReminderSettings] = useState<{ review_request_reminders_enabled: boolean } | null>(null);
+  const [savingReminderSetting, setSavingReminderSetting] = useState(false);
+
   useEffect(() => { checkAuth(); }, []);
 
   async function checkAuth() {
@@ -66,7 +69,22 @@ export default function MarketingPage() {
     const { data: prof } = await supabase.from("profiles").select("role, is_admin").eq("id", user.id).single();
     if (prof?.role !== "instructor") { router.push("/dashboard"); return; }
     setIsAdmin(!!prof?.is_admin);
+    if (prof?.is_admin) loadReminderSettings();
     await loadData();
+  }
+
+  async function loadReminderSettings() {
+    const { data } = await supabase.from("reminder_settings").select("review_request_reminders_enabled").eq("id", 1).single();
+    if (data) setReminderSettings(data);
+  }
+
+  async function toggleReminderSetting() {
+    if (!reminderSettings) return;
+    const next = !reminderSettings.review_request_reminders_enabled;
+    setSavingReminderSetting(true);
+    const { error } = await supabase.from("reminder_settings").update({ review_request_reminders_enabled: next, updated_at: new Date().toISOString() }).eq("id", 1);
+    setSavingReminderSetting(false);
+    if (!error) setReminderSettings({ review_request_reminders_enabled: next });
   }
 
   async function loadData() {
@@ -175,6 +193,7 @@ export default function MarketingPage() {
     ...(isAdmin ? [{ key: "discounts", label: "Discounts", icon: Tag }] as const : []),
     ...(isAdmin ? [{ key: "birthdays", label: "Birthdays", icon: Cake }] as const : []),
     { key: "broadcast", label: "Message a Segment", icon: Send },
+    ...(isAdmin ? [{ key: "reminders", label: "Reminders", icon: Bell }] as const : []),
   ] as const;
 
   if (loading) return (
@@ -222,7 +241,7 @@ export default function MarketingPage() {
             <SectionHeader
               icon={Star}
               title="Review Requests"
-              description="Ask members to leave a review: first-timers from a specific class, or anyone you pick. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
+              description="Ask members to leave a review: first-timers from a specific class, or anyone you pick. First-timers also get this automatically about an hour after their first class ends, if Reminders are turned on. The same tool is also on your Dashboard right after marking attendance, if that's more convenient in the moment."
             />
             <div className="card p-6">
               <ReviewRequestPanel />
@@ -445,6 +464,38 @@ export default function MarketingPage() {
                 {sendingBroadcast ? "Sending…" : `Send to ${selectedBroadcastIds.size}`}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* REMINDERS TAB */}
+        {activeTab === "reminders" && isAdmin && (
+          <div className="max-w-xl">
+            <SectionHeader
+              icon={Bell}
+              title="Reminders"
+              description="Automatic review-request emails sent to members. Turning this off pauses it immediately — no need to touch the schedule."
+            />
+
+            {reminderSettings === null ? (
+              <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
+            ) : (
+              <div className={`card p-5 flex items-center gap-4 transition-all ${reminderSettings.review_request_reminders_enabled ? "ring-1 ring-[#000000]/20" : ""}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${reminderSettings.review_request_reminders_enabled ? "bg-[#000000]/10" : "bg-gray-100"}`}>
+                  <Star className={`w-5 h-5 ${reminderSettings.review_request_reminders_enabled ? "text-[#000000]" : "text-gray-400"}`} strokeWidth={1.75} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-heading text-sm">First-timer review requests</p>
+                  <p className="font-body text-xs text-gray-500 mt-0.5">Sent automatically about an hour after a member's first class ends. "First-timers by class" and "Any members" in Review Requests still work manually too.</p>
+                </div>
+                <button
+                  onClick={toggleReminderSetting}
+                  disabled={savingReminderSetting}
+                  className={`relative inline-flex items-center appearance-none border-0 p-0 w-12 h-7 rounded-full shrink-0 transition-colors ${reminderSettings.review_request_reminders_enabled ? "bg-[#000000]" : "bg-gray-300"} disabled:opacity-50`}
+                >
+                  <span className={`absolute left-1 w-5 h-5 rounded-full bg-white transition-transform ${reminderSettings.review_request_reminders_enabled ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
