@@ -12,7 +12,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, ChevronDown, type LucideIcon } from "lucide-react";
 import { notifyPush } from "@/lib/push";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -1238,21 +1238,22 @@ export default function InstructorPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-heading text-sm uppercase tracking-widest text-[#2041d8]">Upcoming</h3>
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-heading text-sm uppercase tracking-widest text-[#2041d8]">Upcoming</h3>
                     {pastClasses.length > 0 && (
                       <button
                         onClick={() => pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                        className="font-body text-xs text-gray-500 border border-gray-300 hover:bg-gray-100 rounded-md px-3 py-1.5"
+                        className="flex items-center gap-1 font-body text-xs text-gray-600 bg-black/5 hover:bg-black/10 rounded-full px-3 py-1.5 transition-colors"
                       >
-                        Past classes ↓
+                        Past classes
+                        <ChevronDown className="w-3 h-3" strokeWidth={2} />
                       </button>
                     )}
-                    <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
-                      Remove All Upcoming
-                    </button>
                   </div>
+                  <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-red-400 hover:text-red-600">
+                    Remove All Upcoming
+                  </button>
                 </div>
                 {upcomingClasses.map((cls) => (
                   <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} isToday={cls.class_date === today} />
