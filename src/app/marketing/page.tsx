@@ -59,6 +59,7 @@ export default function MarketingPage() {
   const [broadcastErrors, setBroadcastErrors] = useState<string[]>([]);
 
   const [reminderSettings, setReminderSettings] = useState<{ review_request_reminders_enabled: boolean } | null>(null);
+  const [reminderSettingsError, setReminderSettingsError] = useState(false);
   const [savingReminderSetting, setSavingReminderSetting] = useState(false);
 
   useEffect(() => { checkAuth(); }, []);
@@ -74,8 +75,12 @@ export default function MarketingPage() {
   }
 
   async function loadReminderSettings() {
-    const { data } = await supabase.from("reminder_settings").select("review_request_reminders_enabled").eq("id", 1).single();
+    // reminder_settings won't exist until supabase/add-review-request-reminders.sql
+    // has been run against this project — show a clear message instead of
+    // spinning on "Loading…" forever when that migration hasn't happened yet.
+    const { data, error } = await supabase.from("reminder_settings").select("review_request_reminders_enabled").eq("id", 1).single();
     if (data) setReminderSettings(data);
+    else if (error) setReminderSettingsError(true);
   }
 
   async function toggleReminderSetting() {
@@ -476,7 +481,9 @@ export default function MarketingPage() {
               description="Automatic review-request emails sent to members. Turning this off pauses it immediately — no need to touch the schedule."
             />
 
-            {reminderSettings === null ? (
+            {reminderSettingsError ? (
+              <div className="card p-6 text-center font-body text-sm text-gray-400">Reminders aren't set up on this project yet — run <code>supabase/add-review-request-reminders.sql</code> in the Supabase SQL editor, then reload this page.</div>
+            ) : reminderSettings === null ? (
               <div className="card p-6 text-center font-body text-sm text-gray-400">Loading…</div>
             ) : (
               <div className={`card p-5 flex items-center gap-4 transition-all ${reminderSettings.review_request_reminders_enabled ? "ring-1 ring-[#000000]/20" : ""}`}>
