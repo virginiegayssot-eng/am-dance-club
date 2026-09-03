@@ -13,7 +13,7 @@ export function buildReviewEmailHtml(firstName: string) {
             So happy you joined me for your first class at BYLA!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you enjoyed it, I'd love it if you could take 30 seconds to leave me a quick review from your dashboard. It means the world to me and helps other dancers find their way here!
+            If you enjoyed it, I'd love it if you could take 30 seconds to leave me a quick review on the app. It means the world to me and helps other dancers find their way here!
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#000000;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
@@ -47,7 +47,7 @@ export function buildGenericReviewEmailHtml(firstName: string) {
             I love having you at BYLA!
           </p>
           <p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 24px;">
-            If you've been enjoying our classes, I'd love it if you could take 30 seconds to leave me a quick review from your dashboard. It means the world to me and helps other dancers find their way here!
+            If you've been enjoying our classes, I'd love it if you could take 30 seconds to leave me a quick review on the app. It means the world to me and helps other dancers find their way here!
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="background:#000000;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:bold;display:inline-block;">
