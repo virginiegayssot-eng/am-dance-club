@@ -21,6 +21,17 @@ function adminClient() {
 // The manual "First-timers by class" and "Any members" tools in Marketing
 // keep working exactly as before — this is purely an additional automatic
 // layer on top of the first-timer case.
+//
+// class_date is bounded to the last few days on purpose: this query has no
+// other time filter, so without it, any attendance row that's ever been
+// marked attended=true and never emailed (e.g. old test data, or a backlog
+// from before this job was set up, or from a period it was paused) would
+// get swept up and emailed the very first time the job runs, with copy
+// that says "this morning" about a class that happened months ago. Rows
+// older than the window are marked as sent (without sending) so they don't
+// linger as permanently-pending and get re-checked forever.
+const REVIEW_REQUEST_MAX_AGE_DAYS = 3;
+
 export async function POST(req: NextRequest) {
   if (req.headers.get("x-cron-secret") !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,16 +52,25 @@ export async function POST(req: NextRequest) {
 
   const { data: pending } = await admin
     .from("attendance")
-    .select("id, student_id, class_id, profiles(full_name, email)")
+    .select("id, student_id, class_id, classes!inner(class_date), profiles(full_name, email)")
     .eq("attended", true)
     .is("review_email_sent_at", null);
 
   if (!pending || pending.length === 0) return NextResponse.json({ sent: 0 });
 
+  const cutoffDate = new Date(Date.now() - REVIEW_REQUEST_MAX_AGE_DAYS * 24 * 3_600_000).toISOString().slice(0, 10);
+
   let sent = 0;
   const errors: string[] = [];
 
   for (const row of pending as any[]) {
+    // Too old to be "this morning" — mark as handled without emailing, so
+    // it doesn't come up again on the next run.
+    if (row.classes?.class_date && row.classes.class_date < cutoffDate) {
+      await admin.from("attendance").update({ review_email_sent_at: new Date().toISOString() }).eq("id", row.id);
+      continue;
+    }
+
     const { data: otherAttended } = await admin
       .from("attendance")
       .select("id")
