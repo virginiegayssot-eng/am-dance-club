@@ -200,11 +200,6 @@ export default function ClassesPage() {
               return (
                 <div key={cls.id} className="card flex flex-col">
                   <div className="relative bg-gradient-to-br from-[#e4c3cc] to-[#a3bdfe] p-6">
-                    {cls.is_special && (
-                      <span className="absolute top-4 right-4 bg-[#2041d8] text-white text-xs font-body font-bold uppercase tracking-wide px-3 py-1 rounded-full">
-                        {cls.special_label || "Special Class"}
-                      </span>
-                    )}
                     <p className="font-heading text-2xl text-black mb-1">{cls.title}</p>
                     <p className="font-body text-xs uppercase tracking-widest text-[#2041d8]">
                       {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long" })}, {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
@@ -212,6 +207,11 @@ export default function ClassesPage() {
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
+                    {cls.is_special && (
+                      <span className="inline-block bg-[#2041d8] text-white text-xs font-body font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-3 self-start">
+                        {cls.special_label || "Special Class"}
+                      </span>
+                    )}
                     <div className="space-y-1.5 mb-5">
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
