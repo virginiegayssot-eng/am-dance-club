@@ -213,6 +213,9 @@ export default function ClassesPage() {
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
+                    {cls.is_special && cls.description && (
+                      <p className="font-body text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100">{cls.description}</p>
+                    )}
                     <div className="space-y-1.5 mb-5">
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#2041d8]" strokeWidth={1.5} />{cls.location}</div>
