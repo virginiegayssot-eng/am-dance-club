@@ -24,6 +24,7 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedDescId, setExpandedDescId] = useState<string | null>(null);
   const [showSpecialOnly, setShowSpecialOnly] = useState(false);
   const [actionError, setActionError] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -221,18 +222,13 @@ export default function ClassesPage() {
                         {cls.special_label || "Special Class"}
                       </span>
                     )}
-                    <p className="font-body text-xs uppercase tracking-widest text-[#221f1c] mb-1">
-                      {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long" })}
-                    </p>
-                    <p className="font-heading text-2xl text-black">
-                      {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
+                    <p className="font-heading text-2xl text-black mb-1">{cls.title}</p>
+                    <p className="font-body text-xs uppercase tracking-widest text-[#221f1c]">
+                      {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long" })}, {new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
-                    {cls.is_special && cls.description && (
-                      <p className="font-body text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100">{cls.description}</p>
-                    )}
                     <div className="space-y-1.5 mb-5">
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><Clock className="w-4 h-4 text-[#221f1c]" strokeWidth={1.5} />{formatTime(cls.class_time)} · {cls.duration_minutes} min</div>
                       <div className="flex items-center gap-2 text-sm font-body text-gray-600"><MapPin className="w-4 h-4 text-[#221f1c]" strokeWidth={1.5} />{cls.location}</div>
@@ -240,6 +236,21 @@ export default function ClassesPage() {
                         <div className="flex items-center gap-2 text-sm font-body text-red-500"><Users className="w-4 h-4" strokeWidth={1.5} />Class full</div>
                       )}
                     </div>
+
+                    {cls.description && (
+                      <div className="mb-5">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedDescId(expandedDescId === cls.id ? null : cls.id)}
+                          className="font-body text-sm text-[#221f1c] hover:text-[#221f1c]/80 transition-colors"
+                        >
+                          {expandedDescId === cls.id ? "Hide details ↑" : "Class details ↓"}
+                        </button>
+                        {expandedDescId === cls.id && (
+                          <p className="font-body text-sm text-gray-600 leading-relaxed mt-2 whitespace-pre-wrap">{cls.description}</p>
+                        )}
+                      </div>
+                    )}
 
                     <div className="border-t border-gray-100 pt-4">
                       {cls.is_registered ? (
