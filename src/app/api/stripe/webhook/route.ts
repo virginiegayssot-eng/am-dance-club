@@ -72,7 +72,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    const { passTypeId, studentId, classId, isDoublePass, discountId } = meta;
+    const { passTypeId, studentId, classId, discountId } = meta;
+    const guestCount = Math.max(0, parseInt(meta.guestCount ?? "0", 10) || 0);
 
     if (!passTypeId || !studentId) {
       return NextResponse.json({ received: true });
@@ -111,10 +112,9 @@ export async function POST(req: NextRequest) {
       }).catch((e) => console.error("Pass-failure alert email error:", e));
     }
 
-    // For casual and double passes, immediately book the class
-    if (classId && pass && (passTypeId === "casual" || passTypeId === "double")) {
-      const guestCount = isDoublePass === "true" ? 1 : 0;
-
+    // For casual bookings, immediately book the class (guestCount already
+    // validated server-side in pass-checkout before this session was created).
+    if (classId && pass && passTypeId === "casual") {
       await supabase.from("registrations").upsert({
         class_id: classId,
         student_id: studentId,
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
         amount_paid_cents: session.amount_total,
         pass_id: pass.id,
         guest_count: guestCount,
-        payment_type: passTypeId === "double" ? "double" : "casual",
+        payment_type: "casual",
       }, { onConflict: "class_id,student_id" });
 
       // Deduct the class credit
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     // Notify instructor
     const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", studentId).single();
-    const passLabel = passTypeId === "casual" ? "Casual ($24)" : passTypeId === "double" ? "Double Pass ($38)" : passTypeId === "intro" ? "Intro Pass (3 classes)" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
+    const passLabel = passTypeId === "casual" ? "Casual Class" : passTypeId === "five" ? "5-Class Pass" : "10-Class Pass";
     let emailBody = `<p><strong>${profile?.full_name ?? "A student"}</strong> (${profile?.email ?? ""}) just purchased a <strong>${passLabel}</strong>.`;
     if (classId) {
       const { data: cls } = await supabase.from("classes").select("title, class_date, location").eq("id", classId).single();
@@ -142,9 +142,8 @@ export async function POST(req: NextRequest) {
         const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         emailBody += ` They are booked in for <strong>${cls.title}</strong> on ${classDate}.`;
 
-        if (profile?.email && (passTypeId === "casual" || passTypeId === "double")) {
+        if (profile?.email && passTypeId === "casual") {
           const firstName = (profile.full_name ?? "dancer").split(" ")[0];
-          const guestCount = isDoublePass === "true" ? 1 : 0;
           await resend.emails.send({
             from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
             to: profile.email,

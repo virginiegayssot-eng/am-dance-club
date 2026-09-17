@@ -23,9 +23,13 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { passTypeId, classId, discountCode, useAltDuration } = await req.json();
+  const { passTypeId, classId, discountCode, useAltDuration, guestCount: rawGuestCount = 0 } = await req.json();
   const config = PASS_CONFIGS[passTypeId];
   if (!config) return NextResponse.json({ error: "Invalid pass type" }, { status: 400 });
+
+  // Guests only make sense when paying casual for a specific class — not
+  // when just buying a 5/10-class pack with no class attached.
+  const guestCount = passTypeId === "casual" && classId ? Math.max(0, Number(rawGuestCount) || 0) : 0;
 
   // Validate new-student-only passes
   if (config.newOnly) {
@@ -90,7 +94,9 @@ export async function POST(req: NextRequest) {
   }
 
   const descriptions: Record<string, string> = {
-    casual: classDurationMinutes ? `Single drop-in class · ${classDurationMinutes} min` : "Single drop-in class",
+    casual: classDurationMinutes
+      ? `Single drop-in class · ${classDurationMinutes} min${guestCount > 0 ? ` (+${guestCount} guest)` : ""}`
+      : "Single drop-in class",
     five:   "5 classes · Valid 2 months",
     ten:    "10 classes · Valid 1 year",
   };
@@ -110,7 +116,8 @@ export async function POST(req: NextRequest) {
         },
         unit_amount: finalPrice,
       },
-      quantity: 1,
+      // Casual + guest(s): charge per person attending, not per booking.
+      quantity: 1 + guestCount,
     }],
     mode: "payment",
     success_url: successUrl,
@@ -120,7 +127,7 @@ export async function POST(req: NextRequest) {
       passTypeId,
       studentId: user.id,
       classId: classId ?? "",
-      isDoublePass: passTypeId === "double" ? "true" : "false",
+      guestCount: String(guestCount),
       discountId: discountId ?? "",
     },
   });

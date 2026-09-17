@@ -27,6 +27,7 @@ export default function ClassesPage() {
   const [filter, setFilter] = useState<"all" | "special" | "alexandria" | "manly" | "videoshoot">("all");
   const [actionError, setActionError] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [guestFlags, setGuestFlags] = useState<Record<string, boolean>>({});
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -99,10 +100,11 @@ export default function ClassesPage() {
     // Auto-use first valid pass (sorted by soonest expiry)
     if (activePasses.length > 0) {
       setActionId(cls.id);
+      const guestCount = guestFlags[cls.id] ? 1 : 0;
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount: 0 }),
+        body: JSON.stringify({ classId: cls.id, passId: activePasses[0].id, guestCount }),
       });
       const { error } = await res.json();
       if (error) { setActionError(error); setActionId(null); return; }
@@ -119,10 +121,11 @@ export default function ClassesPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
     setActionId(cls.id + passTypeId + (useAltDuration ? "-alt" : ""));
+    const guestCount = guestFlags[cls.id] ? 1 : 0;
     const res = await fetch("/api/stripe/pass-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passTypeId, classId: cls.id, useAltDuration }),
+      body: JSON.stringify({ passTypeId, classId: cls.id, useAltDuration, guestCount }),
     });
     const { url, error } = await res.json();
     if (error) { setActionError(error); setActionId(null); return; }
@@ -233,6 +236,9 @@ export default function ClassesPage() {
               const isExpanded = expandedId === cls.id;
               const isLoading = actionId?.startsWith(cls.id);
               const canUsePass = hasPass && !cls.is_special;
+              const bringingGuest = !!guestFlags[cls.id];
+              const maxGuestsOnPass = canUsePass ? ((bestPass as any).pass_types?.max_guests ?? 0) : 0;
+              const passCreditsNeeded = 1 + Math.max(0, (bringingGuest ? 1 : 0) - maxGuestsOnPass);
 
               return (
                 <div key={cls.id} className="card flex flex-col">
@@ -310,6 +316,17 @@ export default function ClassesPage() {
                             <p className="font-body text-xs text-gray-400 text-center pb-1">Special classes are booked separately — class passes don't apply here.</p>
                           )}
 
+                          {/* Bring a guest */}
+                          <label className="flex items-center gap-2 font-body text-xs text-gray-500 pb-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={bringingGuest}
+                              onChange={(e) => setGuestFlags(prev => ({ ...prev, [cls.id]: e.target.checked }))}
+                              className="rounded border-gray-300 text-[#000000] focus:ring-[#000000]"
+                            />
+                            Bring a guest (+1 spot)
+                          </label>
+
                           {/* Primary book button */}
                           <button
                             onClick={() => canUsePass ? handleBook(cls) : payAndBook(cls, "casual")}
@@ -319,7 +336,9 @@ export default function ClassesPage() {
                             {isLoading
                               ? "Booking…"
                               : canUsePass
-                              ? `Book · Use Pass (${bestPass.classes_remaining} left)`
+                              ? `Book · Use Pass (${passCreditsNeeded} credit${passCreditsNeeded !== 1 ? "s" : ""} of ${bestPass.classes_remaining})`
+                              : bringingGuest
+                              ? `Book · ${formatPrice(cls.price_cents * 2)} Casual for 2 (${cls.duration_minutes} min)`
                               : `Book · ${formatPrice(cls.price_cents)} Casual (${cls.duration_minutes} min)`}
                           </button>
 
@@ -342,7 +361,11 @@ export default function ClassesPage() {
                                   disabled={!!actionId}
                                   className="btn-secondary w-full justify-center text-sm py-2"
                                 >
-                                  {actionId === cls.id + "casual-alt" ? "Loading…" : `${formatPrice(cls.alt_price_cents)} Casual (${cls.alt_duration_minutes} min)`}
+                                  {actionId === cls.id + "casual-alt"
+                                    ? "Loading…"
+                                    : bringingGuest
+                                    ? `${formatPrice(cls.alt_price_cents * 2)} Casual for 2 (${cls.alt_duration_minutes} min)`
+                                    : `${formatPrice(cls.alt_price_cents)} Casual (${cls.alt_duration_minutes} min)`}
                                 </button>
                               )}
                               {!cls.is_special && (
