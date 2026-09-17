@@ -83,7 +83,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="label mb-0">Password</label>
-                <Link href="/auth/forgot-password" className="font-body text-xs text-[#000000] hover:underline">
+                <Link href="/auth/forgot-password" className="font-body text-sm font-medium text-[#000000] underline">
                   Forgot password?
                 </Link>
               </div>
@@ -112,6 +112,14 @@ export default function LoginPage() {
                       {resending ? "Sending…" : "Resend confirmation email"}
                     </button>
                   )
+                )}
+                {error === "Invalid login credentials" && (
+                  <p>
+                    Forgot your password?{" "}
+                    <Link href="/auth/forgot-password" className="text-[#000000] underline font-medium">
+                      Reset it here
+                    </Link>
+                  </p>
                 )}
               </div>
             )}
