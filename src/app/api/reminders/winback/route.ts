@@ -11,11 +11,12 @@ function adminClient() {
   );
 }
 
-const INACTIVE_DAYS = 21;
+// Escalating win-back schedule: first nudge at 21 days inactive, then longer
+// gaps (60, 120 days) rather than re-firing every 21 days forever. Once all
+// three have been sent with no return, we stop until they attend again.
+const STAGE_GAP_DAYS = [21, 60, 120];
 
 // Called once a day by pg_cron — see supabase/add-reminders.sql.
-// Emails students whose most recent attended class was 3+ weeks ago and who
-// haven't already had a win-back email in the last 3 weeks.
 export async function POST(req: NextRequest) {
   if (req.headers.get("x-cron-secret") !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +34,6 @@ export async function POST(req: NextRequest) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const cutoff = new Date(Date.now() - INACTIVE_DAYS * 24 * 3_600_000).toISOString();
 
   const { data: lastAttendance } = await admin
     .from("attendance")
@@ -49,24 +49,33 @@ export async function POST(req: NextRequest) {
     if (!lastSeenByStudent.has(row.student_id)) lastSeenByStudent.set(row.student_id, row.marked_at);
   }
 
-  const lapsedIds = [...lastSeenByStudent.entries()]
-    .filter(([, lastSeen]) => lastSeen < cutoff)
-    .map(([studentId]) => studentId);
-
-  if (lapsedIds.length === 0) return NextResponse.json({ sent: 0 });
-
-  const { data: students } = await admin
+  const studentIds = [...lastSeenByStudent.keys()];
+  const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name, email, last_winback_sent_at")
-    .in("id", lapsedIds)
-    .or(`last_winback_sent_at.is.null,last_winback_sent_at.lt.${cutoff}`);
+    .select("id, full_name, email, last_winback_sent_at, winback_count")
+    .in("id", studentIds);
 
-  if (!students || students.length === 0) return NextResponse.json({ sent: 0 });
+  if (!profiles || profiles.length === 0) return NextResponse.json({ sent: 0 });
 
   let sent = 0;
   const errors: string[] = [];
+  const now = Date.now();
 
-  for (const student of students) {
+  for (const student of profiles) {
+    const lastSeen = lastSeenByStudent.get(student.id)!;
+    let stage = student.winback_count ?? 0;
+
+    // They've attended since their last win-back email — reset the sequence.
+    if (stage > 0 && student.last_winback_sent_at && lastSeen > student.last_winback_sent_at) {
+      await admin.from("profiles").update({ winback_count: 0 }).eq("id", student.id);
+      stage = 0;
+    }
+
+    if (stage >= STAGE_GAP_DAYS.length) continue; // already sent the full sequence
+
+    const requiredGapMs = STAGE_GAP_DAYS[stage] * 24 * 3_600_000;
+    if (new Date(lastSeen).getTime() >= now - requiredGapMs) continue; // not lapsed enough yet for this stage
+
     if (student.email) {
       const firstName = (student.full_name ?? "there").split(" ")[0];
       const { error } = await resend.emails.send({
@@ -78,7 +87,10 @@ export async function POST(req: NextRequest) {
       if (error) errors.push(`${student.email}: ${error.message ?? error}`);
       else sent++;
     }
-    await admin.from("profiles").update({ last_winback_sent_at: new Date().toISOString() }).eq("id", student.id);
+    await admin.from("profiles").update({
+      last_winback_sent_at: new Date().toISOString(),
+      winback_count: stage + 1,
+    }).eq("id", student.id);
   }
 
   return NextResponse.json({ sent, errors: errors.length > 0 ? errors : undefined });
