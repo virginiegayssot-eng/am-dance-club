@@ -1378,53 +1378,57 @@ export default function InstructorPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000]">Upcoming</h3>
-                    {pastClasses.length > 0 && (
-                      <button
-                        onClick={() => pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                        className="flex items-center gap-1 font-body text-xs text-gray-600 bg-black/5 hover:bg-black/10 rounded-full px-3 py-1.5 transition-colors"
-                      >
-                        Past classes
-                        <ChevronDown className="w-3 h-3" strokeWidth={2} />
-                      </button>
-                    )}
-                    {pastClasses.length > 0 && (
-                      <div className="flex items-center gap-1.5 bg-black/5 hover:bg-black/10 rounded-full pl-3 pr-1 transition-colors">
-                        <label htmlFor="past-class-date-search" className="flex items-center gap-1 font-body text-xs text-gray-600 cursor-pointer">
-                          <Search className="w-3 h-3" strokeWidth={2} />
-                          Search date
-                        </label>
-                        <input
-                          id="past-class-date-search"
-                          type="date"
-                          value={pastDateSearch}
-                          onChange={(e) => {
-                            setPastDateSearch(e.target.value);
-                            if (e.target.value) pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                          }}
-                          className="font-body text-xs text-gray-600 rounded-full px-2 py-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-black transition-colors"
-                        />
-                        {pastDateSearch && (
-                          <button onClick={() => setPastDateSearch("")} className="font-body text-xs text-gray-400 hover:text-black px-1">
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                    )}
+                <div className="space-y-3">
+                  <div className="overflow-x-auto -mx-1 px-1">
+                    <div className="flex items-center gap-2 w-max">
+                      <h3 className="font-heading text-sm uppercase tracking-widest text-[#000000] whitespace-nowrap">Upcoming</h3>
+                      {pastClasses.length > 0 && (
+                        <button
+                          onClick={() => pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                          className="flex items-center gap-1 font-body text-xs text-gray-600 bg-black/5 hover:bg-black/10 rounded-full px-3 py-1.5 transition-colors whitespace-nowrap"
+                        >
+                          Past classes
+                          <ChevronDown className="w-3 h-3" strokeWidth={2} />
+                        </button>
+                      )}
+                      {pastClasses.length > 0 && (
+                        <div className="flex items-center gap-1.5 bg-black/5 hover:bg-black/10 rounded-full pl-3 pr-1 transition-colors whitespace-nowrap">
+                          <label htmlFor="past-class-date-search" className="flex items-center gap-1 font-body text-xs text-gray-600 cursor-pointer whitespace-nowrap">
+                            <Search className="w-3 h-3" strokeWidth={2} />
+                            Search date
+                          </label>
+                          <input
+                            id="past-class-date-search"
+                            type="date"
+                            value={pastDateSearch}
+                            onChange={(e) => {
+                              setPastDateSearch(e.target.value);
+                              if (e.target.value) pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }}
+                            className="font-body text-xs text-gray-600 rounded-full px-2 py-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-black transition-colors w-[110px]"
+                          />
+                          {pastDateSearch && (
+                            <button onClick={() => setPastDateSearch("")} className="font-body text-xs text-gray-400 hover:text-black px-1 whitespace-nowrap">
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {isAdmin && (
-                    <div className="flex items-center flex-wrap gap-2">
-                      <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                        Remove All Upcoming Manly
-                      </button>
-                      <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5">
-                        Remove All Upcoming Alexandria
-                      </button>
-                      <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5">
-                        Remove All Upcoming
-                      </button>
+                    <div className="overflow-x-auto -mx-1 px-1">
+                      <div className="flex items-center gap-2 w-max">
+                        <button onClick={() => deleteAllUpcomingByLocation("Manly", "Manly")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5 whitespace-nowrap">
+                          Remove All Upcoming Manly
+                        </button>
+                        <button onClick={() => deleteAllUpcomingByLocation("Alexandria", "Alexandria")} className="font-body text-xs text-[#000000] border border-[#000000] hover:bg-[#000000]/10 rounded-md px-3 py-1.5 whitespace-nowrap">
+                          Remove All Upcoming Alexandria
+                        </button>
+                        <button onClick={deleteAllUpcomingClasses} className="font-body text-xs text-white bg-[#000000] hover:bg-black/80 rounded-md px-3 py-1.5 whitespace-nowrap">
+                          Remove All Upcoming
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
