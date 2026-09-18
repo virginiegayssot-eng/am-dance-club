@@ -84,6 +84,7 @@ export default function InstructorPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
   const pastClassesRef = useRef<HTMLDivElement>(null);
   const [pastClassesLimit, setPastClassesLimit] = useState(5);
+  const [pastDateSearch, setPastDateSearch] = useState("");
 
   // Create/edit class form
   const [showClassForm, setShowClassForm] = useState(false);
@@ -1235,6 +1236,7 @@ export default function InstructorPage() {
   const today = todayLocal();
   const upcomingClasses = classes.filter(c => !c.is_cancelled && c.class_date >= today);
   const pastClasses = classes.filter(c => c.class_date < today || c.is_cancelled).reverse();
+  const searchedPastClasses = pastDateSearch ? pastClasses.filter(c => c.class_date === pastDateSearch) : pastClasses;
   const todaysClass = classes.find(c => !c.is_cancelled && c.class_date === today);
 
   return (
@@ -1388,6 +1390,24 @@ export default function InstructorPage() {
                         <ChevronDown className="w-3 h-3" strokeWidth={2} />
                       </button>
                     )}
+                    {pastClasses.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="date"
+                          value={pastDateSearch}
+                          onChange={(e) => {
+                            setPastDateSearch(e.target.value);
+                            if (e.target.value) pastClassesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }}
+                          className="font-body text-xs text-gray-600 bg-black/5 hover:bg-black/10 rounded-full px-3 py-1.5 border-0 focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                        {pastDateSearch && (
+                          <button onClick={() => setPastDateSearch("")} className="font-body text-xs text-gray-400 hover:text-black px-1">
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {isAdmin && (
                     <div className="flex items-center flex-wrap gap-2">
@@ -1409,10 +1429,13 @@ export default function InstructorPage() {
                 {pastClasses.length > 0 && (
                   <>
                     <h3 ref={pastClassesRef} className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8 scroll-mt-24">Past</h3>
-                    {pastClasses.slice(0, pastClassesLimit).map((cls) => (
+                    {pastDateSearch && searchedPastClasses.length === 0 && (
+                      <p className="font-body text-sm text-gray-400 text-center py-6">No class on this date.</p>
+                    )}
+                    {(pastDateSearch ? searchedPastClasses : pastClasses.slice(0, pastClassesLimit)).map((cls) => (
                       <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
                     ))}
-                    {pastClasses.length > pastClassesLimit && (
+                    {!pastDateSearch && pastClasses.length > pastClassesLimit && (
                       <button
                         onClick={() => setPastClassesLimit(n => n + 10)}
                         className="w-full font-body text-xs text-gray-500 hover:text-black bg-black/5 hover:bg-black/10 rounded-full px-4 py-2 transition-colors"
