@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
 import type { Class, Pass, Profile } from "@/lib/supabase";
-import { Clock, MapPin, Users, Check } from "lucide-react";
+import { Clock, MapPin, Users, Check, UserPlus } from "lucide-react";
 
 type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; instructor_name: string | null; instructor2_name: string | null; instructor_avatar: string | null; instructor2_avatar: string | null; registration_id: string | null };
 
@@ -317,15 +317,18 @@ export default function ClassesPage() {
                           )}
 
                           {/* Bring a guest */}
-                          <label className="flex items-center gap-2 font-body text-xs text-gray-500 pb-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={bringingGuest}
-                              onChange={(e) => setGuestFlags(prev => ({ ...prev, [cls.id]: e.target.checked }))}
-                              className="rounded border-gray-300 text-[#000000] focus:ring-[#000000]"
-                            />
-                            Bring a guest (+1 spot)
-                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setGuestFlags(prev => ({ ...prev, [cls.id]: !bringingGuest }))}
+                            className={`w-full flex items-center justify-center gap-2 font-body text-sm font-medium px-4 py-2.5 mb-1 rounded-full border-2 transition-all duration-200 active:scale-95 ${
+                              bringingGuest
+                                ? "bg-[#000000] border-[#000000] text-white"
+                                : "border-[#000000]/25 text-[#000000] hover:border-[#000000]"
+                            }`}
+                          >
+                            {bringingGuest ? <Check className="w-4 h-4" strokeWidth={2.5} /> : <UserPlus className="w-4 h-4" strokeWidth={2} />}
+                            {bringingGuest ? "Bringing a guest" : "Bring a guest (+1 spot)"}
+                          </button>
 
                           {/* Primary book button */}
                           <button
