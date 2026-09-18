@@ -316,20 +316,6 @@ export default function ClassesPage() {
                             <p className="font-body text-xs text-gray-400 text-center pb-1">Special classes are booked separately — class passes don't apply here.</p>
                           )}
 
-                          {/* Bring a guest */}
-                          <button
-                            type="button"
-                            onClick={() => setGuestFlags(prev => ({ ...prev, [cls.id]: !bringingGuest }))}
-                            className={`w-full flex items-center justify-center gap-2 font-body text-sm font-medium px-4 py-2.5 mb-1 rounded-full border-2 transition-all duration-200 active:scale-95 ${
-                              bringingGuest
-                                ? "bg-[#000000] border-[#000000] text-white"
-                                : "border-[#000000]/25 text-[#000000] hover:border-[#000000]"
-                            }`}
-                          >
-                            {bringingGuest ? <Check className="w-4 h-4" strokeWidth={2.5} /> : <UserPlus className="w-4 h-4" strokeWidth={2} />}
-                            {bringingGuest ? "Bringing a guest" : "Bring a guest (+1 spot)"}
-                          </button>
-
                           {/* Primary book button */}
                           <button
                             onClick={() => canUsePass ? handleBook(cls) : payAndBook(cls, "casual")}
@@ -343,6 +329,20 @@ export default function ClassesPage() {
                               : bringingGuest
                               ? `Book · ${formatPrice(cls.price_cents * 2)} Casual for 2 (${cls.duration_minutes} min)`
                               : `Book · ${formatPrice(cls.price_cents)} Casual (${cls.duration_minutes} min)`}
+                          </button>
+
+                          {/* Bring a guest */}
+                          <button
+                            type="button"
+                            onClick={() => setGuestFlags(prev => ({ ...prev, [cls.id]: !bringingGuest }))}
+                            className={`w-full flex items-center justify-center gap-2 font-body text-sm font-medium px-4 py-2.5 rounded-full border-2 transition-all duration-200 active:scale-95 ${
+                              bringingGuest
+                                ? "bg-[#000000] border-[#000000] text-white"
+                                : "border-[#000000]/25 text-[#000000] hover:border-[#000000]"
+                            }`}
+                          >
+                            {bringingGuest ? <Check className="w-4 h-4" strokeWidth={2.5} /> : <UserPlus className="w-4 h-4" strokeWidth={2} />}
+                            {bringingGuest ? "Bringing a guest" : "Bring a guest (+1 spot)"}
                           </button>
 
                           {/* Show payment options toggle when no usable pass */}
