@@ -83,6 +83,7 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef<HTMLDivElement>(null);
   const pastClassesRef = useRef<HTMLDivElement>(null);
+  const [pastClassesLimit, setPastClassesLimit] = useState(5);
 
   // Create/edit class form
   const [showClassForm, setShowClassForm] = useState(false);
@@ -1408,9 +1409,17 @@ export default function InstructorPage() {
                 {pastClasses.length > 0 && (
                   <>
                     <h3 ref={pastClassesRef} className="font-heading text-sm uppercase tracking-widest text-gray-400 mt-8 scroll-mt-24">Past</h3>
-                    {pastClasses.slice(0, 5).map((cls) => (
+                    {pastClasses.slice(0, pastClassesLimit).map((cls) => (
                       <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
                     ))}
+                    {pastClasses.length > pastClassesLimit && (
+                      <button
+                        onClick={() => setPastClassesLimit(n => n + 10)}
+                        className="w-full font-body text-xs text-gray-500 hover:text-black bg-black/5 hover:bg-black/10 rounded-full px-4 py-2 transition-colors"
+                      >
+                        Show 10 more past classes ({pastClasses.length - pastClassesLimit} left)
+                      </button>
+                    )}
                   </>
                 )}
               </div>
