@@ -138,7 +138,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label className="label">Email</label>
-              <input type="email" className="input" value={profile?.email ?? ""} disabled className="input bg-gray-50 text-gray-400 cursor-not-allowed" />
+              <input type="email" className="input bg-gray-50 text-gray-400 cursor-not-allowed" value={profile?.email ?? ""} disabled />
               <p className="font-body text-xs text-gray-400 mt-1">Email cannot be changed here</p>
             </div>
             <div>
