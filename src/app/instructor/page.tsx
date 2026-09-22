@@ -1203,15 +1203,22 @@ export default function InstructorPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Upcoming classes", value: upcomingClasses.length, color: "bg-[#fbf8f4]" },
-            { label: "Total members", value: allStudents.length, color: "bg-[#fbf8f4]" },
-            { label: "Videos", value: videos.length, color: "bg-[#fbf8f4]" },
-            { label: "Active passes", value: allPasses.filter(p => p.classes_remaining > 0 && (!p.expires_at || new Date(p.expires_at) > new Date())).length, color: "bg-[#fbf8f4]" },
+            { label: "Upcoming classes", value: upcomingClasses.length, color: "bg-[#fbf8f4]", tab: "classes" as const },
+            { label: "Total members", value: allStudents.length, color: "bg-[#fbf8f4]", tab: "students" as const },
+            { label: "Videos", value: videos.length, color: "bg-[#fbf8f4]", tab: "videos" as const },
+            { label: "Active passes", value: allPasses.filter(p => p.classes_remaining > 0 && (!p.expires_at || new Date(p.expires_at) > new Date())).length, color: "bg-[#fbf8f4]", tab: "passes" as const },
           ].map((stat) => (
-            <div key={stat.label} className={`card p-5 ${stat.color}`}>
+            <button
+              key={stat.label}
+              onClick={() => {
+                setActiveTab(stat.tab);
+                setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+              }}
+              className={`card p-5 ${stat.color} text-left w-full hover:shadow-md hover:-translate-y-0.5 transition-all duration-150`}
+            >
               <p className="font-heading text-2xl">{stat.value}</p>
               <p className="font-body text-xs text-gray-500 mt-1">{stat.label}</p>
-            </div>
+            </button>
           ))}
         </div>
 
