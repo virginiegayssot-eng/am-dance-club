@@ -1,5 +1,10 @@
 # Conventions
 
+See `PROSPECTS.md` in this repo for durable prospect briefs (Dynamic Pilates,
+and any future ones) — check it before starting work on a prospect demo,
+since scratchpad files from earlier sessions don't survive between
+containers.
+
 ## `demo` always tracks the latest version
 
 `demo` is the branch shown to prospective new clients — it needs to reflect the current state of the app at all times, not a snapshot from whenever it was last touched. **Whenever you ship a change to THE A.M (`main`) — a bug fix, a visual/UX modernization, a new feature — port the applicable parts to `demo` too, in the same session, without waiting to be asked.** This applies even when the user's request only names `main` or another specific client.
