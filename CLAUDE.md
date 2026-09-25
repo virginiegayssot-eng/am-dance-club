@@ -5,6 +5,61 @@ and any future ones) — check it before starting work on a prospect demo,
 since scratchpad files from earlier sessions don't survive between
 containers.
 
+## Infra / accounts (Supabase, Netlify, etc.) — read before assuming access
+
+Dashboard-only settings (a Netlify site's custom subdomain, who's been
+invited to a Supabase org, Stripe dashboard config) live **nowhere in
+code** — there's no file to grep for them. A conversation discussing them
+is not durable either: long sessions get auto-summarized as they grow, and
+a brand-new session starts with zero memory of any prior chat regardless.
+The only thing that survives between sessions and containers is what's
+actually committed to a repo file. So: whenever an infra/account decision
+gets made in chat, write it here (or update it here if it changes) rather
+than trusting it'll still be known next time. This section is that record
+— keep it current instead of re-discovering this list of gotchas from
+scratch each time.
+
+**Supabase org/project map (as last confirmed 25 Sep):**
+- **THE A.M** (`main`) — own project under `virginie.gayssot@gmail.com`'s
+  main personal org (Pro plan, 3 projects).
+- **BYLA** — project lives in an org called **"VIA"** (Free plan). This is
+  a different org from "THE VIA APP" below — easy to mix up, check the
+  exact org name before assuming which one holds which project.
+- **Otherwise** — project **"OTHERWISE APP"** (ref `dnojkediqjulnljjszrv`)
+  lives inside org **"THE VIA APP"** (Free plan) — *not* inside a
+  separate org literally named "Otherwise", which also exists but is
+  empty/unused (an invite was originally sent there by mistake before the
+  project's real location was found). Don't be thrown by the similar name.
+- **Demo Dynamic Pilates** — placeholder org/project from an early Dynamic
+  Pilates exploration, confirmed unused — a candidate to delete to free up
+  a Supabase free-tier project slot if one's ever needed.
+- **demo-app** — separate org, 1 project (relationship to the `demo`
+  branch not yet confirmed — don't assume it's the same thing without
+  checking).
+- **Supabase free-tier constraint:** max 2 free *active* projects **per
+  account**, counted across every org that account owns/admins — not
+  per-org. Creating a new org does not grant a fresh allowance. A paused
+  project likely doesn't count against this (unconfirmed in Supabase's own
+  docs, only inferred from observed behavior).
+
+**Netlify site naming:** BYLA's and Manea's live URLs include "the via
+app" in the subdomain instead of a random Netlify-generated name. The
+mechanism is Netlify's Site settings → General → Site details → "Change
+site name" (renames the `*.netlify.app` subdomain) — but the exact string
+each site was renamed to hasn't been confirmed/recorded here yet. Next
+time either site's Netlify dashboard is open, capture the exact site name
+here so Otherwise's site can match the same pattern instead of needing to
+be reverse-engineered again.
+
+**MCP connector auth is session-scoped, not just account-scoped:**
+reconnecting a connector (e.g. Supabase) in Settings → Connectors updates
+account-level auth, but a session whose MCP connection was already
+established when it started keeps using the auth that was valid at that
+time — it does not pick up a fresh reconnect. If a newly-granted org/access
+isn't showing up despite confirming the grant on the provider's own
+dashboard, the fix is a **new session**, not re-checking the same session
+again.
+
 ## `demo` always tracks the latest version
 
 `demo` is the branch shown to prospective new clients — it needs to reflect the current state of the app at all times, not a snapshot from whenever it was last touched. **Whenever you ship a change to THE A.M (`main`) — a bug fix, a visual/UX modernization, a new feature — port the applicable parts to `demo` too, in the same session, without waiting to be asked.** This applies even when the user's request only names `main` or another specific client.
