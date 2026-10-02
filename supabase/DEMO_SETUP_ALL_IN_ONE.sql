@@ -589,3 +589,23 @@ create policy "Instructors can manage reviews" on public.reviews
   for all using (
     auth.uid() in (select id from public.profiles where role = 'instructor')
   );
+
+-- ---- add-walkin-capacity-fix.sql ----
+-- Supersedes the class_registration_counts view defined near the top of
+-- this file (from schema.sql): that version only summed registrations
+-- (1 + guest_count), ignoring walk_ins entirely, so the Dashboard's
+-- "X/Y booked" figure undercounted any class with walk-in attendees.
+create or replace view public.class_registration_counts as
+  select
+    coalesce(r.class_id, w.class_id) as class_id,
+    coalesce(r.reg_count, 0) + coalesce(w.walkin_count, 0) as registered_count
+  from
+    (select class_id, sum(1 + coalesce(guest_count, 0)) as reg_count
+     from public.registrations
+     where status = 'confirmed'
+     group by class_id) r
+  full outer join
+    (select class_id, count(*) as walkin_count
+     from public.walk_ins
+     group by class_id) w
+    on r.class_id = w.class_id;
