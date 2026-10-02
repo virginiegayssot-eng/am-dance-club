@@ -12,6 +12,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import MemberDetailModal from "@/components/MemberDetailModal";
 import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
@@ -119,6 +120,7 @@ export default function InstructorPage() {
   const [assignPassError, setAssignPassError] = useState("");
 
   // Debit pass
+  const [detailStudent, setDetailStudent] = useState<Profile | null>(null);
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
 
   // Book for member
@@ -1497,8 +1499,8 @@ export default function InstructorPage() {
             ) : (
               <div className="card divide-y divide-gray-50 overflow-hidden">
                 {allStudents.map((s) => (
-                  <div key={s.id} className="px-5 py-4 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                  <div key={s.id} className="px-5 py-4 flex items-start justify-between gap-3 hover:bg-gray-50 transition-colors">
+                    <div className="min-w-0 cursor-pointer" onClick={() => setDetailStudent(s)}>
                       <p className="font-medium text-sm font-body">{s.full_name ?? "—"}</p>
                       <p className="text-xs text-gray-500 font-body">{s.email}</p>
                       <p className="text-xs text-gray-400 font-body inline-flex items-center gap-1">
@@ -2222,6 +2224,18 @@ export default function InstructorPage() {
               </div>
             </form>
           </Modal>
+        )}
+
+        {/* MEMBER DETAIL CARD */}
+        {detailStudent && (
+          <MemberDetailModal
+            student={detailStudent}
+            passes={allPasses.filter(p => p.student_id === detailStudent.id)}
+            onClose={() => setDetailStudent(null)}
+            onDebitPass={debitPass}
+            onAssignPass={() => openAssignPass(detailStudent)}
+            debitingPassId={debitingPassId}
+          />
         )}
 
         {/* BULK IMPORT MODAL */}
