@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
+import { formatTime } from "@/lib/stripe";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
 
   if (reg) {
     const { data: profile } = await admin.from("profiles").select("full_name, email").eq("id", reg.student_id).single();
-    const { data: cls } = await admin.from("classes").select("title, class_date").eq("id", reg.class_id).single();
+    const { data: cls } = await admin.from("classes").select("title, class_date, class_time, location").eq("id", reg.class_id).single();
 
     if (profile?.email && cls) {
       const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
         from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
         to: profile.email,
         subject: `Booking cancelled – ${cls.title}`,
-        html: buildBookingCancellationEmailHtml({ firstName, classTitle: cls.title, classDate, passRefunded }),
+        html: buildBookingCancellationEmailHtml({ firstName, classTitle: cls.title, classDate, classTimeLabel: formatTime(cls.class_time), location: cls.location, passRefunded }),
       }).catch((e) => ({ error: e }));
       if (error) console.error("Cancellation confirmation email error:", error);
     }
