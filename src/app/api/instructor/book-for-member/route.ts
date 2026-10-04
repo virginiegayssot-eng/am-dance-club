@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 import { buildBookingConfirmationEmailHtml } from "@/lib/booking-confirmation-email";
+import { formatTime } from "@/lib/stripe";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -16,7 +17,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
   const { data: profile } = await admin.from("profiles").select("full_name, email").eq("id", studentId).single();
   if (!profile?.email) return;
 
-  const { data: cls } = await admin.from("classes").select("title, class_date").eq("id", classId).single();
+  const { data: cls } = await admin.from("classes").select("title, class_date, class_time, location").eq("id", classId).single();
   if (!cls) return;
 
   const classDate = new Date(cls.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -27,7 +28,7 @@ async function sendBookingConfirmation(admin: ReturnType<typeof adminClient>, st
     from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
     to: profile.email,
     subject: `You're booked – ${cls.title}`,
-    html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, guestCount }),
+    html: buildBookingConfirmationEmailHtml({ firstName, classTitle: cls.title, classDate, classTimeLabel: formatTime(cls.class_time), location: cls.location, guestCount }),
   }).catch((e) => console.error("Booking confirmation email error:", e));
 }
 

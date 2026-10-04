@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { buildBookingCancellationEmailHtml } from "@/lib/booking-cancellation-email";
+import { formatTime } from "@/lib/stripe";
 import { Resend } from "resend";
 
 // class_date/class_time store Sydney wall-clock time with no timezone
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const { data: reg } = await supabase
     .from("registrations")
-    .select("*, classes(title, class_date, class_time)")
+    .select("*, classes(title, class_date, class_time, location)")
     .eq("id", registrationId)
     .eq("student_id", user.id)
     .single();
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
       from: `THE A.M Dance Club <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,
       subject: `Booking cancelled – ${reg.classes.title}`,
-      html: buildBookingCancellationEmailHtml({ firstName, classTitle: reg.classes.title, classDate, passRefunded }),
+      html: buildBookingCancellationEmailHtml({ firstName, classTitle: reg.classes.title, classDate, classTimeLabel: formatTime(reg.classes.class_time), location: reg.classes.location, passRefunded }),
     }).catch((e) => ({ error: e }));
     if (error) console.error("Cancellation confirmation email error:", error);
   }
