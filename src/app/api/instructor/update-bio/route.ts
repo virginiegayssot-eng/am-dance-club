@@ -15,13 +15,16 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: requester } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: requester } = await supabase.from("profiles").select("role, is_admin").eq("id", user.id).single();
   if (requester?.role !== "instructor") {
     return NextResponse.json({ error: "Only instructors can edit instructor bios" }, { status: 403 });
   }
 
-  const { profileId, title, bio } = await req.json();
+  const { profileId, title, bio, show_on_instructors_page } = await req.json();
   if (!profileId) return NextResponse.json({ error: "Missing profileId" }, { status: 400 });
+  if (!requester.is_admin && profileId !== user.id) {
+    return NextResponse.json({ error: "You can only edit your own bio" }, { status: 403 });
+  }
 
   const admin = adminClient();
 
@@ -30,9 +33,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Target is not an instructor" }, { status: 400 });
   }
 
+  const updates: Record<string, unknown> = {};
+  if (title !== undefined) updates.title = title || null;
+  if (bio !== undefined) updates.bio = bio || null;
+  if (show_on_instructors_page !== undefined) updates.show_on_instructors_page = !!show_on_instructors_page;
+
   const { error } = await admin
     .from("profiles")
-    .update({ title: title || null, bio: bio || null })
+    .update(updates)
     .eq("id", profileId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
