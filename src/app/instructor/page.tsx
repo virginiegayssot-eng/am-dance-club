@@ -46,6 +46,7 @@ export default function InstructorPage() {
   const [editBioForm, setEditBioForm] = useState({ title: "", bio: "" });
   const [editBioLoading, setEditBioLoading] = useState(false);
   const [editBioError, setEditBioError] = useState("");
+  const [togglingVisibilityId, setTogglingVisibilityId] = useState<string | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [allPasses, setAllPasses] = useState<PassRow[]>([]);
   const [allStudents, setAllStudents] = useState<Profile[]>([]);
@@ -1116,6 +1117,23 @@ export default function InstructorPage() {
     setEditBioError("");
   }
 
+  // Hides/shows an instructor on the public /instructors page and the
+  // public classes list (which falls back to the studio name for anyone
+  // hidden) — doesn't touch their login, dashboard access, or any class
+  // they're already assigned to teach.
+  async function toggleInstructorVisibility(inst: Profile) {
+    setTogglingVisibilityId(inst.id);
+    const res = await fetch("/api/instructor/update-bio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profileId: inst.id, show_on_instructors_page: !inst.show_on_instructors_page }),
+    });
+    if (res.ok) {
+      setInstructors(prev => prev.map(i => i.id === inst.id ? { ...i, show_on_instructors_page: !inst.show_on_instructors_page } : i));
+    }
+    setTogglingVisibilityId(null);
+  }
+
   async function saveBio(e: React.FormEvent) {
     e.preventDefault();
     if (!editBioTarget) return;
@@ -1849,9 +1867,25 @@ export default function InstructorPage() {
                       {inst.title && <p className="font-body text-xs text-[#2041d8] mt-0.5">{inst.title}</p>}
                       <p className="font-body text-sm text-gray-500 mt-1 whitespace-pre-wrap">{inst.bio || "No bio yet."}</p>
                     </div>
-                    <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#2041d8] hover:underline shrink-0">
-                      Edit
-                    </button>
+                    {(profile?.is_admin || inst.id === profile?.id) && (
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <button onClick={() => openEditBio(inst)} className="font-body text-xs text-[#2041d8] hover:underline">
+                          Edit
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-xs text-gray-400">
+                            {inst.show_on_instructors_page ? "Visible" : "Hidden"}
+                          </span>
+                          <button
+                            onClick={() => toggleInstructorVisibility(inst)}
+                            disabled={togglingVisibilityId === inst.id}
+                            className={`relative inline-flex items-center appearance-none border-0 p-0 w-10 h-6 rounded-full transition-colors disabled:opacity-50 ${inst.show_on_instructors_page ? "bg-[#2041d8]" : "bg-gray-300"}`}
+                          >
+                            <span className={`absolute left-1 w-4 h-4 rounded-full bg-white transition-transform ${inst.show_on_instructors_page ? "translate-x-4" : "translate-x-0"}`} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
