@@ -630,14 +630,31 @@ export default function InstructorPage() {
 
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
+      // A browser's XHR "error" event fires for any network-level failure
+      // (dropped connection, backgrounded tab, CORS block, offline, etc.)
+      // with no way to tell which one happened — the browser deliberately
+      // doesn't expose that, for security reasons. Previously this always
+      // guessed "CORS policy mismatch," which was actively misleading on a
+      // correctly-configured bucket: a long upload interrupted partway
+      // through (phone locked, wifi dropped, app backgrounded) hits this
+      // same event and has nothing to do with CORS. Track how far the
+      // upload got so the message reflects what's actually more likely.
+      let lastProgressPercent = 0;
       xhr.upload.addEventListener("progress", (ev) => {
-        if (ev.lengthComputable) setVideoUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+        if (ev.lengthComputable) {
+          lastProgressPercent = Math.round((ev.loaded / ev.total) * 100);
+          setVideoUploadProgress(lastProgressPercent);
+        }
       });
       xhr.addEventListener("load", () => {
         if (xhr.status >= 200 && xhr.status < 300) resolve();
         else reject(new Error(`Upload failed (status ${xhr.status}): ${xhr.responseText?.slice(0, 300) || "no response body"}`));
       });
-      xhr.addEventListener("error", () => reject(new Error("Upload failed: the browser blocked the request before it reached Cloudflare (likely a CORS policy mismatch on the bucket)")));
+      xhr.addEventListener("error", () => reject(new Error(
+        lastProgressPercent > 0
+          ? `Upload was interrupted at ${lastProgressPercent}% — the connection likely dropped. Try again on a stable wifi connection, and keep the app open and the screen awake until it finishes.`
+          : "Upload failed before it could start — check your connection and try again. If this keeps happening for every video, the storage bucket's CORS settings may need checking."
+      )));
       xhr.open("PUT", uploadUrl);
       xhr.setRequestHeader("Content-Type", file.type);
       xhr.send(file);
