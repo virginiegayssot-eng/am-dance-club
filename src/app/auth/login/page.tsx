@@ -1,15 +1,28 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Only honour a redirect back into the member-facing app (e.g. a shared
+  // class booking link) — never trust this for an instructor's own
+  // post-login destination, and never follow it off-site.
+  const redirectTo = searchParams.get("redirect");
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +51,12 @@ export default function LoginPage() {
       .eq("id", data.user.id)
       .single();
 
-    router.push(profile?.role === "instructor" ? "/instructor" : "/dashboard");
+    const isSafeRedirect = !!redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//");
+    if (profile?.role === "instructor") {
+      router.push("/instructor");
+    } else {
+      router.push(isSafeRedirect ? redirectTo : "/dashboard");
+    }
     router.refresh();
   };
 
