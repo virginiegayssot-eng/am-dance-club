@@ -3130,6 +3130,14 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
     .map(i => i.full_name)
     .join(" & ");
 
+  const [linkCopied, setLinkCopied] = useState(false);
+  async function copyBookingLink() {
+    const url = `${process.env.NEXT_PUBLIC_APP_URL}/classes?classId=${cls.id}`;
+    await navigator.clipboard.writeText(url);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
+
   return (
     <div className={`card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${cls.is_cancelled ? "opacity-60" : ""} ${isToday ? "ring-2 ring-[#2041d8]" : ""}`}>
       <div>
@@ -3175,6 +3183,11 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
           <button onClick={onEdit} className="font-body text-xs text-[#2041d8] hover:underline">
             Edit
           </button>
+          {!cls.is_cancelled && !past && (
+            <button onClick={copyBookingLink} className="font-body text-xs text-[#2041d8] hover:underline">
+              {linkCopied ? "Copied!" : "Copy Link"}
+            </button>
+          )}
           {!cls.is_cancelled && !past && (
             <button onClick={onCancel} className="font-body text-xs text-red-400 hover:text-red-600 underline">
               Cancel

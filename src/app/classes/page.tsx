@@ -1,9 +1,9 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
@@ -15,7 +15,17 @@ import { Clock, MapPin, Users, Check } from "lucide-react";
 type ClassWithMeta = Class & { registered_count: number; is_registered: boolean; guest_count: number; instructor_name: string | null; instructor2_name: string | null; instructor_avatar: string | null; instructor2_avatar: string | null };
 
 export default function ClassesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ClassesPageContent />
+    </Suspense>
+  );
+}
+
+function ClassesPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const focusClassId = searchParams.get("classId");
   const supabase = createClient();
   const [classes, setClasses] = useState<ClassWithMeta[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -90,7 +100,7 @@ export default function ClassesPage() {
   // Smart book: auto-use best pass, else show options
   async function handleBook(cls: ClassWithMeta, guestCount = 0) {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth/login"); return; }
+    if (!user) { router.push(`/auth/login?redirect=${encodeURIComponent(`/classes${focusClassId ? `?classId=${focusClassId}` : ""}`)}`); return; }
 
     // Auto-use first valid pass (sorted by soonest expiry)
     if (activePasses.length > 0) {
@@ -113,7 +123,7 @@ export default function ClassesPage() {
 
   async function payAndBook(cls: ClassWithMeta, passTypeId: "casual" | "double", useAltDuration = false) {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth/login"); return; }
+    if (!user) { router.push(`/auth/login?redirect=${encodeURIComponent(`/classes${focusClassId ? `?classId=${focusClassId}` : ""}`)}`); return; }
     setActionId(cls.id + passTypeId + (useAltDuration ? "-alt" : ""));
     const res = await fetch("/api/stripe/pass-checkout", {
       method: "POST",
@@ -128,7 +138,9 @@ export default function ClassesPage() {
   const hasPass = activePasses.length > 0;
   const bestPass = activePasses[0];
   const isDoublePass = hasPass && (bestPass as any).pass_types?.name?.toLowerCase().includes("double");
-  const visibleClasses = showSpecialOnly ? classes.filter(c => c.is_special) : classes;
+  const visibleClasses = focusClassId
+    ? classes.filter(c => c.id === focusClassId)
+    : showSpecialOnly ? classes.filter(c => c.is_special) : classes;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -138,26 +150,34 @@ export default function ClassesPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
             <p className="font-body text-xs uppercase tracking-[0.3em] text-[#2041d8] mb-2">Book a class</p>
-            <h1 className="section-title mb-1">Upcoming Classes</h1>
-            <p className="font-body text-gray-500">Every Friday at 7:00 AM · North Steyne Surf Club</p>
+            <h1 className="section-title mb-1">{focusClassId ? "Book This Class" : "Upcoming Classes"}</h1>
+            <p className="font-body text-gray-500">
+              {focusClassId ? "Reserve your spot below." : "Every Friday at 7:00 AM · North Steyne Surf Club"}
+            </p>
           </div>
           <Link href="/passes" className="btn-pink self-start sm:self-auto">View Passes & Pricing</Link>
         </div>
 
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={() => setShowSpecialOnly(false)}
-            className={!showSpecialOnly ? "btn-primary" : "btn-secondary"}
-          >
-            All Classes
-          </button>
-          <button
-            onClick={() => setShowSpecialOnly(true)}
-            className={showSpecialOnly ? "btn-primary" : "btn-secondary"}
-          >
-            Special Classes
-          </button>
-        </div>
+        {focusClassId ? (
+          <Link href="/classes" className="font-body text-sm text-[#2041d8] hover:underline inline-block mb-8">
+            ← View all classes
+          </Link>
+        ) : (
+          <div className="flex gap-3 mb-8">
+            <button
+              onClick={() => setShowSpecialOnly(false)}
+              className={!showSpecialOnly ? "btn-primary" : "btn-secondary"}
+            >
+              All Classes
+            </button>
+            <button
+              onClick={() => setShowSpecialOnly(true)}
+              className={showSpecialOnly ? "btn-primary" : "btn-secondary"}
+            >
+              Special Classes
+            </button>
+          </div>
+        )}
 
         {/* Active pass notice */}
         {hasPass && (
@@ -182,11 +202,14 @@ export default function ClassesPage() {
           <div className="text-center py-20">
             <Clock className="w-12 h-12 mx-auto mb-4 text-[#2041d8]" strokeWidth={1.5} />
             <h3 className="font-heading text-xl mb-2">
-              {showSpecialOnly ? "No special classes right now" : "No upcoming classes"}
+              {focusClassId ? "This class isn't available anymore" : showSpecialOnly ? "No special classes right now" : "No upcoming classes"}
             </h3>
-            <p className="font-body text-gray-500">
-              {showSpecialOnly ? "Check back soon for pop-ups and guest classes." : "Check back soon for new Friday sessions."}
+            <p className="font-body text-gray-500 mb-4">
+              {focusClassId ? "It may have already happened or been cancelled." : showSpecialOnly ? "Check back soon for pop-ups and guest classes." : "Check back soon for new Friday sessions."}
             </p>
+            {focusClassId && (
+              <Link href="/classes" className="btn-primary inline-block">View all classes</Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
