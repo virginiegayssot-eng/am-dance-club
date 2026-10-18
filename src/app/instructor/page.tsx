@@ -107,6 +107,10 @@ export default function InstructorPage() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
   const [videoUploadIndex, setVideoUploadIndex] = useState(0);
+  const [editVideoTarget, setEditVideoTarget] = useState<Video | null>(null);
+  const [editVideoForm, setEditVideoForm] = useState({ title: "", description: "", class_id: "", is_public: false });
+  const [editVideoLoading, setEditVideoLoading] = useState(false);
+  const [editVideoError, setEditVideoError] = useState("");
 
   // Add student form
   const [showAddStudentForm, setShowAddStudentForm] = useState(false);
@@ -630,14 +634,31 @@ export default function InstructorPage() {
 
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
+      // A browser's XHR "error" event fires for any network-level failure
+      // (dropped connection, backgrounded tab, CORS block, offline, etc.)
+      // with no way to tell which one happened — the browser deliberately
+      // doesn't expose that, for security reasons. Previously this always
+      // guessed "CORS policy mismatch," which was actively misleading on a
+      // correctly-configured bucket: a long upload interrupted partway
+      // through (phone locked, wifi dropped, app backgrounded) hits this
+      // same event and has nothing to do with CORS. Track how far the
+      // upload got so the message reflects what's actually more likely.
+      let lastProgressPercent = 0;
       xhr.upload.addEventListener("progress", (ev) => {
-        if (ev.lengthComputable) setVideoUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+        if (ev.lengthComputable) {
+          lastProgressPercent = Math.round((ev.loaded / ev.total) * 100);
+          setVideoUploadProgress(lastProgressPercent);
+        }
       });
       xhr.addEventListener("load", () => {
         if (xhr.status >= 200 && xhr.status < 300) resolve();
         else reject(new Error(`Upload failed (status ${xhr.status}): ${xhr.responseText?.slice(0, 300) || "no response body"}`));
       });
-      xhr.addEventListener("error", () => reject(new Error("Upload failed: the browser blocked the request before it reached Cloudflare (likely a CORS policy mismatch on the bucket)")));
+      xhr.addEventListener("error", () => reject(new Error(
+        lastProgressPercent > 0
+          ? `Upload was interrupted at ${lastProgressPercent}% — the connection likely dropped. Try again on a stable wifi connection, and keep the app open and the screen awake until it finishes.`
+          : "Upload failed before it could start — check your connection and try again. If this keeps happening for every video, the storage bucket's CORS settings may need checking."
+      )));
       xhr.open("PUT", uploadUrl);
       xhr.setRequestHeader("Content-Type", file.type);
       xhr.send(file);
@@ -821,6 +842,41 @@ export default function InstructorPage() {
         setVideos((v) => v.filter((vid) => vid.id !== id));
       },
     });
+  }
+
+  function openEditVideo(video: Video) {
+    setEditVideoTarget(video);
+    setEditVideoForm({
+      title: video.title,
+      description: video.description ?? "",
+      class_id: video.class_id ?? "",
+      is_public: video.is_public,
+    });
+    setEditVideoError("");
+  }
+
+  async function saveVideoEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editVideoTarget) return;
+    setEditVideoLoading(true);
+    setEditVideoError("");
+    try {
+      const { error } = await supabase.from("videos").update({
+        title: editVideoForm.title,
+        description: editVideoForm.description || null,
+        class_id: editVideoForm.class_id || null,
+        is_public: editVideoForm.is_public,
+      }).eq("id", editVideoTarget.id);
+      if (error) throw new Error(error.message);
+      setVideos(v => v.map(vid => vid.id === editVideoTarget.id
+        ? { ...vid, title: editVideoForm.title, description: editVideoForm.description || null, class_id: editVideoForm.class_id || null, is_public: editVideoForm.is_public }
+        : vid));
+      setEditVideoTarget(null);
+    } catch (err: any) {
+      setEditVideoError(err?.message ?? "Something went wrong — please try again.");
+    } finally {
+      setEditVideoLoading(false);
+    }
   }
 
   async function inviteStudent(e: React.FormEvent) {
@@ -1492,7 +1548,7 @@ export default function InstructorPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {videos.map((v) => (
-                  <VideoCard key={v.id} video={v} onDelete={() => deleteVideo(v.id)} />
+                  <VideoCard key={v.id} video={v} onEdit={() => openEditVideo(v)} onDelete={() => deleteVideo(v.id)} />
                 ))}
               </div>
             )}
@@ -2272,6 +2328,67 @@ export default function InstructorPage() {
                         ? (videoFiles.length > 1 ? `Uploading ${videoUploadIndex}/${videoFiles.length}…` : "Uploading…")
                         : "Adding…")
                     : (videoMode === "upload" && videoFiles.length > 1 ? `Add ${videoFiles.length} Recordings` : "Add Recording")}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )}
+
+        {/* EDIT VIDEO MODAL */}
+        {editVideoTarget && (
+          <Modal title="Edit Recording" onClose={() => setEditVideoTarget(null)}>
+            <form onSubmit={saveVideoEdit} className="space-y-4">
+              <div>
+                <label className="label">Title</label>
+                <input
+                  className="input"
+                  value={editVideoForm.title}
+                  onChange={e => setEditVideoForm(f => ({ ...f, title: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Description</label>
+                <textarea
+                  className="input resize-none"
+                  rows={2}
+                  placeholder="What's covered in this recording?"
+                  value={editVideoForm.description}
+                  onChange={e => setEditVideoForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label">Link to Class (optional)</label>
+                <select
+                  className="input"
+                  value={editVideoForm.class_id}
+                  onChange={e => setEditVideoForm(f => ({ ...f, class_id: e.target.value }))}
+                >
+                  <option value="">— None —</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.id}>{c.title} · {new Date(c.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="edit_video_is_public"
+                  checked={editVideoForm.is_public}
+                  onChange={e => setEditVideoForm(f => ({ ...f, is_public: e.target.checked }))}
+                  className="w-4 h-4 accent-[#2041d8]"
+                />
+                <label htmlFor="edit_video_is_public" className="font-body text-sm text-gray-700">
+                  Visible to all members (not just paid registrants)
+                </label>
+              </div>
+              {editVideoError && (
+                <p className="font-body text-sm text-red-500">{editVideoError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setEditVideoTarget(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="submit" className="btn-primary flex-1 justify-center" disabled={editVideoLoading}>
+                  {editVideoLoading ? "Saving…" : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -3072,7 +3189,7 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   );
 }
 
-function VideoCard({ video, onDelete }: { video: Video; onDelete: () => void }) {
+function VideoCard({ video, onEdit, onDelete }: { video: Video; onEdit: () => void; onDelete: () => void }) {
   return (
     <div className="card overflow-hidden">
       <div className="relative aspect-video bg-black">
@@ -3109,9 +3226,14 @@ function VideoCard({ video, onDelete }: { video: Video; onDelete: () => void }) 
           <span className={`badge ${video.is_public ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
             {video.is_public ? "Public" : "Members only"}
           </span>
-          <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600">
-            Delete
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={onEdit} className="font-body text-xs text-[#2041d8] hover:underline">
+              Edit
+            </button>
+            <button onClick={onDelete} className="font-body text-xs text-red-400 hover:text-red-600">
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
