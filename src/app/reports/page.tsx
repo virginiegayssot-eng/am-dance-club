@@ -215,8 +215,12 @@ export default function ReportsPage() {
     d.setDate(d.getDate() + 90);
     return d > new Date();
   }).length;
-  const avgAttendance = classes.length
-    ? Math.round(classes.reduce((s, c) => s + (c.registered > 0 ? c.attended / c.registered : 0), 0) / classes.length * 100)
+  // Only past classes have actually had attendance taken — an upcoming
+  // class always has 0 attended regardless of how booked it is, so
+  // including it here would just drag the average down for no reason.
+  const pastClasses = classes.filter(c => c.class_date < todayLocal());
+  const avgAttendance = pastClasses.length
+    ? Math.round(pastClasses.reduce((s, c) => s + (c.registered > 0 ? c.attended / c.registered : 0), 0) / pastClasses.length * 100)
     : 0;
 
   const tabs = [
@@ -424,7 +428,7 @@ export default function ReportsPage() {
           <div>
             <div className="flex justify-end mb-4">
               <button onClick={() => downloadCSV(
-                classes.map(c => ({ date: c.class_date, title: c.title, registered: c.registered, attended: c.attended, rate: c.registered ? `${Math.round(c.attended/c.registered*100)}%` : "0%" })),
+                pastClasses.slice().reverse().map(c => ({ date: c.class_date, title: c.title, registered: c.registered, attended: c.attended, rate: c.registered ? `${Math.round(c.attended/c.registered*100)}%` : "0%" })),
                 "attendance-report.csv"
               )} className="btn-secondary py-2 px-4 text-xs">Export CSV</button>
             </div>
@@ -441,7 +445,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {classes.filter(c => c.class_date >= todayLocal()).map(c => {
+                  {pastClasses.slice().reverse().map(c => {
                     const rate = c.registered > 0 ? Math.round((c.attended / c.registered) * 100) : 0;
                     return (
                       <tr key={c.id} className="hover:bg-gray-50/50">
