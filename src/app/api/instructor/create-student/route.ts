@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
+import { isValidPhone } from "@/lib/phone";
 import { Resend } from "resend";
 
 function adminClient() {
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
 
   const { full_name, email, phone } = await req.json();
   if (!email || !full_name) return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+  if (!isValidPhone(phone ?? "")) return NextResponse.json({ error: "A valid phone number is required" }, { status: 400 });
 
   const admin = adminClient();
 
