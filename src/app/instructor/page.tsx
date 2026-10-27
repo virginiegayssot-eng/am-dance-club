@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime, getYouTubeId } from "@/lib/stripe";
 import { todayLocal, toLocalDateStr } from "@/lib/date";
+import { isValidPhone } from "@/lib/phone";
 import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supabase";
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
@@ -828,9 +829,10 @@ export default function InstructorPage() {
 
   async function inviteStudent(e: React.FormEvent) {
     e.preventDefault();
-    setAddStudentLoading(true);
     setAddStudentError("");
     setAddStudentWarning(null);
+    if (!isValidPhone(addStudentForm.phone)) { setAddStudentError("Please enter a valid phone number."); return; }
+    setAddStudentLoading(true);
 
     const res = await fetch("/api/instructor/create-student", {
       method: "POST",
@@ -2389,13 +2391,14 @@ export default function InstructorPage() {
                 />
               </div>
               <div>
-                <label className="label">Phone (optional)</label>
+                <label className="label">Phone</label>
                 <input
                   className="input"
                   type="tel"
                   placeholder="+61 4xx xxx xxx"
                   value={addStudentForm.phone}
                   onChange={e => setAddStudentForm(f => ({ ...f, phone: e.target.value }))}
+                  required
                 />
               </div>
               {addStudentError && (

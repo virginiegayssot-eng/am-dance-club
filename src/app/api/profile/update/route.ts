@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabase } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { isValidPhone } from "@/lib/phone";
 
 function adminClient() {
   return createSupabase(
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { full_name, phone, birth_date } = await req.json();
+  if (!isValidPhone(phone ?? "")) return NextResponse.json({ error: "A valid phone number is required" }, { status: 400 });
 
   // Store as 2000-MM-DD (placeholder year) since DB column is type date
   const dbDate = birth_date ? `2000-${birth_date}` : null;

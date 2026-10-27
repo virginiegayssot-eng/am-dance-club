@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { isValidPhone } from "@/lib/phone";
 import { Mail } from "lucide-react";
 import PasswordInput from "@/components/PasswordInput";
 
@@ -25,7 +26,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
 
-    if (!/^\+?[\d\s\-]{8,15}$/.test(form.phone.trim())) { setError("Please enter a valid phone number."); return; }
+    if (!isValidPhone(form.phone)) { setError("Please enter a valid phone number."); return; }
     if (!form.birthMonth || !form.birthDay) { setError("Birthday is required."); return; }
     if (!filmingPolicyAccepted) { setError("Please confirm you agree to the Terms & Conditions."); return; }
 
