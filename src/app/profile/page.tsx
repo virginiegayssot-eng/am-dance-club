@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
+import { isValidPhone } from "@/lib/phone";
 import type { Profile } from "@/lib/supabase";
 import AvatarCropper from "@/components/AvatarCropper";
 import { pushSupported, getPushSubscriptionStatus, enablePush, disablePush } from "@/lib/push";
@@ -72,8 +73,9 @@ export default function ProfilePage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setSaveError("");
+    if (!isValidPhone(form.phone)) { setSaveError("Please enter a valid phone number."); return; }
+    setSaving(true);
     const birth_date = form.birth_month && form.birth_day
       ? `${form.birth_month.padStart(2,"0")}-${form.birth_day.padStart(2,"0")}`
       : null;
