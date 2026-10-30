@@ -143,6 +143,10 @@ export default function InstructorPage() {
   const [bookForLoading, setBookForLoading] = useState(false);
   const [bookForError, setBookForError] = useState("");
   const [memberPasses, setMemberPasses] = useState<any[]>([]);
+  const [bookForMode, setBookForMode] = useState<"pass" | "link">("pass");
+  const [bookForLinkAmount, setBookForLinkAmount] = useState("");
+  const [bookForLinkUrl, setBookForLinkUrl] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Walk-ins
   const [walkIns, setWalkIns] = useState<{ id: string; name: string; payment_type: string }[]>([]);
@@ -1093,6 +1097,10 @@ export default function InstructorPage() {
     setBookForPassId("");
     setBookForError("");
     setMemberPasses([]);
+    setBookForMode("pass");
+    setBookForLinkAmount(cls.price_cents ? (cls.price_cents / 100).toFixed(2) : "");
+    setBookForLinkUrl(null);
+    setLinkCopied(false);
     setShowBookForMember(true);
   }
 
@@ -1113,6 +1121,23 @@ export default function InstructorPage() {
   async function bookForMember(e: React.FormEvent) {
     e.preventDefault();
     if (!bookForClass || !bookForStudentId) return;
+
+    if (bookForMode === "link") {
+      setBookForLoading(true);
+      setBookForError("");
+      const amountCents = bookForLinkAmount ? Math.round(parseFloat(bookForLinkAmount) * 100) : null;
+      const res = await fetch("/api/instructor/send-payment-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: bookForClass.id, studentId: bookForStudentId, amountCents }),
+      });
+      const data = await res.json();
+      setBookForLoading(false);
+      if (!res.ok) { setBookForError(data.error ?? "Something went wrong"); return; }
+      setBookForLinkUrl(data.url);
+      return;
+    }
+
     setBookForLoading(true);
     setBookForError("");
 
@@ -1126,6 +1151,14 @@ export default function InstructorPage() {
     setShowBookForMember(false);
     loadData();
     setBookForLoading(false);
+  }
+
+  function copyPaymentLink() {
+    if (!bookForLinkUrl) return;
+    navigator.clipboard?.writeText(bookForLinkUrl).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }).catch(() => {});
   }
 
   function openAssignPass(student: Profile) {
@@ -2620,6 +2653,25 @@ export default function InstructorPage() {
               </div>
 
               {bookForStudentId && (
+                <div className="flex gap-1 bg-gray-50 rounded-full p-1">
+                  <button
+                    type="button"
+                    onClick={() => { setBookForMode("pass"); setBookForLinkUrl(null); setBookForError(""); }}
+                    className={`flex-1 font-body text-xs py-1.5 rounded-full transition-colors ${bookForMode === "pass" ? "bg-white shadow-sm font-medium" : "text-gray-500"}`}
+                  >
+                    Pass / Complimentary
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setBookForMode("link"); setBookForLinkUrl(null); setBookForError(""); }}
+                    className={`flex-1 font-body text-xs py-1.5 rounded-full transition-colors ${bookForMode === "link" ? "bg-white shadow-sm font-medium" : "text-gray-500"}`}
+                  >
+                    Payment Link
+                  </button>
+                </div>
+              )}
+
+              {bookForStudentId && bookForMode === "pass" && (
                 <div>
                   <label className="label">Pass to use</label>
                   {memberPasses.length === 0 ? (
@@ -2643,7 +2695,7 @@ export default function InstructorPage() {
                 </div>
               )}
 
-              {bookForStudentId && (
+              {bookForStudentId && bookForMode === "pass" && (
                 <div>
                   <label className="label">Extra guests (e.g. family member sharing pass)</label>
                   <select
@@ -2659,15 +2711,52 @@ export default function InstructorPage() {
                 </div>
               )}
 
+              {bookForStudentId && bookForMode === "link" && !bookForLinkUrl && (
+                <div>
+                  <label className="label">Amount (AUD)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={bookForLinkAmount}
+                    onChange={e => setBookForLinkAmount(e.target.value)}
+                    required
+                  />
+                  <p className="font-body text-xs text-gray-400 mt-1">
+                    Defaults to this class's listed price — change it for a one-off amount. She'll get a link to pay by card, no account or login needed. Her spot is only confirmed once she pays.
+                  </p>
+                </div>
+              )}
+
+              {bookForLinkUrl && (
+                <div>
+                  <label className="label">Payment link</label>
+                  <div className="flex gap-2">
+                    <input className="input flex-1 text-xs" readOnly value={bookForLinkUrl} onClick={e => (e.target as HTMLInputElement).select()} />
+                    <button type="button" onClick={copyPaymentLink} className="btn-secondary py-2 px-4 text-sm whitespace-nowrap">
+                      {linkCopied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <p className="font-body text-xs text-gray-400 mt-1">
+                    Copy this and send it to her directly (text, WhatsApp, email). Her booking will show up here as soon as she pays.
+                  </p>
+                </div>
+              )}
+
               {bookForError && (
                 <p className="font-body text-sm text-red-500">{bookForError}</p>
               )}
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowBookForMember(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
-                <button type="submit" className="btn-primary flex-1 justify-center" disabled={bookForLoading || !bookForStudentId}>
-                  {bookForLoading ? "Booking…" : "Confirm Booking"}
+                <button type="button" onClick={() => setShowBookForMember(false)} className="btn-secondary flex-1 justify-center">
+                  {bookForLinkUrl ? "Done" : "Cancel"}
                 </button>
+                {!bookForLinkUrl && (
+                  <button type="submit" className="btn-primary flex-1 justify-center" disabled={bookForLoading || !bookForStudentId}>
+                    {bookForLoading ? (bookForMode === "link" ? "Generating…" : "Booking…") : (bookForMode === "link" ? "Generate Payment Link" : "Confirm Booking")}
+                  </button>
+                )}
               </div>
             </form>
           </Modal>
