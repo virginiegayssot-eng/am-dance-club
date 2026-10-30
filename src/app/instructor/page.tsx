@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase";
@@ -13,7 +13,6 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import MemberDetailModal from "@/components/MemberDetailModal";
 import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, ChevronDown, type LucideIcon } from "lucide-react";
 import { notifyPush } from "@/lib/push";
 
@@ -54,6 +53,7 @@ export default function InstructorPage() {
   const [passTypes, setPassTypes] = useState<PassType[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [activeTab, setActiveTab] = useState<"classes" | "attendance" | "videos" | "passes" | "students" | "playlists" | "news" | "instructors">("classes");
+  const searchParams = useSearchParams();
   const [selectedClass, setSelectedClass] = useState<ClassWithCount | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +130,6 @@ export default function InstructorPage() {
   const [assignPassError, setAssignPassError] = useState("");
 
   // Debit pass
-  const [detailStudent, setDetailStudent] = useState<Profile | null>(null);
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
   const [deletingPassId, setDeletingPassId] = useState<string | null>(null);
   const [deletePassError, setDeletePassError] = useState("");
@@ -172,6 +171,13 @@ export default function InstructorPage() {
   const [memberSearch, setMemberSearch] = useState("");
 
   useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t === "classes" || t === "attendance" || t === "videos" || t === "passes" || t === "students" || t === "playlists" || t === "news" || t === "instructors") {
+      setActiveTab(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -1658,7 +1664,7 @@ export default function InstructorPage() {
               <div className="card divide-y divide-gray-50 overflow-hidden">
                 {allStudents.map((s) => (
                   <div key={s.id} className="px-5 py-4 flex items-start justify-between gap-3 hover:bg-gray-50 transition-colors">
-                    <div className="min-w-0 flex items-start gap-3 cursor-pointer" onClick={() => setDetailStudent(s)}>
+                    <div className="min-w-0 flex items-start gap-3 cursor-pointer" onClick={() => router.push(`/instructor/members/${s.id}`)}>
                       <div className="w-10 h-10 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-sm font-heading overflow-hidden shrink-0">
                         {s.avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -2442,21 +2448,6 @@ export default function InstructorPage() {
               </div>
             </form>
           </Modal>
-        )}
-
-        {/* MEMBER DETAIL CARD */}
-        {detailStudent && (
-          <MemberDetailModal
-            student={detailStudent}
-            passes={allPasses.filter(p => p.student_id === detailStudent.id)}
-            onClose={() => setDetailStudent(null)}
-            onDebitPass={debitPass}
-            onDeletePass={deletePass}
-            onAssignPass={() => openAssignPass(detailStudent)}
-            debitingPassId={debitingPassId}
-            deletingPassId={deletingPassId}
-            deletePassError={deletePassError}
-          />
         )}
 
         {/* BULK IMPORT MODAL */}
