@@ -13,10 +13,7 @@ import { isValidPhone } from "@/lib/phone";
 import { todayLocal } from "@/lib/date";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Profile, Pass, PassType, MemberNote } from "@/lib/supabase";
-import {
-  ArrowLeft, Cake, CreditCard, Banknote, Gift, ShoppingBag, Ticket,
-  CalendarCheck, CalendarX, CalendarClock, Sparkles, Ban, type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, Cake, CreditCard, Banknote, Gift, type LucideIcon } from "lucide-react";
 
 type PassWithType = Pass & { pass_types?: PassType };
 
@@ -368,16 +365,14 @@ export default function MemberProfilePage() {
     return reg.pass_id ? passes.find(p => p.id === reg.pass_id) : undefined;
   }
 
-  function classChip(reg: RegRow): { label: string; icon: LucideIcon } {
-    if (reg.payment_type === "complimentary") return { label: "Complimentary", icon: Gift };
+  function classChip(reg: RegRow): string {
+    if (reg.payment_type === "complimentary") return "Complimentary";
     const pass = passForReg(reg);
-    if (reg.payment_type === "pass") {
-      return { label: pass?.pass_types?.name ?? "Pass", icon: Ticket };
-    }
+    if (reg.payment_type === "pass") return pass?.pass_types?.name ?? "Pass";
     const src = sourceMeta(pass?.source ?? null);
     const amount = pass?.amount_paid_cents;
     const fallbackLabel = reg.payment_type === "double" ? "Double Pass" : "Casual";
-    return { label: amount != null ? `${src.label} · ${formatPrice(amount)}` : fallbackLabel, icon: src.icon };
+    return amount != null ? `${src.label} · ${formatPrice(amount)}` : fallbackLabel;
   }
 
   const events: TimelineEvent[] = [
@@ -398,7 +393,7 @@ export default function MemberProfilePage() {
         </Link>
 
         {/* PROFILE HEADER */}
-        <div className="card p-6 sm:p-7">
+        <div className="card p-6 sm:p-8 shadow-lg shadow-black/5">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-start gap-4 min-w-0">
               <div className="w-14 h-14 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-xl font-heading overflow-hidden shrink-0">
@@ -469,25 +464,25 @@ export default function MemberProfilePage() {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
-          <div className="card p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
+          <div className="card p-4 shadow-sm shadow-black/5">
             <p className="label">Lifetime value</p>
-            <p className="font-heading text-xl mt-1">{formatPrice(lifetimeValueCents)}</p>
+            <p className="font-heading text-xl mt-1.5">{formatPrice(lifetimeValueCents)}</p>
             <p className="font-body text-xs text-gray-400 mt-1">
               {classesAttended} class{classesAttended !== 1 ? "es" : ""}{merch.length > 0 ? ` + ${merch.length} merch` : ""}
             </p>
           </div>
-          <div className="card p-4">
+          <div className="card p-4 shadow-sm shadow-black/5">
             <p className="label">Classes attended</p>
-            <p className="font-heading text-xl mt-1">{classesAttended}</p>
+            <p className="font-heading text-xl mt-1.5">{classesAttended}</p>
           </div>
-          <div className="card p-4">
+          <div className="card p-4 shadow-sm shadow-black/5">
             <p className="label">No-shows</p>
-            <p className="font-heading text-xl mt-1">{noShows}</p>
+            <p className="font-heading text-xl mt-1.5">{noShows}</p>
           </div>
-          <div className="card p-4">
+          <div className="card p-4 shadow-sm shadow-black/5">
             <p className="label">Active pass</p>
-            <p className="font-heading text-xl mt-1">
+            <p className="font-heading text-xl mt-1.5">
               {activePasses.length === 0 ? "None" : `${activePasses[0].classes_remaining} left`}
             </p>
             <p className="font-body text-xs text-gray-400 mt-1 truncate">
@@ -495,9 +490,9 @@ export default function MemberProfilePage() {
               {activePasses.length > 1 ? ` +${activePasses.length - 1} more` : ""}
             </p>
           </div>
-          <div className="card p-4">
+          <div className="card p-4 shadow-sm shadow-black/5">
             <p className="label">Last visit</p>
-            <p className="font-heading text-xl mt-1">
+            <p className="font-heading text-xl mt-1.5">
               {daysSinceLastVisit === null ? "Never" : daysSinceLastVisit === 0 ? "Today" : daysSinceLastVisit === 1 ? "Yesterday" : `${daysSinceLastVisit}d ago`}
             </p>
             {lastVisit && <p className="font-body text-xs text-gray-400 mt-1 truncate">{lastVisit.title}</p>}
@@ -505,7 +500,7 @@ export default function MemberProfilePage() {
         </div>
 
         {/* TABS */}
-        <div className="overflow-x-auto mt-8 -mx-1 px-1 border-b border-[#2041d8]/20">
+        <div className="overflow-x-auto mt-9 -mx-1 px-1 border-b border-[#2041d8]/20">
           <div className="inline-flex items-center gap-1 w-max pb-3">
             {([
               ["timeline", "Activity Timeline"],
@@ -525,37 +520,36 @@ export default function MemberProfilePage() {
 
         {/* TIMELINE */}
         {tab === "timeline" && (
-          <div className="mt-6">
+          <div className="mt-7">
             {events.length === 0 ? (
               <p className="font-body text-sm text-gray-400">No activity yet.</p>
             ) : (
-              <div className="flex flex-col gap-1">
+              <div className="relative pl-6 border-l-2 border-[#2041d8]/15 flex flex-col gap-5">
                 {events.map((ev, i) => {
                   const month = monthLabel(ev.kind === "class" ? `${ev.reg.class_date}T00:00:00` : ev.sortKey);
                   const showMonth = month !== lastMonth;
                   lastMonth = month;
 
-                  let icon: LucideIcon = Sparkles;
+                  let dotClass = "border-[#2041d8] bg-[#fff8f3]";
                   let title = "";
                   let when = "";
-                  let chip: { label: string; icon: LucideIcon } | null = null;
+                  let chip: string | null = null;
                   let attendanceBadge: { label: string; cls: string } | null = null;
 
                   if (ev.kind === "joined") {
                     title = "Joined THE A.M";
                     when = new Date(ev.sortKey).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
-                    icon = Sparkles;
+                    dotClass = "border-gray-300 bg-[#fff8f3]";
                   } else if (ev.kind === "pass") {
                     const src = sourceMeta(ev.pass.source);
                     title = `${ev.pass.pass_types?.name ?? "Pass"} — ${ev.pass.classes_total} class${ev.pass.classes_total !== 1 ? "es" : ""}`;
                     when = new Date(ev.sortKey).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
-                    icon = Ticket;
-                    chip = { label: `${src.label} · ${formatPrice(ev.pass.amount_paid_cents ?? ev.pass.pass_types?.price_cents ?? 0)}`, icon: src.icon };
+                    chip = `${src.label} · ${formatPrice(ev.pass.amount_paid_cents ?? ev.pass.pass_types?.price_cents ?? 0)}`;
                   } else if (ev.kind === "merch") {
                     title = `Bought ${ev.order.title}`;
                     when = new Date(ev.sortKey).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
-                    icon = ShoppingBag;
-                    chip = { label: formatPrice(ev.order.amount_paid_cents ?? 0), icon: ShoppingBag };
+                    chip = formatPrice(ev.order.amount_paid_cents ?? 0);
+                    dotClass = "border-gray-300 bg-[#fff8f3]";
                   } else {
                     const r = ev.reg;
                     const isPast = r.class_date < today;
@@ -565,38 +559,32 @@ export default function MemberProfilePage() {
                     chip = classChip(r);
                     if (cancelled) {
                       attendanceBadge = { label: "Cancelled", cls: "badge bg-gray-100 text-gray-500" };
-                      icon = Ban;
+                      dotClass = "border-gray-300 bg-[#fff8f3]";
                     } else if (!isPast) {
                       attendanceBadge = { label: "Upcoming", cls: "badge-confirmed" };
-                      icon = CalendarClock;
                     } else if (r.attended) {
                       attendanceBadge = { label: "Attended", cls: "badge-confirmed" };
-                      icon = CalendarCheck;
+                      dotClass = "border-green-600 bg-[#fff8f3]";
                     } else {
                       attendanceBadge = { label: "No-show", cls: "badge bg-red-50 text-red-500" };
-                      icon = CalendarX;
+                      dotClass = "border-red-400 bg-[#fff8f3]";
                     }
                   }
 
-                  const Icon = icon;
                   return (
-                    <div key={`${ev.kind}-${i}`}>
+                    <div key={`${ev.kind}-${i}`} className="relative">
                       {showMonth && (
-                        <p className="font-heading text-xs uppercase tracking-widest text-gray-400 mt-6 mb-2 first:mt-0">{month}</p>
+                        <p className="font-heading text-xs uppercase tracking-widest text-gray-400 -ml-6 pl-6 mb-3 first:mt-0 mt-1">{month}</p>
                       )}
-                      <div className="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0">
-                        <div className="w-7 h-7 rounded-full bg-[#a3bdfe]/25 flex items-center justify-center shrink-0 mt-0.5">
-                          <Icon className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} />
+                      <span className={`absolute -left-[25px] top-1 w-3 h-3 rounded-full border-2 ${dotClass}`} />
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="min-w-0">
+                          <p className="font-body text-sm font-medium truncate">{title}</p>
+                          <p className="font-body text-xs text-gray-400 mt-0.5">{when}</p>
                         </div>
-                        <div className="min-w-0 flex-1 flex items-start justify-between gap-3 flex-wrap">
-                          <div className="min-w-0">
-                            <p className="font-body text-sm font-medium truncate">{title}</p>
-                            <p className="font-body text-xs text-gray-400">{when}</p>
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap justify-end">
-                            {chip && <span className="badge bg-gray-100 text-gray-500">{chip.label}</span>}
-                            {attendanceBadge && <span className={attendanceBadge.cls}>{attendanceBadge.label}</span>}
-                          </div>
+                        <div className="flex items-center gap-2 flex-wrap justify-end shrink-0">
+                          {chip && <span className="text-xs font-body font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1 whitespace-nowrap">{chip}</span>}
+                          {attendanceBadge && <span className={attendanceBadge.cls}>{attendanceBadge.label}</span>}
                         </div>
                       </div>
                     </div>
@@ -609,7 +597,7 @@ export default function MemberProfilePage() {
 
         {/* PASSES & PURCHASES */}
         {tab === "passes" && (
-          <div className="mt-6">
+          <div className="mt-7">
             <p className="font-body text-xs text-gray-400 mb-4">
               Casual drop-ins aren't stored as passes — see the Timeline tab for those. This is only the pass purchases and assignments on file.
             </p>
@@ -617,7 +605,7 @@ export default function MemberProfilePage() {
             {passes.length === 0 ? (
               <p className="font-body text-sm text-gray-400">No passes yet.</p>
             ) : (
-              <div className="card divide-y divide-gray-50 overflow-hidden">
+              <div className="flex flex-col gap-2.5">
                 {[...activePasses, ...inactivePasses].map(p => {
                   const expired = !!p.expires_at && new Date(p.expires_at) < new Date();
                   const used = p.classes_remaining === 0;
@@ -626,7 +614,7 @@ export default function MemberProfilePage() {
                   const isActive = !expired && !used;
                   const src = sourceMeta(p.source);
                   return (
-                    <div key={p.id} className="px-4 py-3.5 flex items-start justify-between gap-3 flex-wrap">
+                    <div key={p.id} className="card shadow-sm shadow-black/5 px-4 py-3.5 flex items-start justify-between gap-3 flex-wrap">
                       <div className="min-w-0">
                         <p className="text-sm font-body font-medium">{p.pass_types?.name ?? p.pass_type_id}</p>
                         <div className="flex flex-wrap gap-2 mt-1.5 items-center">
@@ -671,8 +659,8 @@ export default function MemberProfilePage() {
 
         {/* NOTES */}
         {tab === "notes" && (
-          <div className="mt-6">
-            <div className="card p-6">
+          <div className="mt-7">
+            <div className="card shadow-sm shadow-black/5 p-6">
               <p className="font-body text-xs text-gray-400 mb-3">Visible to instructors only — never shown to {student.full_name?.split(" ")[0] ?? "the member"}.</p>
               <textarea
                 className="input min-h-[120px]"
