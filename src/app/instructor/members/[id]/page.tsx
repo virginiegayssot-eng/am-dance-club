@@ -8,12 +8,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import AvatarCropper from "@/components/AvatarCropper";
 import { createClient } from "@/lib/supabase";
 import { isValidPhone } from "@/lib/phone";
 import { todayLocal } from "@/lib/date";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Profile, Pass, PassType, MemberNote } from "@/lib/supabase";
-import { ArrowLeft, Cake, CreditCard, Banknote, Gift, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Cake, Camera, CreditCard, Banknote, Gift, type LucideIcon } from "lucide-react";
 
 type PassWithType = Pass & { pass_types?: PassType };
 
@@ -66,6 +67,9 @@ export default function MemberProfilePage() {
   const [note, setNote] = useState<MemberNote | null>(null);
   const [tab, setTab] = useState<"timeline" | "passes" | "notes">("timeline");
   const [copied, setCopied] = useState<string | null>(null);
+  const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState("");
 
   const [confirmDialog, setConfirmDialog] = useState<{ message: string; confirmLabel?: string; action: () => void } | null>(null);
   const [removeError, setRemoveError] = useState("");
@@ -167,6 +171,43 @@ export default function MemberProfilePage() {
       setCopied(key);
       setTimeout(() => setCopied(c => (c === key ? null : c)), 1500);
     }).catch(() => {});
+  }
+
+  // ---- Photo ----
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoError("");
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("FileReader failed"));
+        reader.readAsDataURL(file);
+      });
+      setPendingImageSrc(base64);
+    } catch (err: any) {
+      setPhotoError("Couldn't read that file: " + (err?.message ?? String(err)));
+    }
+  }
+
+  async function handleCropSave(croppedBase64: string) {
+    setPendingImageSrc(null);
+    setUploadingPhoto(true);
+    setPhotoError("");
+    const res = await fetch("/api/instructor/update-member-photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, base64: croppedBase64 }),
+    });
+    setUploadingPhoto(false);
+    if (!res.ok) {
+      const data = await res.json();
+      setPhotoError(data.error ?? "Upload failed, please try again.");
+      return;
+    }
+    loadAll();
   }
 
   // ---- Assign pass ----
@@ -396,13 +437,22 @@ export default function MemberProfilePage() {
         <div className="card p-6 sm:p-8 shadow-lg shadow-black/5">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-start gap-4 min-w-0">
-              <div className="w-14 h-14 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-xl font-heading overflow-hidden shrink-0">
-                {student.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={student.avatar_url} alt="" className="object-cover w-full h-full" />
-                ) : (
-                  (student.full_name ?? student.email)[0]?.toUpperCase()
-                )}
+              <div className="relative shrink-0">
+                <div className="w-14 h-14 rounded-full bg-[#e4c3cc]/50 flex items-center justify-center text-xl font-heading overflow-hidden">
+                  {student.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={student.avatar_url} alt="" className="object-cover w-full h-full" />
+                  ) : (
+                    (student.full_name ?? student.email)[0]?.toUpperCase()
+                  )}
+                </div>
+                <label
+                  className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#2041d8] text-white flex items-center justify-center border-2 border-[#fff8f3] ${uploadingPhoto ? "opacity-60" : "cursor-pointer"}`}
+                  title="Change photo"
+                >
+                  <Camera className="w-3 h-3" strokeWidth={2} />
+                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} disabled={uploadingPhoto} />
+                </label>
               </div>
               <div className="min-w-0">
                 <h1 className="font-heading text-2xl truncate">{student.full_name ?? "—"}</h1>
@@ -429,6 +479,7 @@ export default function MemberProfilePage() {
           </div>
 
           {removeError && <p className="font-body text-sm text-red-500 mt-3">{removeError}</p>}
+          {photoError && <p className="font-body text-sm text-red-500 mt-3">{photoError}</p>}
 
           <div className="flex flex-wrap gap-6 mt-6 pt-5 border-t border-gray-100">
             <div>
@@ -807,6 +858,14 @@ export default function MemberProfilePage() {
           confirmLabel={confirmDialog.confirmLabel}
           onCancel={() => setConfirmDialog(null)}
           onConfirm={() => { const action = confirmDialog.action; setConfirmDialog(null); action(); }}
+        />
+      )}
+
+      {pendingImageSrc && (
+        <AvatarCropper
+          imageSrc={pendingImageSrc}
+          onCancel={() => setPendingImageSrc(null)}
+          onSave={handleCropSave}
         />
       )}
     </div>
