@@ -8,3 +8,6 @@ tsconfig.tsbuildinfo
 
 # Local Netlify folder
 .netlify
+
+# Claude Code local tooling (agent worktree isolation, etc.) — never app source
+.claude
