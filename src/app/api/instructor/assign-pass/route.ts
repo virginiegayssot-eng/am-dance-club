@@ -104,7 +104,11 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt,
     stripe_session_id: null,
     source: source ?? "cash",
-    amount_paid_cents: amountPaidCents ?? passType.price_cents,
+    // Complimentary passes are never paid for — the amount field is hidden
+    // in the dashboard form specifically for this source, but previously
+    // nothing stopped the fallback below from recording the full price
+    // anyway when no amount came through.
+    amount_paid_cents: source === "complimentary" ? 0 : (amountPaidCents ?? passType.price_cents),
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
