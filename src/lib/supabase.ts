@@ -145,3 +145,10 @@ export type MerchOrder = {
   status: "pending" | "paid" | "cancelled";
   created_at: string;
 };
+
+export type MemberNote = {
+  student_id: string;
+  note: string | null;
+  updated_at: string;
+  updated_by: string | null;
+};

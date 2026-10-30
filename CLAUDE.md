@@ -121,6 +121,18 @@ Same root problem as the "Wide content on mobile" table rule above, different sh
 
 Not every client has this column — it started on BYLA (multi-instructor: Majo is owner/admin, Lucha and Luji are regular instructors) and was later added to THE A.M ahead of hiring a second instructor. `role` stays `'instructor'` for everyone; `is_admin` only gates admin-exclusive UI (e.g. Reports > Settings, who can delete/reassign classes). Before writing code that reads `profile.is_admin` on a given client, check whether `supabase/add-admin-flag.sql` (or equivalent) actually exists and has been run there — it hasn't on Manea or `template`/`demo` yet.
 
+## Member Profile page
+
+Ported from THE A.M (`main`) 30 Oct. Clicking a member in the Members tab now opens a dedicated page (`/instructor/members/[id]`) instead of nothing — BYLA never had a detail pop-up for members before this. Shows a merged activity timeline (joined, every pass bought/assigned with how it was paid, every class booking with which pass/payment funded it, merch orders), lifetime value / classes attended / no-shows / active pass / last visit stats, a Passes & Purchases tab, private instructor-only Notes (new `member_notes` table, its own RLS policy — not a column on `profiles`, since that table's SELECT policy is readable by every signed-in member, not just instructors), an Edit Details action (name/phone/birthday), and lets an instructor set a member's photo directly (camera icon on the avatar, reuses the existing `AvatarCropper`/`/api/profile/avatar` pattern).
+
+Also fixed along the way: `assign-pass` recorded a complimentary pass at full price instead of $0 (the amount field is hidden for that source in the form, but the API still fell back to full price) — same bug as THE A.M had, now fixed in the code here too.
+
+**Still needs doing, can't be done from this session:**
+- `supabase/add-member-profile-page.sql` (just the `member_notes` table — BYLA already has `passes.source`/`amount_paid_cents` natively, unlike THE A.M) hasn't been run against BYLA's real Supabase project yet. The page works fine without it except the Notes tab, which will error until it's run.
+- Any existing complimentary passes with a nonzero `amount_paid_cents` haven't been backfilled (same fix THE A.M needed): `update passes set amount_paid_cents = 0 where source = 'complimentary' and amount_paid_cents is distinct from 0;`
+
+Both need someone with access to BYLA's actual Supabase project (it's in the "VIA" org, not reachable from this session).
+
 ## Automatic reminders feature
 
 Built first on THE A.M (`main`): booking reminders (email + push, ~12h before a confirmed class, to registered students only) and win-back emails (members inactive 3+ weeks), both behind a Supabase `pg_cron` schedule hitting `/api/reminders/booking` and `/api/reminders/winback`, both gated by a `CRON_SECRET` header check, and a `reminder_settings` singleton row toggleable per-type from Reports > Settings (admin-only, so needs the `is_admin` column above first). Not yet on BYLA or Manea — planned next. When porting:
