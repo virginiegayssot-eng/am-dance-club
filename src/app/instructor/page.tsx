@@ -516,6 +516,29 @@ export default function InstructorPage() {
     setShowClassForm(true);
   }
 
+  // Same as openEditClass, except editingClassId stays null (so Save
+  // inserts a new class instead of overwriting the one being copied from)
+  // and the date is left blank, since the whole point is picking a new one.
+  function openDuplicateClass(cls: ClassWithCount) {
+    setEditingClassId(null);
+    setClassForm({
+      title: cls.title,
+      description: cls.description ?? "",
+      class_date: "",
+      class_time: cls.class_time,
+      price_cents: (cls.price_cents / 100).toString(),
+      capacity: cls.capacity.toString(),
+      durationMinutes: cls.duration_minutes.toString(),
+      altDurationMinutes: cls.alt_duration_minutes ? cls.alt_duration_minutes.toString() : "",
+      altPriceCents: cls.alt_price_cents ? (cls.alt_price_cents / 100).toString() : "",
+      location: cls.location,
+      isSpecial: cls.is_special ?? false,
+      specialLabel: cls.special_label ?? "",
+    });
+    setClassFormError("");
+    setShowClassForm(true);
+  }
+
   async function saveClass(e: React.FormEvent) {
     e.preventDefault();
     setClassFormLoading(true);
@@ -1450,7 +1473,7 @@ export default function InstructorPage() {
                   )}
                 </div>
                 {upcomingClasses.map((cls) => (
-                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} isToday={cls.class_date === today} />
+                  <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onBookForMember={() => openBookForMember(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} onDuplicate={() => openDuplicateClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} isToday={cls.class_date === today} />
                 ))}
                 {pastClasses.length > 0 && (
                   <>
@@ -1459,7 +1482,7 @@ export default function InstructorPage() {
                       <p className="font-body text-sm text-gray-400 text-center py-6">No class on this date.</p>
                     )}
                     {(pastDateSearch ? searchedPastClasses : pastClasses.slice(0, pastClassesLimit)).map((cls) => (
-                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
+                      <ClassRow key={cls.id} cls={cls} instructors={instructors} onAttendance={() => loadStudents(cls)} onCancel={() => cancelClass(cls)} onDelete={() => deleteClass(cls)} onAssignInstructor={() => openAssignInstructor(cls)} onEdit={() => openEditClass(cls)} onDuplicate={() => openDuplicateClass(cls)} canDelete={isAdmin || cls.instructor_id === profile?.id || cls.instructor_id_2 === profile?.id} past />
                     ))}
                     {!pastDateSearch && pastClasses.length > pastClassesLimit && (
                       <button
@@ -3178,7 +3201,7 @@ export default function InstructorPage() {
   );
 }
 
-function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, onEdit, canDelete, past, isToday }: {
+function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookForMember, onAssignInstructor, onEdit, onDuplicate, canDelete, past, isToday }: {
   cls: ClassWithCount;
   instructors: Profile[];
   onAttendance: () => void;
@@ -3187,6 +3210,7 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
   onBookForMember?: () => void;
   onAssignInstructor: () => void;
   onEdit: () => void;
+  onDuplicate: () => void;
   canDelete: boolean;
   past?: boolean;
   isToday?: boolean;
@@ -3242,6 +3266,9 @@ function ClassRow({ cls, instructors, onAttendance, onCancel, onDelete, onBookFo
           </button>
           <button onClick={onEdit} className="font-body text-xs text-[#000000] hover:underline">
             Edit
+          </button>
+          <button onClick={onDuplicate} className="font-body text-xs text-[#000000] hover:underline">
+            Duplicate
           </button>
           {!cls.is_cancelled && !past && (
             <button onClick={onCancel} className="font-body text-xs text-red-400 hover:text-red-600 underline">
