@@ -309,22 +309,41 @@ export default function ReportsPage() {
 
             {/* Bar chart */}
             <div className="card p-6 mb-6">
-              <div className="flex items-end gap-3 h-48">
-                {revenue.map(row => {
-                  const max = Math.max(...revenue.map(r => r.total), 1);
-                  const h = Math.max((row.total / max) * 100, 2);
-                  return (
-                    <div key={row.month} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="font-body text-xs text-gray-500">{formatPrice(row.total)}</span>
-                      <div
-                        className="w-full bg-gradient-to-t from-[#2041d8] to-[#a3bdfe] rounded-t-lg transition-all"
-                        style={{ height: `${h}%` }}
-                      />
-                      <span className="font-body text-xs text-gray-400">{row.month}</span>
+              {revenue.every(r => r.total === 0) ? (
+                <p className="font-body text-sm text-gray-400 text-center py-16">No revenue in this period yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="min-w-max" style={{ width: `max(100%, ${revenue.length * 64}px)` }}>
+                    <div className="flex items-stretch gap-3 h-48 border-b border-gray-100">
+                      {revenue.map(row => {
+                        const max = Math.max(...revenue.map(r => r.total), 1);
+                        const h = Math.max((row.total / max) * 100, row.total > 0 ? 4 : 0);
+                        const isCurrent = row.month === revenue[revenue.length - 1].month;
+                        return (
+                          <div key={row.month} className="group flex-1 flex flex-col items-center justify-end gap-2 h-full">
+                            <span className="font-heading text-xs text-gray-600 group-hover:text-[#2041d8] transition-colors whitespace-nowrap">
+                              {formatPrice(row.total)}
+                            </span>
+                            <div
+                              className={`w-full rounded-t-lg transition-all ${
+                                isCurrent
+                                  ? "bg-gradient-to-t from-[#2041d8] to-[#5c74e8]"
+                                  : "bg-gradient-to-t from-[#2041d8]/70 to-[#a3bdfe]/70 group-hover:from-[#2041d8] group-hover:to-[#5c74e8]"
+                              }`}
+                              style={{ height: `${h}%`, minHeight: row.total > 0 ? "6px" : 0 }}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="flex gap-3 mt-3">
+                      {revenue.map(row => (
+                        <span key={row.month} className="flex-1 text-center font-body text-xs text-gray-400 whitespace-nowrap">{row.month}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Pass Sales */}
