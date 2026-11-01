@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import PhoneNumberPrompt from "@/components/PhoneNumberPrompt";
 import { createClient } from "@/lib/supabase";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
@@ -29,6 +30,8 @@ export default function ClassesPage() {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [guestFlags, setGuestFlags] = useState<Record<string, boolean>>({});
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+  const [showPhonePrompt, setShowPhonePrompt] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     loadData();
@@ -96,6 +99,11 @@ export default function ClassesPage() {
   async function handleBook(cls: ClassWithMeta) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
+    if (!profile?.phone) {
+      setPendingBooking(() => () => handleBook(cls));
+      setShowPhonePrompt(true);
+      return;
+    }
 
     // Auto-use first valid pass (sorted by soonest expiry)
     if (activePasses.length > 0) {
@@ -120,6 +128,11 @@ export default function ClassesPage() {
   async function payAndBook(cls: ClassWithMeta, passTypeId: "casual", useAltDuration = false) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
+    if (!profile?.phone) {
+      setPendingBooking(() => () => payAndBook(cls, passTypeId, useAltDuration));
+      setShowPhonePrompt(true);
+      return;
+    }
     setActionId(cls.id + passTypeId + (useAltDuration ? "-alt" : ""));
     const guestCount = guestFlags[cls.id] ? 1 : 0;
     const res = await fetch("/api/stripe/pass-checkout", {
@@ -164,6 +177,18 @@ export default function ClassesPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {showPhonePrompt && profile && (
+        <PhoneNumberPrompt
+          profileId={profile.id}
+          onSaved={(phone) => {
+            setProfile(p => p ? { ...p, phone } : p);
+            setShowPhonePrompt(false);
+            const resume = pendingBooking;
+            setPendingBooking(null);
+            resume?.();
+          }}
+        />
+      )}
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
 

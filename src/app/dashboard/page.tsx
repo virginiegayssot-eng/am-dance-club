@@ -13,6 +13,7 @@ import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Megaphone, MapPin, PartyPopper, Music2, X, Ticket, type LucideIcon } from "lucide-react";
 import { MERCH_ENABLED } from "@/lib/feature-flags";
+import PhoneNumberPrompt from "@/components/PhoneNumberPrompt";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const [showFilmingPolicyPrompt, setShowFilmingPolicyPrompt] = useState(false);
   const [acceptingFilmingPolicy, setAcceptingFilmingPolicy] = useState(false);
   const [filmingPolicyError, setFilmingPolicyError] = useState("");
+  const [showPhonePrompt, setShowPhonePrompt] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -92,6 +94,9 @@ export default function DashboardPage() {
     }
     setProfile(p => p ? { ...p, filming_policy_accepted_at: acceptedAt } : p);
     setShowFilmingPolicyPrompt(false);
+    if (!profile.phone) {
+      setShowPhonePrompt(true);
+    }
   }
 
   async function submitReview(e: React.FormEvent) {
@@ -119,6 +124,8 @@ export default function DashboardPage() {
     setProfile(prof);
     if (prof && prof.role === "student" && !prof.filming_policy_accepted_at) {
       setShowFilmingPolicyPrompt(true);
+    } else if (prof && prof.role === "student" && !prof.phone) {
+      setShowPhonePrompt(true);
     }
 
     const { data: regs } = await supabase
@@ -195,6 +202,15 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+      )}
+      {showPhonePrompt && profile && (
+        <PhoneNumberPrompt
+          profileId={profile.id}
+          onSaved={(phone) => {
+            setProfile(p => p ? { ...p, phone } : p);
+            setShowPhonePrompt(false);
+          }}
+        />
       )}
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-14 w-full">
