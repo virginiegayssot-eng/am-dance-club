@@ -9,7 +9,28 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
 import Link from "next/link";
-import { Cake, PartyPopper, Calendar, CreditCard, Banknote, Gift } from "lucide-react";
+import { Cake, PartyPopper, Calendar, CreditCard, Banknote, Gift, ChevronRight } from "lucide-react";
+
+// Defined at module scope (not inside ReportsPage) so its `open` state
+// survives the parent's re-renders instead of being torn down every time —
+// an inline component defined in the parent's body gets a fresh identity,
+// and therefore fresh state, on every render.
+function MonthGroup({ label, subtitle, defaultOpen, children }: { label: string; subtitle: string; defaultOpen: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="mb-3 last:mb-0">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between mb-2 px-1 py-1 appearance-none border-0 bg-transparent">
+        <span className="inline-flex items-center gap-1.5 font-heading text-sm">
+          <ChevronRight className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-90" : ""}`} strokeWidth={2} />
+          <Calendar className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} />
+          {label}
+        </span>
+        <span className="font-body text-xs text-gray-400">{subtitle}</span>
+      </button>
+      {open && <div className="card divide-y divide-gray-50 overflow-hidden">{children}</div>}
+    </div>
+  );
+}
 
 type StudentReport = {
   id: string;
@@ -272,7 +293,11 @@ export default function ReportsPage() {
   const periodStart = periodStartDate();
   const passesInPeriod = passesSold.filter(p => new Date(p.created_at) >= periodStart);
   const passesByMonth = groupByMonth(passesInPeriod, p => p.created_at);
-  const classesInPeriod = classes.filter(c => new Date(c.class_date) >= periodStart);
+  // Only classes that have actually happened — an upcoming class hasn't
+  // earned its revenue yet, so leading the list with future months (which
+  // sort first since groups are newest-first) was confusing to read as a
+  // revenue report.
+  const classesInPeriod = classes.filter(c => new Date(c.class_date) >= periodStart && c.class_date < todayLocal());
   const classesByMonth = groupByMonth(classesInPeriod, c => c.class_date);
 
   const tabs = [
@@ -418,42 +443,38 @@ export default function ReportsPage() {
               </div>
             ) : (
               <div className="mb-8">
-                {passesByMonth.map(group => {
+                {passesByMonth.map((group, i) => {
                   const subtotal = group.items.reduce((s, p) => s + (p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0), 0);
                   return (
-                    <div key={group.key} className="mb-5 last:mb-0">
-                      <div className="flex items-center justify-between mb-2 px-1">
-                        <span className="inline-flex items-center gap-1.5 font-heading text-sm">
-                          <Calendar className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} />
-                          {group.label}
-                        </span>
-                        <span className="font-body text-xs text-gray-400">{group.items.length} {group.items.length === 1 ? "pass" : "passes"} · {formatPrice(subtotal)}</span>
-                      </div>
-                      <div className="card divide-y divide-gray-50 overflow-hidden">
-                        {group.items.map(p => {
-                          const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
-                          const source = p.source ?? "stripe";
-                          const SourceIcon = source === "stripe" || source === "card_manual" ? CreditCard : source === "cash" ? Banknote : source === "complimentary" ? Gift : null;
-                          const sourceLabel = source === "stripe" ? "Stripe" : source === "cash" ? "Cash" : source === "card_manual" ? "Card" : source === "complimentary" ? "Comp" : source;
-                          return (
-                            <div key={p.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-full bg-[#2041d8]/10 flex items-center justify-center shrink-0">
-                                  {SourceIcon ? <SourceIcon className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} /> : <CreditCard className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} />}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm font-body truncate">{p.profiles?.full_name ?? p.profiles?.email ?? "—"}</p>
-                                  <p className="text-xs text-gray-400 font-body truncate">
-                                    {p.pass_types?.name ?? p.pass_type_id} · {new Date(p.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })} · {sourceLabel}
-                                  </p>
-                                </div>
+                    <MonthGroup
+                      key={group.key}
+                      label={group.label}
+                      subtitle={`${group.items.length} ${group.items.length === 1 ? "pass" : "passes"} · ${formatPrice(subtotal)}`}
+                      defaultOpen={i === 0}
+                    >
+                      {group.items.map(p => {
+                        const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
+                        const source = p.source ?? "stripe";
+                        const SourceIcon = source === "stripe" || source === "card_manual" ? CreditCard : source === "cash" ? Banknote : source === "complimentary" ? Gift : null;
+                        const sourceLabel = source === "stripe" ? "Stripe" : source === "cash" ? "Cash" : source === "card_manual" ? "Card" : source === "complimentary" ? "Comp" : source;
+                        return (
+                          <div key={p.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-[#2041d8]/10 flex items-center justify-center shrink-0">
+                                {SourceIcon ? <SourceIcon className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} /> : <CreditCard className="w-4 h-4 text-[#2041d8]" strokeWidth={1.75} />}
                               </div>
-                              <p className="font-heading text-sm shrink-0">{formatPrice(amount)}</p>
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm font-body truncate">{p.profiles?.full_name ?? p.profiles?.email ?? "—"}</p>
+                                <p className="text-xs text-gray-400 font-body truncate">
+                                  {p.pass_types?.name ?? p.pass_type_id} · {new Date(p.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })} · {sourceLabel}
+                                </p>
+                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                            <p className="font-heading text-sm shrink-0">{formatPrice(amount)}</p>
+                          </div>
+                        );
+                      })}
+                    </MonthGroup>
                   );
                 })}
               </div>
@@ -472,41 +493,37 @@ export default function ReportsPage() {
                 <p className="font-body text-sm text-gray-400">No classes in this period.</p>
               </div>
             ) : (
-              classesByMonth.map(group => {
+              classesByMonth.map((group, i) => {
                 const subtotal = group.items.reduce((s, c) => s + c.revenue, 0);
                 const sortedItems = group.items.slice().sort((a, b) => b.class_date.localeCompare(a.class_date));
                 return (
-                  <div key={group.key} className="mb-5 last:mb-0">
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <span className="inline-flex items-center gap-1.5 font-heading text-sm">
-                        <Calendar className="w-3.5 h-3.5 text-[#2041d8]" strokeWidth={1.75} />
-                        {group.label}
-                      </span>
-                      <span className="font-body text-xs text-gray-400">{group.items.length} {group.items.length === 1 ? "class" : "classes"} · {formatPrice(subtotal)}</span>
-                    </div>
-                    <div className="card divide-y divide-gray-50 overflow-hidden">
-                      {sortedItems.map(c => {
-                        const pct = c.capacity > 0 ? Math.min(100, (c.registered / c.capacity) * 100) : 0;
-                        return (
-                          <div key={c.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
-                            <div className="min-w-0">
-                              <p className="font-medium text-sm font-body truncate">{c.title}</p>
-                              <p className="text-xs text-gray-400 font-body">
-                                {new Date(c.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}
-                              </p>
-                              <div className="mt-1.5 flex items-center gap-2">
-                                <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
-                                  <div className="h-full bg-[#2041d8] rounded-full" style={{ width: `${pct}%` }} />
-                                </div>
-                                <span className="text-xs text-gray-400 font-body whitespace-nowrap">{c.registered}/{c.capacity} booked</span>
+                  <MonthGroup
+                    key={group.key}
+                    label={group.label}
+                    subtitle={`${group.items.length} ${group.items.length === 1 ? "class" : "classes"} · ${formatPrice(subtotal)}`}
+                    defaultOpen={i === 0}
+                  >
+                    {sortedItems.map(c => {
+                      const pct = c.capacity > 0 ? Math.min(100, (c.registered / c.capacity) * 100) : 0;
+                      return (
+                        <div key={c.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm font-body truncate">{c.title}</p>
+                            <p className="text-xs text-gray-400 font-body">
+                              {new Date(c.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}
+                            </p>
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
+                                <div className="h-full bg-[#2041d8] rounded-full" style={{ width: `${pct}%` }} />
                               </div>
+                              <span className="text-xs text-gray-400 font-body whitespace-nowrap">{c.registered}/{c.capacity} booked</span>
                             </div>
-                            <p className="font-heading text-sm shrink-0">{formatPrice(c.revenue)}</p>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                          <p className="font-heading text-sm shrink-0">{formatPrice(c.revenue)}</p>
+                        </div>
+                      );
+                    })}
+                  </MonthGroup>
                 );
               })
             )}
