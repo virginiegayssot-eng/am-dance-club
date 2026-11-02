@@ -517,7 +517,7 @@ export default function MemberProfilePage() {
         {/* STATS */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
           <div className="card p-4 shadow-sm shadow-black/5">
-            <p className="label">Lifetime value</p>
+            <p className="label">Total spent</p>
             <p className="font-heading text-xl mt-1.5">{formatPrice(lifetimeValueCents)}</p>
             <p className="font-body text-xs text-gray-400 mt-1">
               {classesAttended} class{classesAttended !== 1 ? "es" : ""}{merch.length > 0 ? ` + ${merch.length} merch` : ""}
