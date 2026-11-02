@@ -9,7 +9,28 @@ import { createClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/stripe";
 import { todayLocal } from "@/lib/date";
 import Link from "next/link";
-import { Cake, CreditCard, Banknote, Gift } from "lucide-react";
+import { Cake, Calendar, CreditCard, Banknote, Gift, ChevronRight } from "lucide-react";
+
+// Defined at module scope (not inside ReportsPage) so its `open` state
+// survives the parent's re-renders instead of being torn down every time —
+// an inline component defined in the parent's body gets a fresh identity,
+// and therefore fresh state, on every render.
+function MonthGroup({ label, subtitle, defaultOpen, children }: { label: string; subtitle: string; defaultOpen: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="mb-3 last:mb-0">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between mb-2 px-1 py-1 appearance-none border-0 bg-transparent">
+        <span className="inline-flex items-center gap-1.5 font-heading text-sm">
+          <ChevronRight className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-90" : ""}`} strokeWidth={2} />
+          <Calendar className="w-3.5 h-3.5 text-[#000000]" strokeWidth={1.75} />
+          {label}
+        </span>
+        <span className="font-body text-xs text-gray-400">{subtitle}</span>
+      </button>
+      {open && <div className="card divide-y divide-gray-50 overflow-hidden">{children}</div>}
+    </div>
+  );
+}
 
 type StudentReport = {
   id: string;
@@ -131,16 +152,26 @@ export default function ReportsPage() {
     setStudents(studentRows);
 
     // Build class reports
+    // Headcount includes +guest bookings (a confirmed registration can cover
+    // 2 people), matching the same formula the instructor Dashboard already
+    // uses for its own "X/Y attended" figure — this report previously just
+    // counted registration rows, silently undercounting any class where a
+    // member brought a guest.
     const classRows: ClassReport[] = (classData ?? []).map(c => {
       const classRegs = (regs ?? []).filter(r => r.class_id === c.id);
       const classAtt = (att ?? []).filter(a => a.class_id === c.id && a.attended);
+      const registered = classRegs.reduce((s, r) => s + 1 + (r.guest_count ?? 0), 0);
+      const attended = classAtt.reduce((s, a) => {
+        const reg = classRegs.find(r => r.student_id === a.student_id);
+        return s + 1 + (reg?.guest_count ?? 0);
+      }, 0);
       return {
         id: c.id,
         title: c.title,
         class_date: c.class_date,
         capacity: c.capacity,
-        registered: classRegs.length,
-        attended: classAtt.length,
+        registered,
+        attended,
         revenue: classRegs.reduce((s, r) => s + (r.amount_paid_cents ?? 0), 0),
       };
     });
@@ -170,6 +201,40 @@ export default function ReportsPage() {
     }
 
     setRevenue(rows);
+  }
+
+  // Start of the selected period's window (e.g. "3m" → start of the month
+  // 2 months ago), shared by the bar chart and the Pass Sales / Revenue by
+  // Class tables below so the whole Revenue tab stays in sync with one
+  // period control instead of each section picking its own window.
+  function periodStartDate() {
+    const months = parseInt(period);
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+  }
+
+  function monthKey(dateStr: string) {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function monthLabel(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString("en-AU", { month: "long", year: "numeric" });
+  }
+
+  // Groups already-filtered rows into { key, label, items } buckets by
+  // calendar month, newest month first.
+  function groupByMonth<T>(items: T[], getDate: (item: T) => string) {
+    const groups = new Map<string, { label: string; items: T[] }>();
+    for (const item of items) {
+      const dateStr = getDate(item);
+      const key = monthKey(dateStr);
+      if (!groups.has(key)) groups.set(key, { label: monthLabel(dateStr), items: [] });
+      groups.get(key)!.items.push(item);
+    }
+    return Array.from(groups.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([key, g]) => ({ key, ...g }));
   }
 
   function downloadCSV(data: object[], filename: string) {
@@ -208,6 +273,18 @@ export default function ReportsPage() {
   const avgAttendance = pastClasses.length
     ? Math.round(pastClasses.reduce((s, c) => s + (c.registered > 0 ? c.attended / c.registered : 0), 0) / pastClasses.length * 100)
     : 0;
+
+  // Pass Sales and Revenue by Class both follow the same 3/6/12-month
+  // period picker as the chart above, grouped into month sections.
+  const periodStart = periodStartDate();
+  const passesInPeriod = passesSold.filter(p => new Date(p.created_at) >= periodStart);
+  const passesByMonth = groupByMonth(passesInPeriod, p => p.created_at);
+  // Only classes that have actually happened — an upcoming class hasn't
+  // earned its revenue yet, so leading the list with future months (which
+  // sort first since groups are newest-first) was confusing to read as a
+  // revenue report.
+  const classesInPeriod = classes.filter(c => new Date(c.class_date) >= periodStart && c.class_date < todayLocal());
+  const classesByMonth = groupByMonth(classesInPeriod, c => c.class_date);
 
   const tabs = [
     { key: "revenue", label: "Revenue" },
@@ -292,29 +369,48 @@ export default function ReportsPage() {
 
             {/* Bar chart */}
             <div className="card p-6 mb-6">
-              <div className="flex items-end gap-3 h-48">
-                {revenue.map(row => {
-                  const max = Math.max(...revenue.map(r => r.total), 1);
-                  const h = Math.max((row.total / max) * 100, 2);
-                  return (
-                    <div key={row.month} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="font-body text-xs text-gray-500">{formatPrice(row.total)}</span>
-                      <div
-                        className="w-full bg-gradient-to-t from-[#000000] to-[#9b7fc7] rounded-t-lg transition-all"
-                        style={{ height: `${h}%` }}
-                      />
-                      <span className="font-body text-xs text-gray-400">{row.month}</span>
+              {revenue.every(r => r.total === 0) ? (
+                <p className="font-body text-sm text-gray-400 text-center py-16">No revenue in this period yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="min-w-max" style={{ width: `max(100%, ${revenue.length * 64}px)` }}>
+                    <div className="flex items-stretch gap-3 h-48 border-b border-gray-100">
+                      {revenue.map(row => {
+                        const max = Math.max(...revenue.map(r => r.total), 1);
+                        const h = Math.max((row.total / max) * 100, row.total > 0 ? 4 : 0);
+                        const isCurrent = row.month === revenue[revenue.length - 1].month;
+                        return (
+                          <div key={row.month} className="group flex-1 flex flex-col items-center justify-end gap-2 h-full">
+                            <span className="font-heading text-xs text-gray-600 group-hover:text-[#000000] transition-colors whitespace-nowrap">
+                              {formatPrice(row.total)}
+                            </span>
+                            <div
+                              className={`w-full rounded-t-lg transition-all ${
+                                isCurrent
+                                  ? "bg-gradient-to-t from-[#000000] to-[#3d3d3d]"
+                                  : "bg-gradient-to-t from-[#000000]/70 to-[#9b7fc7]/70 group-hover:from-[#000000] group-hover:to-[#3d3d3d]"
+                              }`}
+                              style={{ height: `${h}%`, minHeight: row.total > 0 ? "6px" : 0 }}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="flex gap-3 mt-3">
+                      {revenue.map(row => (
+                        <span key={row.month} className="flex-1 text-center font-body text-xs text-gray-400 whitespace-nowrap">{row.month}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Pass Sales */}
             <div className="flex items-center justify-between mb-4 mt-8">
               <h3 className="font-heading text-base">Pass Sales</h3>
               <button onClick={() => downloadCSV(
-                passesSold.map(p => ({
+                passesInPeriod.map(p => ({
                   date: new Date(p.created_at).toLocaleDateString("en-AU"),
                   student: p.profiles?.full_name ?? p.profiles?.email ?? "—",
                   pass: p.pass_types?.name ?? p.pass_type_id,
@@ -324,85 +420,96 @@ export default function ReportsPage() {
                 "pass-sales.csv"
               )} className="font-body text-xs text-[#000000] hover:underline">Export CSV</button>
             </div>
-            <div className="card overflow-hidden mb-8">
-              <div className="overflow-x-auto">
-              <table className="w-full text-sm font-body">
-                <thead className="bg-[#ffffff] border-b border-gray-100">
-                  <tr>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Member</th>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Pass</th>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Source</th>
-                    <th className="text-right px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {passesSold.length === 0 ? (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400 font-body text-sm">No passes sold yet.</td></tr>
-                  ) : passesSold.map(p => {
-                    const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
-                    const source = p.source ?? "stripe";
-                    const SourceIcon = source === "stripe" || source === "card_manual" ? CreditCard : source === "cash" ? Banknote : source === "complimentary" ? Gift : null;
-                    const sourceLabel = source === "stripe" ? "Stripe" : source === "cash" ? "Cash" : source === "card_manual" ? "Card" : source === "complimentary" ? "Comp" : source;
-                    return (
-                      <tr key={p.id} className="hover:bg-gray-50/50">
-                        <td className="px-5 py-3 text-gray-500">
-                          {new Date(p.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                        </td>
-                        <td className="px-5 py-3">
-                          <p className="font-medium">{p.profiles?.full_name ?? "—"}</p>
-                          <p className="text-xs text-gray-400">{p.profiles?.email}</p>
-                        </td>
-                        <td className="px-5 py-3">{p.pass_types?.name ?? p.pass_type_id}</td>
-                        <td className="px-5 py-3 text-xs">
-                          <span className="inline-flex items-center gap-1">
-                            {SourceIcon && <SourceIcon className="w-3.5 h-3.5 text-[#000000]" strokeWidth={1.75} />}
-                            {sourceLabel}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-right font-heading">{formatPrice(amount)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {passesByMonth.length === 0 ? (
+              <div className="card p-10 text-center mb-8">
+                <p className="font-body text-sm text-gray-400">No passes sold in this period.</p>
               </div>
-            </div>
+            ) : (
+              <div className="mb-8">
+                {passesByMonth.map((group, i) => {
+                  const subtotal = group.items.reduce((s, p) => s + (p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0), 0);
+                  return (
+                    <MonthGroup
+                      key={group.key}
+                      label={group.label}
+                      subtitle={`${group.items.length} ${group.items.length === 1 ? "pass" : "passes"} · ${formatPrice(subtotal)}`}
+                      defaultOpen={i === 0}
+                    >
+                      {group.items.map(p => {
+                        const amount = p.amount_paid_cents ?? p.pass_types?.price_cents ?? 0;
+                        const source = p.source ?? "stripe";
+                        const SourceIcon = source === "stripe" || source === "card_manual" ? CreditCard : source === "cash" ? Banknote : source === "complimentary" ? Gift : null;
+                        const sourceLabel = source === "stripe" ? "Stripe" : source === "cash" ? "Cash" : source === "card_manual" ? "Card" : source === "complimentary" ? "Comp" : source;
+                        return (
+                          <div key={p.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-[#000000]/10 flex items-center justify-center shrink-0">
+                                {SourceIcon ? <SourceIcon className="w-4 h-4 text-[#000000]" strokeWidth={1.75} /> : <CreditCard className="w-4 h-4 text-[#000000]" strokeWidth={1.75} />}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm font-body truncate">{p.profiles?.full_name ?? p.profiles?.email ?? "—"}</p>
+                                <p className="text-xs text-gray-400 font-body truncate">
+                                  {p.pass_types?.name ?? p.pass_type_id} · {new Date(p.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })} · {sourceLabel}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="font-heading text-sm shrink-0">{formatPrice(amount)}</p>
+                          </div>
+                        );
+                      })}
+                    </MonthGroup>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Revenue by class */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-heading text-base">Revenue by Class</h3>
               <button onClick={() => downloadCSV(
-                classes.map(c => ({ date: c.class_date, title: c.title, registered: c.registered, attended: c.attended, revenue_aud: (c.revenue / 100).toFixed(2) })),
+                classesInPeriod.map(c => ({ date: c.class_date, title: c.title, registered: c.registered, capacity: c.capacity, attended: c.attended, revenue_aud: (c.revenue / 100).toFixed(2) })),
                 "class-revenue.csv"
               )} className="font-body text-xs text-[#000000] hover:underline">Export CSV</button>
             </div>
-            <div className="card overflow-hidden">
-              <div className="overflow-x-auto">
-              <table className="w-full text-sm font-body">
-                <thead className="bg-[#ffffff] border-b border-gray-100">
-                  <tr>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Date</th>
-                    <th className="text-left px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Class</th>
-                    <th className="text-center px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Booked</th>
-                    <th className="text-right px-5 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Revenue</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {classes.slice(0, 20).map(c => (
-                    <tr key={c.id} className="hover:bg-gray-50/50">
-                      <td className="px-5 py-3 text-gray-500">
-                        {new Date(c.class_date + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                      </td>
-                      <td className="px-5 py-3 font-medium">{c.title}</td>
-                      <td className="px-5 py-3 text-center">{c.registered}/{c.capacity}</td>
-                      <td className="px-5 py-3 text-right font-heading">{formatPrice(c.revenue)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {classesByMonth.length === 0 ? (
+              <div className="card p-10 text-center">
+                <p className="font-body text-sm text-gray-400">No classes in this period.</p>
               </div>
-            </div>
+            ) : (
+              classesByMonth.map((group, i) => {
+                const subtotal = group.items.reduce((s, c) => s + c.revenue, 0);
+                const sortedItems = group.items.slice().sort((a, b) => b.class_date.localeCompare(a.class_date));
+                return (
+                  <MonthGroup
+                    key={group.key}
+                    label={group.label}
+                    subtitle={`${group.items.length} ${group.items.length === 1 ? "class" : "classes"} · ${formatPrice(subtotal)}`}
+                    defaultOpen={i === 0}
+                  >
+                    {sortedItems.map(c => {
+                      const pct = c.capacity > 0 ? Math.min(100, (c.registered / c.capacity) * 100) : 0;
+                      return (
+                        <div key={c.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/50 transition-colors">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm font-body truncate">{c.title}</p>
+                            <p className="text-xs text-gray-400 font-body">
+                              {new Date(c.class_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}
+                            </p>
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
+                                <div className="h-full bg-[#000000] rounded-full" style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="text-xs text-gray-400 font-body whitespace-nowrap">{c.registered}/{c.capacity} booked</span>
+                            </div>
+                          </div>
+                          <p className="font-heading text-sm shrink-0">{formatPrice(c.revenue)}</p>
+                        </div>
+                      );
+                    })}
+                  </MonthGroup>
+                );
+              })
+            )}
           </div>
         )}
 
