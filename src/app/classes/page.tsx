@@ -31,7 +31,7 @@ export default function ClassesPage() {
   const [guestFlags, setGuestFlags] = useState<Record<string, boolean>>({});
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [showPhonePrompt, setShowPhonePrompt] = useState(false);
-  const [pendingBooking, setPendingBooking] = useState<(() => void) | null>(null);
+  const [pendingBooking, setPendingBooking] = useState<((phone: string) => void) | null>(null);
 
   useEffect(() => {
     loadData();
@@ -96,11 +96,11 @@ export default function ClassesPage() {
   }
 
   // Smart book: auto-use best pass, else show options
-  async function handleBook(cls: ClassWithMeta) {
+  async function handleBook(cls: ClassWithMeta, phoneOverride?: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
-    if (!profile?.phone) {
-      setPendingBooking(() => () => handleBook(cls));
+    if (!phoneOverride && !profile?.phone) {
+      setPendingBooking(() => (phone: string) => handleBook(cls, phone));
       setShowPhonePrompt(true);
       return;
     }
@@ -125,11 +125,11 @@ export default function ClassesPage() {
     setExpandedId(cls.id === expandedId ? null : cls.id);
   }
 
-  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual", useAltDuration = false) {
+  async function payAndBook(cls: ClassWithMeta, passTypeId: "casual", useAltDuration = false, phoneOverride?: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth/login"); return; }
-    if (!profile?.phone) {
-      setPendingBooking(() => () => payAndBook(cls, passTypeId, useAltDuration));
+    if (!phoneOverride && !profile?.phone) {
+      setPendingBooking(() => (phone: string) => payAndBook(cls, passTypeId, useAltDuration, phone));
       setShowPhonePrompt(true);
       return;
     }
@@ -185,7 +185,7 @@ export default function ClassesPage() {
             setShowPhonePrompt(false);
             const resume = pendingBooking;
             setPendingBooking(null);
-            resume?.();
+            resume?.(phone);
           }}
         />
       )}
