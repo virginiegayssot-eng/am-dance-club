@@ -2313,17 +2313,26 @@ export default function InstructorPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="is_public"
-                  checked={videoForm.is_public}
-                  onChange={e => setVideoForm(f => ({ ...f, is_public: e.target.checked }))}
-                  className="w-4 h-4 accent-[#2041d8]"
-                />
-                <label htmlFor="is_public" className="font-body text-sm text-gray-700">
-                  Visible to all members (not just paid registrants)
-                </label>
+              <div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is_public"
+                    checked={videoForm.is_public}
+                    onChange={e => setVideoForm(f => ({ ...f, is_public: e.target.checked }))}
+                    className="w-4 h-4 accent-[#2041d8]"
+                  />
+                  <label htmlFor="is_public" className="font-body text-sm text-gray-700">
+                    Visible to all members
+                  </label>
+                </div>
+                <p className="font-body text-xs text-gray-400 mt-1 ml-7">
+                  {videoForm.is_public
+                    ? "Every member can see this video."
+                    : videoForm.class_id
+                    ? "Unchecked: only members who attended that class will see this video."
+                    : "Unchecked with no class linked, only instructors will see this video — link a class above to restrict it to attendees instead."}
+                </p>
               </div>
               {videoFormError && (
                 <p className="font-body text-sm text-red-500">{videoFormError}</p>
@@ -2378,17 +2387,26 @@ export default function InstructorPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="edit_video_is_public"
-                  checked={editVideoForm.is_public}
-                  onChange={e => setEditVideoForm(f => ({ ...f, is_public: e.target.checked }))}
-                  className="w-4 h-4 accent-[#2041d8]"
-                />
-                <label htmlFor="edit_video_is_public" className="font-body text-sm text-gray-700">
-                  Visible to all members (not just paid registrants)
-                </label>
+              <div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="edit_video_is_public"
+                    checked={editVideoForm.is_public}
+                    onChange={e => setEditVideoForm(f => ({ ...f, is_public: e.target.checked }))}
+                    className="w-4 h-4 accent-[#2041d8]"
+                  />
+                  <label htmlFor="edit_video_is_public" className="font-body text-sm text-gray-700">
+                    Visible to all members
+                  </label>
+                </div>
+                <p className="font-body text-xs text-gray-400 mt-1 ml-7">
+                  {editVideoForm.is_public
+                    ? "Every member can see this video."
+                    : editVideoForm.class_id
+                    ? "Unchecked: only members who attended that class will see this video."
+                    : "Unchecked with no class linked, only instructors will see this video — link a class above to restrict it to attendees instead."}
+                </p>
               </div>
               {editVideoError && (
                 <p className="font-body text-sm text-red-500">{editVideoError}</p>
