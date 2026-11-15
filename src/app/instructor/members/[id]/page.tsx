@@ -11,10 +11,10 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import AvatarCropper from "@/components/AvatarCropper";
 import { createClient } from "@/lib/supabase";
 import { isValidPhone } from "@/lib/phone";
-import { todayLocal } from "@/lib/date";
+import { todayLocal, toLocalDateStr } from "@/lib/date";
 import { formatPrice, formatTime } from "@/lib/stripe";
 import type { Profile, Pass, PassType, MemberNote } from "@/lib/supabase";
-import { ArrowLeft, Cake, Camera, CreditCard, Banknote, Gift, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Cake, Camera, CreditCard, Banknote, Gift, CalendarClock, type LucideIcon } from "lucide-react";
 
 type PassWithType = Pass & { pass_types?: PassType };
 
@@ -87,6 +87,12 @@ export default function MemberProfilePage() {
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
   const [deletingPassId, setDeletingPassId] = useState<string | null>(null);
   const [passActionError, setPassActionError] = useState("");
+
+  // Extend pass modal
+  const [showExtendPass, setShowExtendPass] = useState<PassWithType | null>(null);
+  const [extendPassDate, setExtendPassDate] = useState("");
+  const [extendPassLoading, setExtendPassLoading] = useState(false);
+  const [extendPassError, setExtendPassError] = useState("");
 
   // Edit details modal
   const [showEdit, setShowEdit] = useState(false);
@@ -285,6 +291,47 @@ export default function MemberProfilePage() {
         setDeletingPassId(null);
       },
     });
+  }
+
+  // ---- Extend pass ----
+  function openExtendPass(p: PassWithType) {
+    const base = p.expires_at && new Date(p.expires_at) > new Date() ? new Date(p.expires_at) : new Date();
+    base.setMonth(base.getMonth() + 1);
+    setExtendPassDate(toLocalDateStr(base));
+    setExtendPassError("");
+    setShowExtendPass(p);
+  }
+
+  function bumpExtendPassDate(amount: number, unit: "days" | "months") {
+    if (!showExtendPass) return;
+    const base = showExtendPass.expires_at && new Date(showExtendPass.expires_at) > new Date()
+      ? new Date(showExtendPass.expires_at)
+      : new Date();
+    if (unit === "days") base.setDate(base.getDate() + amount);
+    else base.setMonth(base.getMonth() + amount);
+    setExtendPassDate(toLocalDateStr(base));
+  }
+
+  async function submitExtendPass(e: React.FormEvent) {
+    e.preventDefault();
+    if (!showExtendPass) return;
+    setExtendPassLoading(true);
+    setExtendPassError("");
+    try {
+      const res = await fetch("/api/instructor/extend-pass", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passId: showExtendPass.id, newExpiryDate: extendPassDate }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
+      setShowExtendPass(null);
+      await loadAll();
+    } catch (err: any) {
+      setExtendPassError(err?.message ?? "Something went wrong — please try again.");
+    } finally {
+      setExtendPassLoading(false);
+    }
   }
 
   // ---- Edit details ----
@@ -683,6 +730,14 @@ export default function MemberProfilePage() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
+                        {p.expires_at && (
+                          <button
+                            onClick={() => openExtendPass(p)}
+                            className="font-body text-xs text-[#2041d8] hover:underline inline-flex items-center gap-1"
+                          >
+                            <CalendarClock className="w-3 h-3" strokeWidth={2} /> Extend
+                          </button>
+                        )}
                         {isActive && (
                           <button
                             onClick={() => debitPass(p.id)}
@@ -804,6 +859,57 @@ export default function MemberProfilePage() {
               <button type="button" onClick={() => setShowAssignPass(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
               <button type="submit" className="btn-primary flex-1 justify-center" disabled={assignPassLoading}>
                 {assignPassLoading ? "Assigning…" : "Assign Pass"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* EXTEND PASS MODAL */}
+      {showExtendPass && (
+        <Modal title={`Extend Pass — ${showExtendPass.pass_types?.name ?? "Pass"}`} onClose={() => setShowExtendPass(null)}>
+          <form onSubmit={submitExtendPass} className="space-y-5">
+            <p className="font-body text-sm text-gray-500">
+              {showExtendPass.expires_at
+                ? `Currently expires ${new Date(showExtendPass.expires_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}.`
+                : "This pass has no expiry set."}
+            </p>
+            <div>
+              <label className="label">Quick extend</label>
+              <div className="flex flex-wrap gap-2 mt-1.5">
+                {([
+                  { label: "+1 week", amount: 7, unit: "days" as const },
+                  { label: "+1 month", amount: 1, unit: "months" as const },
+                  { label: "+3 months", amount: 3, unit: "months" as const },
+                ]).map(opt => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => bumpExtendPassDate(opt.amount, opt.unit)}
+                    className="font-body text-xs px-3.5 py-2 rounded-full border border-gray-200 text-gray-600 hover:border-[#2041d8] hover:text-[#2041d8] transition-colors"
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="label">New expiry date</label>
+              <input
+                type="date"
+                className="input"
+                value={extendPassDate}
+                onChange={e => setExtendPassDate(e.target.value)}
+                required
+              />
+            </div>
+            {extendPassError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-body px-4 py-3 rounded-xl">{extendPassError}</div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={() => setShowExtendPass(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+              <button type="submit" className="btn-primary flex-1 justify-center" disabled={extendPassLoading}>
+                {extendPassLoading ? "Saving…" : "Save New Expiry"}
               </button>
             </div>
           </form>
