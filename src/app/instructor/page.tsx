@@ -168,6 +168,7 @@ export default function InstructorPage() {
   const [bookForLoading, setBookForLoading] = useState(false);
   const [bookForError, setBookForError] = useState("");
   const [memberPasses, setMemberPasses] = useState<any[]>([]);
+  const [memberPassesLoading, setMemberPassesLoading] = useState(false);
 
   // Walk-ins
   const [walkIns, setWalkIns] = useState<{ id: string; name: string; payment_type: string }[]>([]);
@@ -177,6 +178,7 @@ export default function InstructorPage() {
   const [walkInPassStudentId, setWalkInPassStudentId] = useState("");
   const [walkInPassId, setWalkInPassId] = useState("");
   const [walkInPasses, setWalkInPasses] = useState<any[]>([]);
+  const [walkInPassesLoading, setWalkInPassesLoading] = useState(false);
   const [walkInPaymentType, setWalkInPaymentType] = useState("casual");
   const [memberNoPassPaymentType, setMemberNoPassPaymentType] = useState("casual");
   const [walkInLoading, setWalkInLoading] = useState(false);
@@ -423,12 +425,14 @@ export default function InstructorPage() {
     setWalkInPassStudentId(studentId);
     setWalkInPassId("");
     if (!studentId) { setWalkInPasses([]); return; }
+    setWalkInPassesLoading(true);
     const { data } = await supabase.from("passes").select("*, pass_types(name)")
       .eq("student_id", studentId).gt("classes_remaining", 0)
       .order("expires_at", { ascending: true, nullsFirst: false });
     const active = (data ?? []).filter((p: any) => !p.expires_at || new Date(p.expires_at) > new Date());
     setWalkInPasses(active);
     if (active.length > 0) setWalkInPassId(active[0].id);
+    setWalkInPassesLoading(false);
   }
 
   async function submitAddToRoll(e: React.FormEvent) {
@@ -1136,6 +1140,7 @@ export default function InstructorPage() {
     setBookForStudentId(studentId);
     setBookForPassId("");
     if (!studentId) { setMemberPasses([]); return; }
+    setMemberPassesLoading(true);
     const { data } = await supabase
       .from("passes").select("*, pass_types(name)")
       .eq("student_id", studentId)
@@ -1144,6 +1149,7 @@ export default function InstructorPage() {
     const active = (data ?? []).filter((p: any) => !p.expires_at || new Date(p.expires_at) > new Date());
     setMemberPasses(active);
     if (active.length > 0) setBookForPassId(active[0].id);
+    setMemberPassesLoading(false);
   }
 
   async function bookForMember(e: React.FormEvent) {
@@ -1611,7 +1617,9 @@ export default function InstructorPage() {
                               <span className="ml-2 badge bg-[#e2d0fb]/50 text-black text-xs">Walk-in</span>
                               {w.payment_type === "pass" && <span className="ml-1 badge bg-blue-100 text-blue-700 text-xs">Pass deducted</span>}
                             </p>
-                            <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
+                            <p className="text-xs text-gray-400 font-body">
+                              {w.payment_type === "complimentary" ? "Complimentary" : w.payment_type === "pass" ? "Pass" : "Casual (paid on spot)"}
+                            </p>
                           </div>
                           <div className="w-8 h-8 rounded-full bg-[#000000] border-2 border-[#000000] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
                         </div>
@@ -2845,8 +2853,20 @@ export default function InstructorPage() {
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowAddToRoll(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
-                <button type="submit" className="btn-primary flex-1 justify-center" disabled={walkInLoading || (addToRollMode === "member" && !bookForStudentId) || (addToRollMode === "walkin" && !walkInName)}>
-                  {walkInLoading ? "Adding…" : "Add to Roll"}
+                <button
+                  type="submit"
+                  className="btn-primary flex-1 justify-center"
+                  disabled={
+                    walkInLoading ||
+                    (addToRollMode === "member" && (!bookForStudentId || memberPassesLoading)) ||
+                    (addToRollMode === "walkin" && (!walkInName || (!!walkInPassStudentId && walkInPassesLoading)))
+                  }
+                >
+                  {walkInLoading
+                    ? "Adding…"
+                    : (addToRollMode === "member" ? memberPassesLoading : walkInPassesLoading)
+                    ? "Checking passes…"
+                    : "Add to Roll"}
                 </button>
               </div>
             </form>

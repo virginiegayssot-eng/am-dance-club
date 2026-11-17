@@ -87,12 +87,26 @@ export async function POST(req: NextRequest) {
     const creditsNeeded = 1 + Math.max(0, guestCount - maxGuests);
     if (pass.classes_remaining < creditsNeeded) return NextResponse.json({ error: "Not enough credits on this pass" }, { status: 400 });
 
+    let registrationId: string | undefined = cancelled?.id;
     if (cancelled) {
       await admin.from("registrations").update({ status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: guestCount }).eq("id", cancelled.id);
     } else {
-      await admin.from("registrations").insert({ class_id: classId, student_id: studentId, status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: guestCount });
+      const inserted = await admin.from("registrations").insert({ class_id: classId, student_id: studentId, status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: guestCount }).select("id").single();
+      registrationId = inserted.data?.id;
     }
-    await admin.from("passes").update({ classes_remaining: pass.classes_remaining - creditsNeeded }).eq("id", passId);
+
+    const { error: passUpdateError } = await admin.from("passes").update({ classes_remaining: pass.classes_remaining - creditsNeeded }).eq("id", passId);
+    if (passUpdateError) {
+      console.error(`Failed to deduct pass credit for pass ${passId}:`, passUpdateError);
+      // Don't leave a "confirmed, pass selected" booking standing if the
+      // credit was never actually spent — that's a free class nobody
+      // notices was never paid for.
+      if (registrationId) {
+        if (cancelled) await admin.from("registrations").update({ status: "cancelled", pass_id: null, payment_type: null }).eq("id", registrationId);
+        else await admin.from("registrations").delete().eq("id", registrationId);
+      }
+      return NextResponse.json({ error: "Something went wrong deducting the pass — please try again." }, { status: 500 });
+    }
   } else {
     // Complimentary booking (no pass)
     if (cancelled) {

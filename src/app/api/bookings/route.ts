@@ -79,20 +79,23 @@ export async function POST(req: NextRequest) {
     .single();
 
   let regError;
+  let registrationId: string | undefined = cancelled?.id;
   if (cancelled) {
     ({ error: regError } = await supabase
       .from("registrations")
       .update({ status: "confirmed", pass_id: passId, payment_type: "pass", guest_count: guestCount })
       .eq("id", cancelled.id));
   } else {
-    ({ error: regError } = await supabase.from("registrations").insert({
+    const inserted = await supabase.from("registrations").insert({
       class_id: classId,
       student_id: user.id,
       status: "confirmed",
       pass_id: passId,
       payment_type: "pass",
       guest_count: guestCount,
-    }));
+    }).select("id").single();
+    regError = inserted.error;
+    registrationId = inserted.data?.id;
   }
 
   if (regError) return NextResponse.json({ error: regError.message }, { status: 500 });
@@ -104,7 +107,22 @@ export async function POST(req: NextRequest) {
     .from("passes")
     .update({ classes_remaining: pass.classes_remaining - creditsNeeded })
     .eq("id", passId);
-  if (passUpdateError) console.error(`Failed to deduct pass credit for pass ${passId}:`, passUpdateError);
+
+  if (passUpdateError) {
+    console.error(`Failed to deduct pass credit for pass ${passId}:`, passUpdateError);
+    // The registration above already committed as "confirmed" — if the
+    // credit deduction fails, leaving it stand would hand out a free class
+    // (confirmed, credit never spent) with no record anything went wrong.
+    // Undo the registration instead of telling the student they're booked.
+    if (registrationId) {
+      if (cancelled) {
+        await admin.from("registrations").update({ status: "cancelled", pass_id: null, payment_type: null }).eq("id", registrationId);
+      } else {
+        await admin.from("registrations").delete().eq("id", registrationId);
+      }
+    }
+    return NextResponse.json({ error: "Something went wrong confirming your pass — please try booking again." }, { status: 500 });
+  }
 
   // Notify instructor
   const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("id", user.id).single();

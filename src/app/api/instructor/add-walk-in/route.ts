@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
     const { data: pass } = await admin.from("passes").select("*").eq("id", passId).single();
     if (!pass) return NextResponse.json({ error: "Pass not found" }, { status: 404 });
     if (pass.classes_remaining < 1) return NextResponse.json({ error: "No credits left on this pass" }, { status: 400 });
-    await admin.from("passes").update({ classes_remaining: pass.classes_remaining - 1 }).eq("id", pass.id);
+    const { error: passUpdateError } = await admin.from("passes").update({ classes_remaining: pass.classes_remaining - 1 }).eq("id", pass.id);
+    if (passUpdateError) {
+      console.error(`Failed to deduct pass credit for pass ${pass.id}:`, passUpdateError);
+      return NextResponse.json({ error: "Something went wrong deducting the pass — please try again." }, { status: 500 });
+    }
   }
 
   const { error } = await admin.from("walk_ins").insert({
@@ -38,6 +42,14 @@ export async function POST(req: NextRequest) {
     pass_id: passId ?? null,
   });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    // The credit was already spent above — refund it rather than leaving a
+    // deducted credit with no walk-in record to show for it.
+    if (passId) {
+      const { data: pass } = await admin.from("passes").select("classes_remaining").eq("id", passId).single();
+      if (pass) await admin.from("passes").update({ classes_remaining: pass.classes_remaining + 1 }).eq("id", passId);
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }
