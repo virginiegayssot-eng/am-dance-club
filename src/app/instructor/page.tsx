@@ -159,6 +159,10 @@ export default function InstructorPage() {
   const [debitingPassId, setDebitingPassId] = useState<string | null>(null);
   const [deletingPassId, setDeletingPassId] = useState<string | null>(null);
 
+  // Remove walk-in
+  const [removingWalkInId, setRemovingWalkInId] = useState<string | null>(null);
+  const [walkInActionError, setWalkInActionError] = useState("");
+
   // Book for member
   const [showBookForMember, setShowBookForMember] = useState(false);
   const [bookForClass, setBookForClass] = useState<ClassWithCount | null>(null);
@@ -491,6 +495,31 @@ export default function InstructorPage() {
     setStudents((prev) =>
       prev.map((s) => s.id === studentId ? { ...s, attended: !attended } : s)
     );
+  }
+
+  function removeWalkIn(walkInId: string, name: string) {
+    setConfirmDialog({
+      message: `Remove ${name} from this class? If a pass was deducted for them, the credit will be given back.`,
+      confirmLabel: "Remove",
+      action: async () => {
+        if (!selectedClass) return;
+        setRemovingWalkInId(walkInId);
+        setWalkInActionError("");
+        const res = await fetch("/api/instructor/delete-walk-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walkInId }),
+        });
+        if (res.ok) {
+          const { data: wis } = await supabase.from("walk_ins").select("id, name, payment_type").eq("class_id", selectedClass.id);
+          setWalkIns(wis ?? []);
+        } else {
+          const data = await res.json();
+          setWalkInActionError(data.error ?? "Something went wrong");
+        }
+        setRemovingWalkInId(null);
+      },
+    });
   }
 
   function openNewClass() {
@@ -1560,6 +1589,8 @@ export default function InstructorPage() {
                   </div>
                 </div>
 
+                {walkInActionError && <p className="font-body text-sm text-red-500 mb-3">{walkInActionError}</p>}
+
                 {students.length === 0 && walkIns.length === 0 ? (
                   <div className="card p-8 text-center">
                     <p className="font-body text-gray-400">No registered members for this class.</p>
@@ -1610,7 +1641,7 @@ export default function InstructorPage() {
                         </div>
                       ))}
                       {walkIns.map((w) => (
-                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#ffffff]">
+                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#ffffff] group">
                           <div>
                             <p className="font-medium text-sm font-body">
                               {w.name}
@@ -1621,7 +1652,16 @@ export default function InstructorPage() {
                               {w.payment_type === "complimentary" ? "Complimentary" : w.payment_type === "pass" ? "Pass" : "Casual (paid on spot)"}
                             </p>
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-[#000000] border-2 border-[#000000] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <button
+                              onClick={() => removeWalkIn(w.id, w.name)}
+                              disabled={removingWalkInId === w.id}
+                              className="font-body text-xs text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                            >
+                              {removingWalkInId === w.id ? "…" : "Remove"}
+                            </button>
+                            <div className="w-8 h-8 rounded-full bg-[#000000] border-2 border-[#000000] text-white flex items-center justify-center"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
+                          </div>
                         </div>
                       ))}
                     </div>
