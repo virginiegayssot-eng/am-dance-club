@@ -11,7 +11,7 @@ import ReviewRequestPanel from "@/components/ReviewRequestPanel";
 import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
 import MerchPanel from "@/components/MerchPanel";
 import DiscountsPanel from "@/components/DiscountsPanel";
-import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, Smartphone, type LucideIcon } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
@@ -59,6 +59,12 @@ export default function MarketingPage() {
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [broadcastSent, setBroadcastSent] = useState<number | null>(null);
   const [broadcastErrors, setBroadcastErrors] = useState<string[]>([]);
+
+  const [pushTitle, setPushTitle] = useState("");
+  const [pushBody, setPushBody] = useState("");
+  const [sendingPush, setSendingPush] = useState(false);
+  const [pushSent, setPushSent] = useState<number | null>(null);
+  const [pushError, setPushError] = useState("");
 
   useEffect(() => { checkAuth(); }, []);
 
@@ -160,6 +166,21 @@ export default function MarketingPage() {
     setBroadcastSent(data.sent ?? 0);
     setBroadcastErrors(data.errors ?? []);
     setSendingBroadcast(false);
+  }
+
+  async function sendPush() {
+    if (selectedBroadcastIds.size === 0 || !pushTitle.trim() || !pushBody.trim()) return;
+    setSendingPush(true);
+    setPushError("");
+    const res = await fetch("/api/instructor/broadcast-push", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentIds: Array.from(selectedBroadcastIds), title: pushTitle, body: pushBody }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setPushError(data.error ?? "Something went wrong"); setSendingPush(false); return; }
+    setPushSent(data.sent ?? 0);
+    setSendingPush(false);
   }
 
   const upcomingBirthdays = students
@@ -457,6 +478,51 @@ export default function MarketingPage() {
               >
                 {sendingBroadcast ? "Sending…" : `Send to ${selectedBroadcastIds.size}`}
               </button>
+            </div>
+
+            <div className="mt-10">
+              <SectionHeader
+                icon={Smartphone}
+                title="Push Notification"
+                description="Send a quick push nudge to the same selected group — only reaches members who've turned notifications on, and never shows up on News."
+              />
+              <div className="card p-6 sm:p-8 space-y-6">
+                <div>
+                  <label className="label">Title</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Class tomorrow at 7am"
+                    value={pushTitle}
+                    onChange={e => setPushTitle(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label">Body</label>
+                  <textarea
+                    className="input resize-none"
+                    rows={3}
+                    placeholder="Keep it short, it's a notification"
+                    value={pushBody}
+                    onChange={e => setPushBody(e.target.value)}
+                  />
+                </div>
+
+                {pushError && <p className="font-body text-sm text-red-500">{pushError}</p>}
+                {pushSent !== null && (
+                  <p className="font-body text-sm text-green-600">
+                    {pushSent === 0 ? "None of the selected members have notifications on." : `Sent to ${pushSent} member${pushSent !== 1 ? "s" : ""} with notifications on.`}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={sendPush}
+                  disabled={sendingPush || selectedBroadcastIds.size === 0 || !pushTitle.trim() || !pushBody.trim()}
+                  className="btn-primary w-full justify-center"
+                >
+                  {sendingPush ? "Sending…" : `Send Push to ${selectedBroadcastIds.size}`}
+                </button>
+              </div>
             </div>
           </div>
         )}
