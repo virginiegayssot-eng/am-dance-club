@@ -338,6 +338,19 @@ Product images in Merch (Marketing > Merch on `main`/`demo`; still an inline Das
 
 The standalone Filming Policy page got merged into one combined `/terms-and-conditions` page a while back (see the `#filming` section within it) — signup's checkbox and the Dashboard's re-consent prompt were updated to say "Terms & Conditions" at the time, but the instructor Dashboard's Members list badge (`s.filming_policy_accepted_at && ...`) was missed and still read "Filming policy accepted" with a "Accepted the Filming & Photography Policy on ..." tooltip. Found on THE A.M, and the exact same stale copy was sitting on BYLA, Manea, and `demo` too — fixed on all four to "Terms & Conditions accepted" / "Accepted the Terms & Conditions on ...". The underlying column/state name (`filming_policy_accepted_at`) is intentionally left as-is; this was a display-label-only fix, not a rename. If a new client is forked from any of these branches, check that badge's wording matches whatever `/terms-and-conditions` actually says there before shipping.
 
+### Message a Segment: Push Notification + Send History (26 Nov)
+
+Two gaps found the same day the rate-limit bug (below) was: there was no way to send a one-off push notification without publishing a News post (which permanently adds it to the News feed — wrong for a transient "class tomorrow at 7am" nudge), and no record of who a past broadcast (email or push) actually reached, so after sending in a couple of batches there was no way to tell who'd already gotten it short of checking Resend's own dashboard.
+
+- **Push Notification** — a new section under Message a Segment's existing email form, reusing the exact same segment/recipient picker (`selectedBroadcastIds`) so push and email share one audience-selection UI, but with its own title/body fields and its own send button. New `/api/instructor/broadcast-push` route, calling the existing `sendPushToStudents` helper (already used by the automatic booking reminders) — never touches `news_posts`.
+- **Send History** — new `broadcast_sends` / `broadcast_recipients` tables (`supabase/add-broadcast-log.sql`) log every send: subject/title, message/body, and each recipient's name/email with `sent`/`failed` status. Marketing > Message a Segment shows a **Recent Sends** list underneath both send sections, expandable per entry to see exactly who it reached. Both `broadcast-email` and `broadcast-push` write to these tables.
+- Shipped on `main`, `byla`, and Manea — all three have push infra (`push_subscriptions`) so both pieces apply fully. `demo` has no push infra, so it only got the Send History half (email only) — see its checklist entry.
+- Migration run against THE A.M's and Manea's real Supabase projects. **Still outstanding — no Supabase access from this session (different org):** run `supabase/add-broadcast-log.sql` against BYLA's real project, and against `demo`'s.
+
+### Bug fix: Message a Segment email hit Resend's rate limit (26 Nov)
+
+`broadcast-email` sent the whole recipient list back to back with no pacing — Resend caps at 10 requests/second, so anything over ~10 recipients came back mostly as "Too many requests" failures instead of actually sending. Fixed on `main`, `byla`, `demo`, and Manea: a 150ms delay between each send plus a single retry with a longer backoff for anything still rate limited. `template` not checked — same fix needed if/when its Marketing section gets the modern Merch/Discounts/broadcast layout (see its checklist).
+
 ## Member Profile page (30 Oct)
 
 Clicking a member on the instructor Dashboard's Members tab now opens a dedicated page (`/instructor/members/[id]`) instead of a pop-up card — built after the user compared China's current-pass view ("she used one of her pass, the intro pass, doesn't make any sense") to a mock-up and asked for something richer. Replaces `MemberDetailModal.tsx` (deleted, no longer referenced anywhere once ported).
@@ -370,6 +383,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [ ] Merch image upload (photo library instead of URL) — not ported, see "Merch image upload" above.
 - [ ] Classes page doesn't show the class title or an expandable description toggle yet, unlike THE A.M/`demo`/Manea — see "Classes page: show the class title, and description as an expandable toggle" above.
 - [x] Member Profile page (`/instructor/members/[id]`) — ported 30 Oct, see "Member Profile page" above. BYLA already had `passes.source`/`amount_paid_cents` natively (unlike THE A.M, which was missing them until this session), so no schema-drift fix needed there. The `assign-pass` complimentary-$0 bug existed here too and was fixed. **Still outstanding — this session has no Supabase access to BYLA's project (different org):** (1) run `supabase/add-member-profile-page.sql` against BYLA's real project — the page works without it, only the Notes tab needs it; (2) backfill any complimentary passes with a nonzero `amount_paid_cents` to 0, the same way THE A.M's were.
+- [x] Message a Segment: Push Notification + Send History, and the Resend rate-limit fix — ported 26 Nov, see "Message a Segment: Push Notification + Send History" and the rate-limit bug fix above. **Still outstanding — no Supabase access to BYLA's project:** run `supabase/add-broadcast-log.sql` against BYLA's real project — Send History errors until it's run (the Push Notification send itself still works, it just can't log).
 
 ### Manea
 - [x] `is_admin` tier — migration run, Manea (the owner) is admin.
@@ -390,6 +404,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [x] Review-request email already uses a Google review link in code (`process.env.GOOGLE_REVIEW_URL`, same pattern as THE A.M) — just needs the real `GOOGLE_REVIEW_URL` value set in Manea's Netlify env vars once she's live.
 - [ ] Birthday card redesign in Marketing > Birthdays — depends on the Marketing section existing first.
 - Push notification infra already exists (`push_subscriptions`, `push-admin.ts`) — reminders' push half can use it directly once built, no new infra needed there.
+- [x] Message a Segment: Push Notification + Send History, and the Resend rate-limit fix — ported 26 Nov, see "Message a Segment: Push Notification + Send History" and the rate-limit bug fix above. Migration run against Manea's real Supabase project, fully working.
 
 ### `template` (lower priority — not a live client)
 - [ ] Marketing section still has the old 4-tab layout — Merch/Discounts/Reviews-carousel move not ported.
@@ -413,6 +428,7 @@ State as of 29 Aug. Cross-reference the detailed sections above for how each pie
 - [x] Edit Class capability — 10 Sep, see "Edit Class (Dashboard)" above.
 - Merch image upload (photo library instead of URL) already existed here (inline in `instructor/page.tsx`, not yet in its own panel before this) — carried straight into `MerchPanel.tsx` during the move, nothing new to port.
 - [x] Member Profile page (`/instructor/members/[id]`) — ported 30 Oct, see "Member Profile page" above. `passes.source`/`amount_paid_cents` already existed via `add-pass-payment-tracking.sql`, so only the new `member_notes` table was needed. No `is_admin` here, so nothing on the new page is gated. No "Delete pass" button on `demo`'s version since `demo`'s instructor side never had a delete-pass route at all; photo upload uses `demo`'s own plain upload-without-crop pattern (no `AvatarCropper` component on this branch). **Still outstanding — this session has no Supabase access to `demo`'s real project:** run `supabase/add-member-profile-page.sql` against it (the page works without it, only the Notes tab needs it). Note: `demo`'s own `CLAUDE.md` is a short, separate file with no per-client tracker — this checklist only lives on `main`, so update it here when porting to `demo` in future, not there.
+- [x] Message a Segment: Send History, and the Resend rate-limit fix — ported 26 Nov, see "Message a Segment: Push Notification + Send History" and the rate-limit bug fix above. `demo` has no push notification infra, so it only got the Send History half (email broadcasts only) — no Push Notification section here, matching the same push-infra gap noted elsewhere in this file. **Still outstanding — no Supabase access to `demo`'s real project:** run `supabase/add-broadcast-log.sql` against it (Send History errors until it's run, the actual email send still works without it).
 
 ### Shared, whichever client you're doing
 - Give each client's cron jobs (all four reminder types) their own `CRON_SECRET`, set in that client's own Netlify env vars — never reuse THE A.M's.
