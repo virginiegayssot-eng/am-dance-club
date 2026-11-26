@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { Resend } from "resend";
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createServerSupabaseClient();
@@ -27,8 +31,12 @@ export async function POST(req: NextRequest) {
   let sent = 0;
   const errors: string[] = [];
 
+  // Resend caps at 10 requests/second — sending the whole list back to back
+  // blew straight through that and most of the batch came back as 429s.
+  // A fixed gap between sends keeps this comfortably under the cap.
   for (const profile of recipients ?? []) {
     if (!profile.email) continue;
+    await sleep(150);
     const firstName = (profile.full_name ?? "there").split(" ")[0];
     const bodyHtml = String(message).trim().split("\n").map((line: string) => `<p style="color:#444;font-size:16px;line-height:1.6;margin:0 0 16px;">${line}</p>`).join("");
 
@@ -53,12 +61,24 @@ export async function POST(req: NextRequest) {
       </html>
     `;
 
-    const { error } = await resend.emails.send({
+    let { error } = await resend.emails.send({
       from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
       to: profile.email,
       subject: String(subject).trim(),
       html,
     }).catch((e) => ({ error: e }));
+
+    // Still rate limited despite the gap above (e.g. another send racing
+    // in from elsewhere) — wait it out and try once more before giving up.
+    if (error?.message?.includes("Too many requests")) {
+      await sleep(1100);
+      ({ error } = await resend.emails.send({
+        from: `BYLA <${process.env.RESEND_FROM ?? "onboarding@resend.dev"}>`,
+        to: profile.email,
+        subject: String(subject).trim(),
+        html,
+      }).catch((e) => ({ error: e })));
+    }
 
     if (error) errors.push(`${profile.email}: ${error.message ?? error}`);
     else sent++;
