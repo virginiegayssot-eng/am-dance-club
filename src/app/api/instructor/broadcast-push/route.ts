@@ -28,10 +28,11 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = adminClient();
-  const { count } = await admin
+  const { data: subs } = await admin
     .from("push_subscriptions")
-    .select("id", { count: "exact", head: true })
+    .select("student_id")
     .in("student_id", studentIds);
+  const subscribedIds = new Set((subs ?? []).map(s => s.student_id));
 
   await sendPushToStudents(studentIds, {
     title: String(title).trim(),
@@ -39,5 +40,36 @@ export async function POST(req: NextRequest) {
     url: url?.trim() || "/classes",
   });
 
-  return NextResponse.json({ sent: count ?? 0 });
+  const { data: recipients } = await supabase
+    .from("profiles")
+    .select("id, full_name, email")
+    .in("id", studentIds);
+
+  const { data: broadcast } = await supabase
+    .from("broadcast_sends")
+    .insert({
+      sent_by: user.id,
+      channel: "push",
+      subject: String(title).trim(),
+      message: String(body).trim(),
+      recipient_count: studentIds.length,
+      sent_count: subscribedIds.size,
+      failed_count: studentIds.length - subscribedIds.size,
+    })
+    .select("id")
+    .single();
+
+  if (broadcast?.id && recipients) {
+    const logRows = recipients.map(r => ({
+      broadcast_id: broadcast.id,
+      student_id: r.id,
+      email: r.email,
+      full_name: r.full_name,
+      status: subscribedIds.has(r.id) ? "sent" as const : "failed" as const,
+      error: subscribedIds.has(r.id) ? null : "No push subscription (notifications not enabled)",
+    }));
+    await supabase.from("broadcast_recipients").insert(logRows);
+  }
+
+  return NextResponse.json({ sent: subscribedIds.size });
 }

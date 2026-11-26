@@ -25,11 +25,24 @@ export async function POST(req: NextRequest) {
 
   const { data: recipients } = await supabase
     .from("profiles")
-    .select("full_name, email")
+    .select("id, full_name, email")
     .in("id", studentIds);
+
+  const { data: broadcast } = await supabase
+    .from("broadcast_sends")
+    .insert({
+      sent_by: user.id,
+      channel: "email",
+      subject: String(subject).trim(),
+      message: String(message).trim(),
+      recipient_count: recipients?.length ?? 0,
+    })
+    .select("id")
+    .single();
 
   let sent = 0;
   const errors: string[] = [];
+  const logRows: { broadcast_id: string; student_id: string; email: string; full_name: string | null; status: "sent" | "failed"; error: string | null }[] = [];
 
   // Resend caps at 10 requests/second — sending the whole list back to back
   // blew straight through that and most of the batch came back as 429s.
@@ -83,6 +96,22 @@ export async function POST(req: NextRequest) {
 
     if (error) errors.push(`${profile.email}: ${error.message ?? error}`);
     else sent++;
+
+    if (broadcast?.id) {
+      logRows.push({
+        broadcast_id: broadcast.id,
+        student_id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        status: error ? "failed" : "sent",
+        error: error ? String(error.message ?? error) : null,
+      });
+    }
+  }
+
+  if (broadcast?.id) {
+    if (logRows.length > 0) await supabase.from("broadcast_recipients").insert(logRows);
+    await supabase.from("broadcast_sends").update({ sent_count: sent, failed_count: errors.length }).eq("id", broadcast.id);
   }
 
   return NextResponse.json({ sent, errors: errors.length > 0 ? errors : undefined });

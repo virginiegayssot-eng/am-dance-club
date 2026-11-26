@@ -11,7 +11,7 @@ import ReviewRequestPanel from "@/components/ReviewRequestPanel";
 import ReviewsCarouselPanel from "@/components/ReviewsCarouselPanel";
 import MerchPanel from "@/components/MerchPanel";
 import DiscountsPanel from "@/components/DiscountsPanel";
-import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, Smartphone, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Calendar, Star, Quote, ShoppingBag, Tag, Send, Bell, Clock, Heart, Smartphone, Mail, ChevronDown, History, type LucideIcon } from "lucide-react";
 
 type StudentRow = { id: string; full_name: string | null; email: string; phone: string | null; birth_date: string | null };
 type SegmentKey = "no_pass" | "inactive_3w" | "all";
@@ -66,6 +66,13 @@ export default function MarketingPage() {
   const [pushSent, setPushSent] = useState<number | null>(null);
   const [pushError, setPushError] = useState("");
 
+  type BroadcastSend = { id: string; created_at: string; channel: "email" | "push"; subject: string; message: string; recipient_count: number; sent_count: number; failed_count: number };
+  type BroadcastRecipient = { id: string; email: string | null; full_name: string | null; status: "sent" | "failed"; error: string | null };
+  const [broadcastHistory, setBroadcastHistory] = useState<BroadcastSend[]>([]);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
+  const [historyRecipients, setHistoryRecipients] = useState<Record<string, BroadcastRecipient[]>>({});
+  const [loadingHistoryId, setLoadingHistoryId] = useState<string | null>(null);
+
   useEffect(() => { checkAuth(); }, []);
 
   async function checkAuth() {
@@ -119,7 +126,28 @@ export default function MarketingPage() {
     });
     setLastBookingByStudent(lastBooking);
 
+    const { data: history } = await supabase
+      .from("broadcast_sends")
+      .select("id, created_at, channel, subject, message, recipient_count, sent_count, failed_count")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setBroadcastHistory(history ?? []);
+
     setLoading(false);
+  }
+
+  async function toggleHistoryExpanded(id: string) {
+    if (expandedHistoryId === id) { setExpandedHistoryId(null); return; }
+    setExpandedHistoryId(id);
+    if (historyRecipients[id]) return;
+    setLoadingHistoryId(id);
+    const { data } = await supabase
+      .from("broadcast_recipients")
+      .select("id, email, full_name, status, error")
+      .eq("broadcast_id", id)
+      .order("status");
+    setHistoryRecipients(prev => ({ ...prev, [id]: data ?? [] }));
+    setLoadingHistoryId(null);
   }
 
   function daysAgoStr(days: number) {
@@ -154,6 +182,15 @@ export default function MarketingPage() {
     });
   }
 
+  async function refreshBroadcastHistory() {
+    const { data: history } = await supabase
+      .from("broadcast_sends")
+      .select("id, created_at, channel, subject, message, recipient_count, sent_count, failed_count")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setBroadcastHistory(history ?? []);
+  }
+
   async function sendBroadcast() {
     if (selectedBroadcastIds.size === 0 || !broadcastSubject.trim() || !broadcastMessage.trim()) return;
     setSendingBroadcast(true);
@@ -166,6 +203,7 @@ export default function MarketingPage() {
     setBroadcastSent(data.sent ?? 0);
     setBroadcastErrors(data.errors ?? []);
     setSendingBroadcast(false);
+    await refreshBroadcastHistory();
   }
 
   async function sendPush() {
@@ -181,6 +219,7 @@ export default function MarketingPage() {
     if (!res.ok) { setPushError(data.error ?? "Something went wrong"); setSendingPush(false); return; }
     setPushSent(data.sent ?? 0);
     setSendingPush(false);
+    await refreshBroadcastHistory();
   }
 
   const upcomingBirthdays = students
@@ -523,6 +562,64 @@ export default function MarketingPage() {
                   {sendingPush ? "Sending…" : `Send Push to ${selectedBroadcastIds.size}`}
                 </button>
               </div>
+            </div>
+
+            <div className="mt-10">
+              <SectionHeader
+                icon={History}
+                title="Recent Sends"
+                description="Every email and push broadcast you've sent, with exactly who it reached."
+              />
+              {broadcastHistory.length === 0 ? (
+                <p className="font-body text-sm text-gray-400">Nothing sent yet.</p>
+              ) : (
+                <div className="card divide-y divide-gray-50">
+                  {broadcastHistory.map(h => {
+                    const Icon = h.channel === "push" ? Smartphone : Mail;
+                    const expanded = expandedHistoryId === h.id;
+                    const recipients = historyRecipients[h.id] ?? [];
+                    return (
+                      <div key={h.id}>
+                        <button
+                          type="button"
+                          onClick={() => toggleHistoryExpanded(h.id)}
+                          className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left appearance-none border-0 bg-transparent"
+                        >
+                          <div className="min-w-0 flex items-center gap-3">
+                            <Icon className="w-4 h-4 text-[#2041d8] shrink-0" strokeWidth={1.75} />
+                            <div className="min-w-0">
+                              <p className="font-body text-sm font-medium truncate">{h.subject}</p>
+                              <p className="font-body text-xs text-gray-400">
+                                {new Date(h.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} · {h.sent_count} sent{h.failed_count > 0 ? `, ${h.failed_count} failed` : ""}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} strokeWidth={2} />
+                        </button>
+                        {expanded && (
+                          <div className="px-5 pb-4">
+                            <p className="font-body text-xs text-gray-400 mb-3 whitespace-pre-wrap">{h.message}</p>
+                            {loadingHistoryId === h.id ? (
+                              <p className="font-body text-xs text-gray-400">Loading…</p>
+                            ) : (
+                              <div className="space-y-1">
+                                {recipients.map(r => (
+                                  <div key={r.id} className="flex items-center justify-between font-body text-xs px-3 py-1.5 rounded-lg bg-gray-50">
+                                    <span className="truncate">{r.full_name ?? r.email}</span>
+                                    <span className={r.status === "sent" ? "text-green-600" : "text-red-500"}>
+                                      {r.status === "sent" ? "Sent" : "Failed"}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
