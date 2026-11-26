@@ -60,6 +60,36 @@ isn't showing up despite confirming the grant on the provider's own
 dashboard, the fix is a **new session**, not re-checking the same session
 again.
 
+**Resend accounts (confirmed 26 Nov) — THE A.M sends through a different
+domain than it looks like it should:** THE A.M's own domain,
+`theamdance.com`, has never passed Resend's domain verification (shows
+`Failed` in Resend — a DNS/DKIM issue on the domain's own registrar, not
+something fixable from code). Because of that, THE A.M's `RESEND_FROM`
+Netlify env var was set to `hello@thevia.app` instead — the shared VIA
+platform's own Resend domain, which *is* verified — as a working fallback.
+This means:
+- There are at least three separate Resend accounts/workspaces in play:
+  the personal one under `virginie.gayssot@gmail.com` (only has
+  `theputtylab.com.au` — a different business, The Putty Lab, unrelated to
+  any VIA client), a `theamdance` workspace (has `theamdance.com`, status
+  Failed), and the shared **VIA** workspace (has `thevia.app`, Verified —
+  this is the one actually in use for THE A.M's real sends). Check the VIA
+  workspace first when looking for THE A.M's (or likely any VIA client's)
+  actual Resend activity/logs — not the personal or theamdance ones, which
+  look like the obvious place to check but aren't where sends actually go.
+- Every THE A.M email (`broadcast-email`, `bookings`, reminders, etc.) is
+  sent as `"THE A.M Dance Club" <hello@thevia.app>` — the display name
+  still reads fully branded in a recipient's inbox, but the underlying
+  address is the shared VIA one, not a THE A.M-specific address. A member
+  hitting Reply sends to `hello@thevia.app`, not somewhere monitored
+  specifically for THE A.M — flagged as a real gap, not yet fixed.
+- The actual fix (making `theamdance.com` verify properly on Resend so
+  THE A.M can send from its own domain again) requires DNS changes at
+  THE A.M's domain registrar — outside what's doable from a coding
+  session. Worth checking whether BYLA/Manea/other VIA clients have the
+  same domain-verification-failed-so-falls-back-to-thevia.app situation
+  next time a client's email sending is in question.
+
 ## `demo` always tracks the latest version
 
 `demo` is the branch shown to prospective new clients — it needs to reflect the current state of the app at all times, not a snapshot from whenever it was last touched. **Whenever you ship a change to THE A.M (`main`) — a bug fix, a visual/UX modernization, a new feature — port the applicable parts to `demo` too, in the same session, without waiting to be asked.** This applies even when the user's request only names `main` or another specific client.
