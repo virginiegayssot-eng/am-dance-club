@@ -89,6 +89,10 @@ This means:
   session. Worth checking whether BYLA/Manea/other VIA clients have the
   same domain-verification-failed-so-falls-back-to-thevia.app situation
   next time a client's email sending is in question.
+- **Confirmed working 26 Nov:** user sent herself a test email through
+  Message a Segment and it arrived fine — the `hello@thevia.app` fallback
+  is a real, working setup, not just a theory. No action needed unless
+  the Reply-To gap above becomes an actual problem.
 
 ## `demo` always tracks the latest version
 
