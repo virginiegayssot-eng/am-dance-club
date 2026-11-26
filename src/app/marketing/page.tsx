@@ -189,6 +189,9 @@ export default function MarketingPage() {
   function selectAllInSegment() {
     setSelectedBroadcastIds(new Set(currentSegment.map(s => s.id)));
   }
+  function clearBroadcastSelection() {
+    setSelectedBroadcastIds(new Set());
+  }
   function toggleBroadcastRecipient(id: string) {
     setSelectedBroadcastIds(prev => {
       const next = new Set(prev);
@@ -257,7 +260,7 @@ export default function MarketingPage() {
     ...(isAdmin && MERCH_ENABLED ? [{ key: "merch", label: "Merch", icon: ShoppingBag }] as const : []),
     ...(isAdmin ? [{ key: "discounts", label: "Discounts", icon: Tag }] as const : []),
     ...(isAdmin ? [{ key: "birthdays", label: "Birthdays", icon: Cake }] as const : []),
-    { key: "broadcast", label: "Message a Segment", icon: Send },
+    { key: "broadcast", label: "Send a Message", icon: Send },
     ...(isAdmin ? [{ key: "reminders", label: "Reminders", icon: Bell }] as const : []),
   ] as const;
 
@@ -429,12 +432,12 @@ export default function MarketingPage() {
           </div>
         )}
 
-        {/* MESSAGE A SEGMENT TAB */}
+        {/* SEND A MESSAGE TAB */}
         {activeTab === "broadcast" && (
           <div className="max-w-xl">
             <SectionHeader
               icon={Send}
-              title="Message a Segment"
+              title="Email"
               description="Send a one-off email to a filtered group — a promo, a new-class announcement, a check-in."
             />
 
@@ -463,7 +466,10 @@ export default function MarketingPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="label mb-0">Recipients ({selectedBroadcastIds.size} selected)</label>
-                  <button type="button" onClick={selectAllInSegment} className="font-body text-xs text-[#000000] hover:underline">Select all</button>
+                  <div className="flex items-center gap-3">
+                    <button type="button" onClick={selectAllInSegment} className="font-body text-xs text-[#000000] hover:underline">Select all</button>
+                    <button type="button" onClick={clearBroadcastSelection} className="font-body text-xs text-gray-400 hover:underline">Clear</button>
+                  </div>
                 </div>
                 {currentSegment.length === 0 ? (
                   <p className="font-body text-sm text-gray-400">No members match this filter.</p>
