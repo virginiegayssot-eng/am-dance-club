@@ -13,7 +13,7 @@ import type { Class, Pass, PassType, Playlist, Profile, Video } from "@/lib/supa
 import Link from "next/link";
 import Linkify from "@/components/Linkify";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, type LucideIcon } from "lucide-react";
+import { Cake, PartyPopper, Check, X, Megaphone, MapPin, Music2, Image as ImageIcon, Film, Upload, Calendar, CheckSquare, Video as VideoIcon, Ticket, Users, ListMusic, Newspaper, UserCog, Pencil, type LucideIcon } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = { general: Megaphone, location: MapPin, event: PartyPopper, routine: Music2 };
 
@@ -145,6 +145,9 @@ export default function InstructorPage() {
   const [memberNoPassPaymentType, setMemberNoPassPaymentType] = useState("casual");
   const [walkInLoading, setWalkInLoading] = useState(false);
   const [walkInError, setWalkInError] = useState("");
+  const [editingWalkInId, setEditingWalkInId] = useState<string | null>(null);
+  const [editWalkInName, setEditWalkInName] = useState("");
+  const [savingWalkInEdit, setSavingWalkInEdit] = useState(false);
 
   // Review emails
   const [sendingReviews, setSendingReviews] = useState(false);
@@ -434,6 +437,29 @@ export default function InstructorPage() {
     setBookForPassId("");
     setBookForGuestCount(0);
     setWalkInLoading(false);
+  }
+
+  async function saveWalkInNameEdit(walkInId: string) {
+    const name = editWalkInName.trim();
+    if (!name || !selectedClass) { setEditingWalkInId(null); return; }
+    setSavingWalkInEdit(true);
+    try {
+      const res = await fetch("/api/instructor/edit-walk-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walkInId, name }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setWalkInError(data.error ?? "Something went wrong");
+        return;
+      }
+      const { data: wis } = await supabase.from("walk_ins").select("id, name, payment_type").eq("class_id", selectedClass.id);
+      setWalkIns(wis ?? []);
+      setEditingWalkInId(null);
+    } finally {
+      setSavingWalkInEdit(false);
+    }
   }
 
   async function toggleAttendance(studentId: string, attended: boolean) {
@@ -1381,14 +1407,40 @@ export default function InstructorPage() {
                         </div>
                       ))}
                       {walkIns.map((w) => (
-                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#fbf8f4]">
-                          <div>
-                            <p className="font-medium text-sm font-body">
-                              {w.name}
-                              <span className="ml-2 badge bg-[#f4efe6]/50 text-black text-xs">Walk-in</span>
-                              {w.payment_type === "pass" && <span className="ml-1 badge bg-blue-100 text-blue-700 text-xs">Pass deducted</span>}
-                            </p>
-                            <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
+                        <div key={w.id} className="flex items-center justify-between px-5 py-3 bg-[#fbf8f4] group">
+                          <div className="flex-1 min-w-0">
+                            {editingWalkInId === w.id ? (
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  autoFocus
+                                  className="input text-sm py-1.5 px-3"
+                                  value={editWalkInName}
+                                  onChange={e => setEditWalkInName(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === "Enter") saveWalkInNameEdit(w.id);
+                                    if (e.key === "Escape") setEditingWalkInId(null);
+                                  }}
+                                />
+                                <button onClick={() => saveWalkInNameEdit(w.id)} disabled={savingWalkInEdit} className="font-body text-xs text-[#221f1c] hover:underline whitespace-nowrap disabled:opacity-50">Save</button>
+                                <button onClick={() => setEditingWalkInId(null)} className="font-body text-xs text-gray-400 hover:underline whitespace-nowrap">Cancel</button>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="font-medium text-sm font-body flex items-center gap-1.5">
+                                  {w.name}
+                                  <span className="badge bg-[#f4efe6]/50 text-black text-xs">Walk-in</span>
+                                  {w.payment_type === "pass" && <span className="badge bg-blue-100 text-blue-700 text-xs">Pass deducted</span>}
+                                  <button
+                                    onClick={() => { setEditingWalkInId(w.id); setEditWalkInName(w.name); }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-500"
+                                    title="Edit name"
+                                  >
+                                    <Pencil className="w-3 h-3" strokeWidth={1.75} />
+                                  </button>
+                                </p>
+                                <p className="text-xs text-gray-400 font-body">{w.payment_type === "complimentary" ? "Complimentary" : "Pass"}</p>
+                              </>
+                            )}
                           </div>
                           <div className="w-8 h-8 rounded-full bg-[#221f1c] border-2 border-[#221f1c] text-white flex items-center justify-center shrink-0"><Check className="w-4 h-4" strokeWidth={2.5} /></div>
                         </div>
